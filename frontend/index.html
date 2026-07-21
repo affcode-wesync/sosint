@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Analyzer - Windows XP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: url('/static/wall.png') center/cover no-repeat fixed;
+        }
+
+        /* Desktop Icons */
+        .desktop-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 75px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .desktop-icon:active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .desktop-icon-img {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #4169e1, #00bfff);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .desktop-icon-label {
+            font-size: 11px;
+            color: white;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+
+        /* XP Window */
+        .xp-window {
+            position: absolute;
+            width: 820px;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ece9d8;
+            border: 3px outset #dfdfdf;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+            z-index: 100;
+        }
+
+        .xp-window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 36px) !important;
+            transform: none !important;
+            border-radius: 0;
+        }
+
+        .xp-window.minimized {
+            display: none;
+        }
+
+        /* Title Bar */
+        .xp-titlebar {
+            background: linear-gradient(180deg, #0a246a 0%, #0f3795 3%, #2f6fce 6%, #2f6fce 90%, #0f3795 97%, #0a246a 100%);
+            padding: 4px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 5px 5px 0 0;
+            cursor: move;
+        }
+
+        .xp-titlebar-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .xp-titlebar-icon {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff6b35, #ffd700, #00aa00, #0066ff);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .xp-titlebar-text {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+
+        .xp-titlebar-buttons {
+            display: flex;
+            gap: 2px;
+        }
+
+        .xp-btn {
+            width: 21px;
+            height: 21px;
+            border: 1px outset #aaa;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .xp-btn:active {
+            border-style: inset;
+        }
+
+        .xp-btn-minimize { background: linear-gradient(180deg, #3c7fb1, #2f6299); }
+        .xp-btn-maximize { background: linear-gradient(180deg, #3c7fb1, #2f6299); }
+        .xp-btn-restore { background: linear-gradient(180deg, #3c7fb1, #2f6299); }
+        .xp-btn-close { background: linear-gradient(180deg, #e08356, #c53a20); }
+
+        /* Toolbar */
+        .xp-toolbar {
+            background: linear-gradient(180deg, #f2f0e8, #e6e2d6);
+            border-bottom: 1px solid #aca899;
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .xp-toolbar-input {
+            flex: 1;
+            padding: 5px 8px;
+            font-size: 12px;
+            border: 2px inset #d4d0c8;
+            font-family: 'Tahoma', sans-serif;
+            background: white;
+        }
+
+        .xp-toolbar-input:focus {
+            outline: none;
+            border-color: #316ac5;
+        }
+
+        .xp-toolbar-btn {
+            padding: 5px 20px;
+            font-size: 11px;
+            font-family: 'Tahoma', sans-serif;
+            background: linear-gradient(180deg, #fff 0%, #ece9d8 100%);
+            border: 2px outset #d4d0c8;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .xp-toolbar-btn:hover {
+            background: linear-gradient(180deg, #fff 0%, #ddd8c8 100%);
+        }
+
+        .xp-toolbar-btn:active {
+            border-style: inset;
+            background: #ddd8c8;
+        }
+
+        /* Content */
+        .xp-content {
+            background: white;
+            margin: 0 3px;
+            padding: 16px;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px inset #d4d0c8;
+        }
+
+        .xp-window.maximized .xp-content {
+            max-height: calc(100vh - 160px);
+        }
+
+        /* Status Bar */
+        .xp-statusbar {
+            background: #ece9d8;
+            border-top: 2px outset #fff;
+            padding: 3px 8px;
+            font-size: 11px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .xp-statusbar-section {
+            border: 1px inset #d4d0c8;
+            padding: 1px 8px;
+        }
+
+        /* Taskbar */
+        .xp-taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: linear-gradient(180deg, #3168d5 0%, #2456bb 2%, #1941a5 50%, #18399a 50%, #1e4fbd 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            z-index: 1000;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.3);
+        }
+
+        .xp-start-btn {
+            background: linear-gradient(180deg, #3c9b47 0%, #2d7e36 30%, #1e6b27 100%);
+            color: white;
+            padding: 3px 10px 3px 6px;
+            border: 2px outset #4caf50;
+            border-radius: 0 8px 8px 0;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Tahoma', sans-serif;
+        }
+
+        .xp-start-btn:active {
+            border-style: inset;
+        }
+
+        /* Start Menu */
+        .start-menu {
+            display: none;
+            position: fixed;
+            bottom: 36px;
+            left: 0;
+            width: 380px;
+            background: #ece9d8;
+            border: 2px outset #dfdfdf;
+            border-radius: 8px 8px 0 0;
+            z-index: 2000;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.5);
+        }
+
+        .start-menu.show { display: block; }
+
+        .start-menu-header {
+            background: linear-gradient(180deg, #1a5276 0%, #2471a3 100%);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .start-menu-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 2px solid white;
+            background: linear-gradient(135deg, #4169e1, #00bfff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .start-menu-username {
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .start-menu-body {
+            display: flex;
+            min-height: 300px;
+        }
+
+        .start-menu-left {
+            flex: 1;
+            background: white;
+            padding: 8px 0;
+            border-right: 1px solid #d4d0c8;
+        }
+
+        .start-menu-right {
+            width: 180px;
+            background: #d3e5fa;
+            padding: 8px 0;
+        }
+
+        .start-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .start-menu-item:hover {
+            background: #316ac5;
+            color: white;
+            border-color: #316ac5;
+        }
+
+        .start-menu-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .start-menu-item-text {
+            flex: 1;
+        }
+
+        .start-menu-item-title {
+            font-weight: bold;
+        }
+
+        .start-menu-item-desc {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .start-menu-item:hover .start-menu-item-desc {
+            color: #ccc;
+        }
+
+        .start-menu-separator {
+            height: 1px;
+            background: #d4d0c8;
+            margin: 4px 12px;
+        }
+
+        .start-menu-right .start-menu-item {
+            font-weight: bold;
+        }
+
+        .start-menu-footer {
+            background: linear-gradient(180deg, #3168d5, #1941a5);
+            padding: 6px 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .start-menu-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: linear-gradient(180deg, #3c7fb1, #2f6299);
+            border: 1px outset #5599cc;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .start-menu-footer-btn:active {
+            border-style: inset;
+        }
+
+        /* XP Icons */
+        .xp-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .xp-icon-16 {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .icon-email {
+            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
+            border: 1px solid #8b7355;
+        }
+
+        .icon-email::before {
+            content: '';
+            width: 20px;
+            height: 12px;
+            background: linear-gradient(180deg, #ffffcc 0%, #ffff99 100%);
+            border: 1px solid #999;
+            position: absolute;
+        }
+
+        .icon-email::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 6px solid #ccc;
+            position: absolute;
+            top: 4px;
+        }
+
+        .icon-phone {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 1px solid #888;
+            position: relative;
+        }
+
+        .icon-phone::before {
+            content: '';
+            width: 16px;
+            height: 24px;
+            background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
+            border: 1px solid #444;
+            border-radius: 3px;
+            position: absolute;
+        }
+
+        .icon-phone::after {
+            content: '';
+            width: 8px;
+            height: 3px;
+            background: #666;
+            position: absolute;
+            bottom: 4px;
+            border-radius: 1px;
+        }
+
+        .icon-search {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 1px solid #888;
+            position: relative;
+        }
+
+        .icon-search::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+        }
+
+        .icon-search::after {
+            content: '';
+            width: 3px;
+            height: 8px;
+            background: #333;
+            position: absolute;
+            bottom: 4px;
+            right: 5px;
+            transform: rotate(-45deg);
+            border-radius: 1px;
+        }
+
+        .icon-internet {
+            background: linear-gradient(135deg, #4169e1 0%, #00bfff 100%);
+            border: 1px solid #00008b;
+        }
+
+        .icon-internet::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .icon-outlook {
+            background: linear-gradient(180deg, #f0f0f0 0%, #d0d0d0 100%);
+            border: 1px solid #888;
+        }
+
+        .icon-outlook::before {
+            content: '';
+            width: 16px;
+            height: 10px;
+            background: linear-gradient(180deg, #99ccff 0%, #6699cc 100%);
+            border: 1px solid #336699;
+            position: absolute;
+        }
+
+        .icon-notepad {
+            background: linear-gradient(180deg, #fffff0 0%, #f5f5dc 100%);
+            border: 1px solid #999;
+        }
+
+        .icon-notepad::before {
+            content: '';
+            width: 18px;
+            height: 20px;
+            background: repeating-linear-gradient(
+                0deg,
+                #ccc 0px,
+                #ccc 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            position: absolute;
+            border: 1px solid #888;
+        }
+
+        .icon-calc {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 1px solid #888;
+        }
+
+        .icon-calc::before {
+            content: '';
+            width: 14px;
+            height: 10px;
+            background: #c0d6b0;
+            border: 1px solid #666;
+            position: absolute;
+            top: 4px;
+        }
+
+        .icon-folder {
+            background: linear-gradient(180deg, #ffcc00 0%, #cc9900 100%);
+            border: 1px solid #996600;
+        }
+
+        .icon-folder::before {
+            content: '';
+            width: 12px;
+            height: 4px;
+            background: #cc9900;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .icon-pictures {
+            background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%);
+            border: 1px solid #2f4f4f;
+        }
+
+        .icon-pictures::before {
+            content: '';
+            width: 16px;
+            height: 12px;
+            background: linear-gradient(180deg, #90ee90 0%, #228b22 100%);
+            border: 1px solid #006400;
+            position: absolute;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .icon-music {
+            background: linear-gradient(180deg, #f5f5f5 0%, #d0d0d0 100%);
+            border: 1px solid #888;
+        }
+
+        .icon-music::before {
+            content: '♪';
+            font-size: 16px;
+            color: #333;
+        }
+
+        .icon-computer {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c0c0c0 100%);
+            border: 1px solid #808080;
+        }
+
+        .icon-computer::before {
+            content: '';
+            width: 20px;
+            height: 14px;
+            background: #1a1a2e;
+            border: 2px solid #444;
+            position: absolute;
+            top: 2px;
+        }
+
+        .icon-computer::after {
+            content: '';
+            width: 10px;
+            height: 4px;
+            background: #888;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        .icon-control {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 1px solid #888;
+        }
+
+        .icon-control::before {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid #666;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .icon-control::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ff6600, #ffcc00);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .icon-logout {
+            background: linear-gradient(180deg, #4169e1 0%, #00008b 100%);
+            border: 1px solid #000066;
+        }
+
+        .icon-logout::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .icon-shutdown {
+            background: linear-gradient(180deg, #cc0000 0%, #8b0000 100%);
+            border: 1px solid #660000;
+        }
+
+        .icon-shutdown::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2px solid white;
+            position: absolute;
+        }
+
+        /* Desktop Icon */
+        .desktop-icon-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .desktop-icon-email {
+            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
+            border: 2px solid #8b7355;
+            position: relative;
+        }
+
+        .desktop-icon-email::before {
+            content: '';
+            width: 30px;
+            height: 18px;
+            background: linear-gradient(180deg, #ffffcc 0%, #ffff99 100%);
+            border: 1px solid #999;
+            position: absolute;
+        }
+
+        .desktop-icon-email::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 9px solid #ccc;
+            position: absolute;
+            top: 6px;
+        }
+
+        .desktop-icon-phone {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 2px solid #888;
+            position: relative;
+        }
+
+        .desktop-icon-phone::before {
+            content: '';
+            width: 22px;
+            height: 34px;
+            background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 4px;
+            position: absolute;
+        }
+
+        .desktop-icon-phone::after {
+            content: '';
+            width: 10px;
+            height: 4px;
+            background: #666;
+            position: absolute;
+            bottom: 6px;
+            border-radius: 2px;
+        }
+
+        .icon-phone-small {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(180deg, #2f2f2f, #1a1a1a);
+            border: 1px solid #444;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .icon-phone-small::after {
+            content: '';
+            width: 6px;
+            height: 2px;
+            background: #666;
+            position: absolute;
+            bottom: 2px;
+            left: 3px;
+            border-radius: 1px;
+        }
+
+        .desktop-icon-search {
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 2px solid #888;
+            position: relative;
+        }
+
+        .desktop-icon-search::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .desktop-icon-search::after {
+            content: '';
+            width: 4px;
+            height: 12px;
+            background: #333;
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            transform: rotate(-45deg);
+            border-radius: 2px;
+        }
+
+        .icon-search-small {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
+            border: 1px solid #888;
+            position: relative;
+        }
+
+        .icon-search-small::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+        }
+
+        .icon-search-small::after {
+            content: '';
+            width: 2px;
+            height: 5px;
+            background: #333;
+            position: absolute;
+            bottom: 1px;
+            right: 2px;
+            transform: rotate(-45deg);
+        }
+
+        /* Taskbar Icon */
+        .xp-taskbar-item-icon {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
+            border: 1px solid #8b7355;
+            position: relative;
+        }
+
+        .xp-taskbar-item-icon::before {
+            content: '';
+            width: 10px;
+            height: 6px;
+            background: linear-gradient(180deg, #ffffcc, #ffff99);
+            border: 1px solid #999;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+        }
+
+        /* Title Icon */
+        .xp-titlebar-icon {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
+            border: 1px solid #8b7355;
+            position: relative;
+        }
+
+        .xp-titlebar-icon::before {
+            content: '';
+            width: 10px;
+            height: 6px;
+            background: linear-gradient(180deg, #ffffcc, #ffff99);
+            border: 1px solid #999;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+        }
+
+        /* Start Logo */
+        .xp-start-logo {
+            width: 20px;
+            height: 20px;
+            position: relative;
+        }
+
+        .xp-start-logo::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff0000;
+            border-radius: 1px;
+            top: 0;
+            left: 0;
+        }
+
+        .xp-start-logo::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00aa00;
+            border-radius: 1px;
+            bottom: 0;
+            right: 0;
+        }
+
+        .xp-start-logo span:nth-child(1) {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffcc00;
+            border-radius: 1px;
+            top: 0;
+            right: 0;
+        }
+
+        .xp-start-logo span:nth-child(2) {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #0066ff;
+            border-radius: 1px;
+            bottom: 0;
+            left: 0;
+        }
+
+        .xp-taskbar-items {
+            flex: 1;
+            display: flex;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .xp-taskbar-item {
+            background: linear-gradient(180deg, #3c7fb1 0%, #2f6299 50%, #245080 100%);
+            color: white;
+            padding: 3px 12px;
+            border: 2px outset #5599cc;
+            border-radius: 2px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'Tahoma', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .xp-taskbar-item:active {
+            border-style: inset;
+        }
+
+        .xp-taskbar-item-icon {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #4169e1, #00bfff);
+            border-radius: 2px;
+        }
+
+        .xp-taskbar-clock {
+            color: white;
+            font-size: 11px;
+            padding: 3px 12px;
+            border: 2px inset #3366aa;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #1a5276, #0e3d5c);
+        }
+
+        /* Results */
+        .section { margin-bottom: 16px; }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #003399;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #7f9db9;
+        }
+
+        .xp-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            border: 2px inset #d4d0c8;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .xp-profile {
+            display: flex;
+            gap: 16px;
+            padding: 12px;
+            background: #f0f0f0;
+            border: 2px inset #d4d0c8;
+        }
+
+        .xp-avatar {
+            width: 80px;
+            height: 80px;
+            border: 2px inset #d4d0c8;
+            background: linear-gradient(135deg, #4169e1, #00bfff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .xp-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .xp-profile-info { flex: 1; }
+
+        .xp-info-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+
+        .xp-info-label {
+            font-weight: bold;
+            color: #003399;
+            min-width: 100px;
+        }
+
+        .xp-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #aca899;
+        }
+
+        .xp-link {
+            padding: 6px 12px;
+            background: linear-gradient(180deg, #fff, #ece9d8);
+            border: 2px outset #d4d0c8;
+            border-radius: 2px;
+            text-decoration: none;
+            color: #003399;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .xp-link:hover { background: linear-gradient(180deg, #fff, #ddd8c8); }
+        .xp-link:active { border-style: inset; }
+
+        .xp-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            border: 2px inset #d4d0c8;
+        }
+
+        .xp-table th {
+            background: linear-gradient(180deg, #f2f0e8, #e6e2d6);
+            border: 1px solid #aca899;
+            padding: 4px 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .xp-table td {
+            border: 1px solid #aca899;
+            padding: 4px 8px;
+        }
+
+        .xp-table tr:hover { background: #e8f4fd; }
+
+        .xp-badge {
+            padding: 2px 6px;
+            border: 1px solid;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .xp-badge.found { background: #90ee90; border-color: #006400; color: #006400; }
+        .xp-badge.not_found { background: #d3d3d3; border-color: #666; color: #666; }
+        .xp-badge.redirect { background: #add8e6; border-color: #00008b; color: #00008b; }
+        .xp-badge.error { background: #ffb6c1; border-color: #8b0000; color: #8b0000; }
+
+        .xp-loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .xp-loading.show { display: block; }
+
+        #results { display: none; }
+        #results.show { display: block; }
+
+        .xp-footer {
+            text-align: center;
+            color: #999;
+            font-size: 10px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 860px) {
+            .xp-window {
+                width: 100%;
+                left: 0;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Desktop Icons -->
+    <div class="desktop-icons">
+        <div class="desktop-icon" ondblclick="openApp()">
+            <div class="desktop-icon-img desktop-icon-email"></div>
+            <div class="desktop-icon-label">Email SOSINT</div>
+        </div>
+        <div class="desktop-icon" ondblclick="openHLR()">
+            <div class="desktop-icon-img desktop-icon-phone"></div>
+            <div class="desktop-icon-label">HLR Query</div>
+        </div>
+        <div class="desktop-icon" ondblclick="openSherlock()">
+            <div class="desktop-icon-img desktop-icon-search"></div>
+            <div class="desktop-icon-label">Nick Search</div>
+        </div>
+    </div>
+
+    <!-- XP Window -->
+    <div class="xp-window" id="xpWindow">
+        <div class="xp-titlebar" id="titlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon"></div>
+                <span class="xp-titlebar-text">Email Analyzer</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="minimizeWindow()" title="Свернуть">_</div>
+                <div class="xp-btn xp-btn-maximize" id="maxBtn" onclick="toggleMaximize()" title="Развернуть">□</div>
+                <div class="xp-btn xp-btn-close" onclick="closeWindow()" title="Закрыть">✕</div>
+            </div>
+        </div>
+
+        <div class="xp-toolbar">
+            <span style="font-size:11px;color:#666">Address:</span>
+            <input type="email" id="emailInput" class="xp-toolbar-input" placeholder="Enter email address..." autocomplete="off">
+            <button class="xp-toolbar-btn" onclick="analyzeEmail()">Analyze</button>
+        </div>
+
+        <div class="xp-content" id="xpContent">
+            <div class="xp-loading" id="loading">
+                <p>Analyzing email...</p>
+                <p style="margin-top:8px;color:#999">Please wait</p>
+            </div>
+            <div id="results"></div>
+        </div>
+
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Ready</div>
+            <div class="xp-statusbar-section" id="statusTime"></div>
+        </div>
+    </div>
+
+    <!-- HLR Window -->
+    <div class="xp-window" id="hlrWindow" style="display:none">
+        <div class="xp-titlebar" id="hlrTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon icon-phone-small"></div>
+                <span class="xp-titlebar-text">HLR Lookup - Numverify</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="minimizeHLR()">_</div>
+                <div class="xp-btn xp-btn-close" onclick="closeHLR()">✕</div>
+            </div>
+        </div>
+
+        <div class="xp-toolbar" style="flex-wrap:wrap;gap:4px">
+            <span style="font-size:11px;color:#666">API Key:</span>
+            <input type="text" id="apiKeyInput" class="xp-toolbar-input" placeholder="Your Numverify API key" autocomplete="off" style="max-width:280px" value="b9f3dd40b9e704fe0d9f053ce29e7e55">
+            <span style="font-size:11px;color:#666;margin-left:8px">Phone:</span>
+            <input type="text" id="phoneInput" class="xp-toolbar-input" placeholder="79001234567" autocomplete="off" style="max-width:180px">
+            <button class="xp-toolbar-btn" onclick="lookupHLR()">Lookup</button>
+        </div>
+
+        <div class="xp-content" id="hlrContent">
+            <div class="xp-loading" id="hlrLoading">
+                <p>Querying Numverify API...</p>
+                <p style="margin-top:8px;color:#999">Please wait</p>
+            </div>
+            <div id="hlrResults"></div>
+        </div>
+
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Ready</div>
+            <div class="xp-statusbar-section">Numverify API — free 100 req/month</div>
+        </div>
+    </div>
+
+    <!-- Sherlock Window -->
+    <div class="xp-window" id="sherlockWindow" style="display:none">
+        <div class="xp-titlebar" id="sherlockTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon icon-search-small"></div>
+                <span class="xp-titlebar-text">Nick Search — Sherlock</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="minimizeSherlock()">_</div>
+                <div class="xp-btn xp-btn-close" onclick="closeSherlock()">✕</div>
+            </div>
+        </div>
+
+        <div class="xp-toolbar">
+            <span style="font-size:11px;color:#666">Username:</span>
+            <input type="text" id="usernameInput" class="xp-toolbar-input" placeholder="Enter username..." autocomplete="off">
+            <button class="xp-toolbar-btn" onclick="searchSherlock()">Search</button>
+        </div>
+
+        <div class="xp-content" id="sherlockContent">
+            <div class="xp-loading" id="sherlockLoading">
+                <p>Searching across 300+ sites...</p>
+                <p style="margin-top:8px;color:#999">Please wait</p>
+            </div>
+            <div id="sherlockResults"></div>
+        </div>
+
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Ready</div>
+            <div class="xp-statusbar-section">Powered by sherlock-project</div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-header">
+            <div class="start-menu-avatar">S</div>
+            <div class="start-menu-username">User</div>
+        </div>
+        <div class="start-menu-body">
+            <div class="start-menu-left">
+                <div class="start-menu-item" onclick="openApp(); toggleStartMenu();">
+                    <div class="xp-icon icon-email"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Email Analyzer</div>
+                        <div class="start-menu-item-desc">OSINT email tool</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="openHLR(); toggleStartMenu();">
+                    <div class="xp-icon icon-phone"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">HLR Query</div>
+                        <div class="start-menu-item-desc">Phone lookup</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="openSherlock(); toggleStartMenu();">
+                    <div class="xp-icon icon-search"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Nick Search</div>
+                        <div class="start-menu-item-desc">Sherlock username lookup</div>
+                    </div>
+                </div>
+                <div class="start-menu-separator"></div>
+                <div class="start-menu-item" onclick="alert('Internet Explorer'); toggleStartMenu();">
+                    <div class="xp-icon icon-internet"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Internet</div>
+                        <div class="start-menu-item-desc">Internet Explorer</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="alert('Outlook Express'); toggleStartMenu();">
+                    <div class="xp-icon icon-outlook"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">E-Mail</div>
+                        <div class="start-menu-item-desc">Outlook Express</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="alert('Notepad'); toggleStartMenu();">
+                    <div class="xp-icon icon-notepad"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Notepad</div>
+                        <div class="start-menu-item-desc">Text Editor</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="alert('Calculator'); toggleStartMenu();">
+                    <div class="xp-icon icon-calc"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Calculator</div>
+                        <div class="start-menu-item-desc">Windows Calculator</div>
+                    </div>
+                </div>
+            </div>
+            <div class="start-menu-right">
+                <div class="start-menu-item" onclick="alert('My Documents'); toggleStartMenu();">
+                    <div class="xp-icon icon-folder"></div>
+                    <div class="start-menu-item-text">My Documents</div>
+                </div>
+                <div class="start-menu-item" onclick="alert('My Pictures'); toggleStartMenu();">
+                    <div class="xp-icon icon-pictures"></div>
+                    <div class="start-menu-item-text">My Pictures</div>
+                </div>
+                <div class="start-menu-item" onclick="alert('My Music'); toggleStartMenu();">
+                    <div class="xp-icon icon-music"></div>
+                    <div class="start-menu-item-text">My Music</div>
+                </div>
+                <div class="start-menu-item" onclick="alert('My Computer'); toggleStartMenu();">
+                    <div class="xp-icon icon-computer"></div>
+                    <div class="start-menu-item-text">My Computer</div>
+                </div>
+                <div class="start-menu-separator"></div>
+                <div class="start-menu-item" onclick="alert('Control Panel'); toggleStartMenu();">
+                    <div class="xp-icon icon-control"></div>
+                    <div class="start-menu-item-text">Control Panel</div>
+                </div>
+            </div>
+        </div>
+        <div class="start-menu-footer">
+            <div class="start-menu-footer-btn" onclick="alert('Log Off')">
+                <div class="xp-icon-16 icon-logout"></div> Log Off
+            </div>
+            <div class="start-menu-footer-btn" onclick="alert('Turn Off Computer')">
+                <div class="xp-icon-16 icon-shutdown"></div> Turn Off
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="xp-taskbar">
+        <button class="xp-start-btn" onclick="toggleStartMenu()">
+            <div class="xp-start-logo"><span></span><span></span></div>
+            start
+        </button>
+        <div class="xp-taskbar-items">
+            <div class="xp-taskbar-item" id="taskbarItem" onclick="restoreWindow()">
+                <div class="xp-taskbar-item-icon"></div>
+                Email Analyzer
+            </div>
+        </div>
+        <div class="xp-taskbar-clock" id="taskbarClock"></div>
+    </div>
+
+    <script>
+        // === Start Menu ===
+        function toggleStartMenu() {
+            document.getElementById('startMenu').classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.start-menu') && !e.target.closest('.xp-start-btn')) {
+                document.getElementById('startMenu').classList.remove('show');
+            }
+        });
+
+        // === Window State ===
+        let isMaximized = false;
+        let isMinimized = false;
+        let windowState = { x: 0, y: 0 };
+
+        const win = document.getElementById('xpWindow');
+        const titlebar = document.getElementById('titlebar');
+        const results = document.getElementById('results');
+        const loading = document.getElementById('loading');
+        const emailInput = document.getElementById('emailInput');
+
+        // === Draggable Window ===
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        titlebar.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            if (isMaximized) return;
+
+            isDragging = true;
+            const rect = win.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            win.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            win.style.left = (e.clientX - dragOffsetX) + 'px';
+            win.style.top = (e.clientY - dragOffsetY) + 'px';
+            win.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            win.style.transition = '';
+        });
+
+        titlebar.addEventListener('dblclick', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            toggleMaximize();
+        });
+
+        // === Window Controls ===
+        function minimizeWindow() {
+            isMinimized = true;
+            win.classList.add('minimized');
+        }
+
+        function restoreWindow() {
+            isMinimized = false;
+            win.classList.remove('minimized');
+        }
+
+        function toggleMaximize() {
+            if (isMaximized) {
+                isMaximized = false;
+                win.classList.remove('maximized');
+                win.style.left = windowState.x + 'px';
+                win.style.top = windowState.y + 'px';
+                win.style.transform = 'none';
+                document.getElementById('maxBtn').textContent = '□';
+            } else {
+                windowState.x = win.offsetLeft;
+                windowState.y = win.offsetTop;
+                isMaximized = true;
+                win.classList.add('maximized');
+                document.getElementById('maxBtn').textContent = '❐';
+            }
+        }
+
+        function closeWindow() {
+            win.style.display = 'none';
+        }
+
+        function openApp() {
+            win.style.display = '';
+            isMinimized = false;
+            win.classList.remove('minimized');
+            win.classList.remove('maximized');
+            win.style.left = '50%';
+            win.style.top = '80px';
+            win.style.transform = 'translateX(-50%)';
+        }
+
+        // === HLR Window ===
+        const hlrWin = document.getElementById('hlrWindow');
+        const hlrLoading = document.getElementById('hlrLoading');
+        const hlrResults = document.getElementById('hlrResults');
+        const phoneInput = document.getElementById('phoneInput');
+
+        let hlrDragging = false;
+        let hlrDragX = 0, hlrDragY = 0;
+
+        document.getElementById('hlrTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            hlrDragging = true;
+            const rect = hlrWin.getBoundingClientRect();
+            hlrDragX = e.clientX - rect.left;
+            hlrDragY = e.clientY - rect.top;
+            hlrWin.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!hlrDragging) return;
+            hlrWin.style.left = (e.clientX - hlrDragX) + 'px';
+            hlrWin.style.top = (e.clientY - hlrDragY) + 'px';
+            hlrWin.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', () => {
+            hlrDragging = false;
+            hlrWin.style.transition = '';
+        });
+
+        function openHLR() {
+            hlrWin.style.display = '';
+            hlrWin.style.left = '50%';
+            hlrWin.style.top = '100px';
+            hlrWin.style.transform = 'translateX(-50%)';
+        }
+
+        function closeHLR() {
+            hlrWin.style.display = 'none';
+        }
+
+        function minimizeHLR() {
+            hlrWin.style.display = 'none';
+        }
+
+        // === Sherlock Window ===
+        const sherlockWin = document.getElementById('sherlockWindow');
+        const sherlockLoading = document.getElementById('sherlockLoading');
+        const sherlockResults = document.getElementById('sherlockResults');
+        const usernameInput = document.getElementById('usernameInput');
+
+        let sherlockDragging = false;
+        let sherlockDragX = 0, sherlockDragY = 0;
+
+        document.getElementById('sherlockTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            sherlockDragging = true;
+            const rect = sherlockWin.getBoundingClientRect();
+            sherlockDragX = e.clientX - rect.left;
+            sherlockDragY = e.clientY - rect.top;
+            sherlockWin.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!sherlockDragging) return;
+            sherlockWin.style.left = (e.clientX - sherlockDragX) + 'px';
+            sherlockWin.style.top = (e.clientY - sherlockDragY) + 'px';
+            sherlockWin.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', () => {
+            sherlockDragging = false;
+            sherlockWin.style.transition = '';
+        });
+
+        function openSherlock() {
+            sherlockWin.style.display = '';
+            sherlockWin.style.left = '50%';
+            sherlockWin.style.top = '120px';
+            sherlockWin.style.transform = 'translateX(-50%)';
+        }
+
+        function closeSherlock() {
+            sherlockWin.style.display = 'none';
+        }
+
+        function minimizeSherlock() {
+            sherlockWin.style.display = 'none';
+        }
+
+        usernameInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchSherlock(); });
+
+        async function searchSherlock() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert('Enter a username');
+                return;
+            }
+
+            sherlockLoading.classList.add('show');
+            sherlockResults.innerHTML = '';
+
+            try {
+                const resp = await fetch('/api/sherlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                if (!resp.ok) throw new Error('Search failed');
+                renderSherlock(await resp.json());
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                sherlockLoading.classList.remove('show');
+            }
+        }
+
+        function renderSherlock(data) {
+            let h = '';
+
+            if (data.error) {
+                h += `<div class="section"><div class="section-title">Error</div><div class="xp-code">${data.error}</div></div>`;
+            }
+
+            h += `<div class="section"><div class="section-title">Results for: ${data.username} (${data.found.length} found, ${data.search_time}s)</div>`;
+
+            if (data.found.length > 0) {
+                h += `<table class="xp-table"><tr><th>SITE</th><th>LINK</th></tr>`;
+                for (const item of data.found) {
+                    h += `<tr><td><b>${item.site}</b></td><td style="font-size:10px"><a href="${item.url}" target="_blank" style="color:#003399">${item.url}</a></td></tr>`;
+                }
+                h += `</table>`;
+            } else {
+                h += `<div class="xp-code">No accounts found</div>`;
+            }
+
+            h += `</div>`;
+            sherlockResults.innerHTML = h;
+        }
+
+        phoneInput.addEventListener('keypress', e => { if (e.key === 'Enter') lookupHLR(); });
+
+        async function lookupHLR() {
+            const phone = phoneInput.value.trim();
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!phone) {
+                alert('Enter a phone number');
+                return;
+            }
+            if (!apiKey) {
+                alert('Enter your Numverify API key');
+                return;
+            }
+
+            hlrLoading.classList.add('show');
+            hlrResults.innerHTML = '';
+
+            try {
+                const resp = await fetch('/api/hlr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, api_key: apiKey })
+                });
+                if (!resp.ok) throw new Error('HLR lookup failed');
+                renderHLR(await resp.json());
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                hlrLoading.classList.remove('show');
+            }
+        }
+
+        function renderHLR(data) {
+            let h = '';
+
+            if (data.error) {
+                h += `
+                <div class="section">
+                    <div class="section-title">Error</div>
+                    <div class="xp-code">${data.error}</div>
+                </div>`;
+            } else {
+                h += `
+                <div class="section">
+                    <div class="section-title">HLR Results</div>
+                    <table class="xp-table">
+                        <tr><th>Field</th><th>Value</th></tr>
+                        <tr><td><b>Phone</b></td><td>${data.phone}</td></tr>
+                        <tr><td><b>Status</b></td><td>${data.status || '—'}</td></tr>
+                        <tr><td><b>Country</b></td><td>${data.country || '—'}</td></tr>
+                        <tr><td><b>Region</b></td><td>${data.region || '—'}</td></tr>
+                        <tr><td><b>Operator</b></td><td>${data.operator || '—'}</td></tr>
+                        <tr><td><b>MNC</b></td><td>${data.mnc || '—'}</td></tr>
+                        <tr><td><b>IMSI</b></td><td>${data.imsi || '—'}</td></tr>
+                        <tr><td><b>IMEI</b></td><td>${data.imei || '—'}</td></tr>
+                        <tr><td><b>Ported</b></td><td>${data.ported || '—'}</td></tr>
+                        <tr><td><b>Roaming</b></td><td>${data.roaming || '—'}</td></tr>
+                    </table>
+                </div>`;
+            }
+
+            if (data.raw_response) {
+                h += `
+                <div class="section">
+                    <div class="section-title">Raw Response</div>
+                    <div class="xp-code">${data.raw_response.substring(0, 500)}</div>
+                </div>`;
+            }
+
+            hlrResults.innerHTML = h;
+        }
+
+        // === Clock ===
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('taskbarClock').textContent = time;
+            document.getElementById('statusTime').textContent = now.toLocaleString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // === Enter to analyze ===
+        emailInput.addEventListener('keypress', e => { if (e.key === 'Enter') analyzeEmail(); });
+
+        // === Analyze ===
+        async function analyzeEmail() {
+            const email = emailInput.value.trim();
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+
+            try {
+                const resp = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                if (!resp.ok) throw new Error('Analysis failed');
+                renderResults(await resp.json());
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        function renderResults(data) {
+            let h = '';
+
+            // SMTP
+            h += `
+            <div class="section">
+                <div class="section-title">SMTP Results</div>
+                <div class="xp-code">{
+  "email": "${data.email}",
+  "valid_format": ${data.smtp.valid_format},
+  "mx_records": [${data.smtp.mx_records.map(r => `\n    "${r}"`).join(',')}],
+  "steps": [${data.smtp.steps.map(s => `\n    { "${s.step}": { "code": ${s.code} } }`).join(',')}],
+  "final_status": "${data.smtp.final_status}",
+  "smtp_code": ${data.smtp.smtp_code}
+}</div>
+            </div>`;
+
+            // Profile
+            let mainAvatar = null;
+            if (data.connections) {
+                const gh = data.connections.find(c => c.service === 'GitHub' && c.avatar);
+                if (gh) mainAvatar = gh.avatar;
+            }
+            if (data.google && data.google.avatar_url) mainAvatar = data.google.avatar_url;
+
+            const initial = (data.email.split('@')[0])[0].toUpperCase();
+
+            if (data.is_gmail && data.google) {
+                h += `
+                <div class="section">
+                    <div class="section-title">Google Infrastructure</div>
+                    <div class="xp-profile">
+                        <div class="xp-avatar">
+                            ${mainAvatar ? `<img src="${mainAvatar}" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
+                        </div>
+                        <div class="xp-profile-info">
+                            <div class="xp-info-row">
+                                <span class="xp-info-label">GOOGLE ID:</span>
+                                <span>${data.google.google_id}</span>
+                            </div>
+                            <div class="xp-info-row">
+                                <span class="xp-info-label">LAST UPDATE:</span>
+                                <span>${data.google.last_update}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="xp-links">
+                        ${(data.google.services || []).map(s => `<a href="${s.url}" class="xp-link" target="_blank">${s.name}</a>`).join('')}
+                    </div>
+                </div>`;
+            } else {
+                h += `
+                <div class="section">
+                    <div class="section-title">Profile</div>
+                    <div class="xp-profile">
+                        <div class="xp-avatar">
+                            ${mainAvatar ? `<img src="${mainAvatar}" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
+                        </div>
+                        <div class="xp-profile-info">
+                            <div class="xp-info-row"><span class="xp-info-label">EMAIL:</span><span>${data.email}</span></div>
+                            <div class="xp-info-row"><span class="xp-info-label">DOMAIN:</span><span>${data.domain}</span></div>
+                            <div class="xp-info-row"><span class="xp-info-label">STATUS:</span><span style="color:${data.smtp.final_status === 'valid' ? '#006400' : '#8b0000'}">${data.smtp.final_status}</span></div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // Connections
+            if (data.connections && data.connections.length) {
+                h += `
+                <div class="section">
+                    <div class="section-title">Connections</div>
+                    <table class="xp-table">
+                        <tr><th>SERVICE</th><th>LINK</th><th>STATUS</th></tr>
+                        ${data.connections.map(c => `<tr><td><b>${c.service}</b></td><td style="font-size:10px;color:#666">${c.url}</td><td><span class="xp-badge ${c.status}">${c.status}</span></td></tr>`).join('')}
+                    </table>
+                </div>`;
+            }
+
+            h += `<div class="xp-footer">${data.analysis_timestamp}</div>`;
+            results.innerHTML = h;
+            results.classList.add('show');
+        }
+    </script>
+</body>
+</html>
