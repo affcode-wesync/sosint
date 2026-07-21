@@ -542,28 +542,72 @@ async def sherlock_search(username: str) -> SherlockResult:
 
 
 async def sherlock_fallback(username: str, elapsed: float) -> SherlockResult:
-    """Fallback sherlock using manual HTTP checks"""
+    """Fallback sherlock using manual HTTP checks — 50+ sites"""
     sites = {
-        "GitHub": f"https://api.github.com/users/{username}",
+        # Social
         "Twitter": f"https://twitter.com/{username}",
         "Instagram": f"https://www.instagram.com/{username}/",
-        "Reddit": f"https://www.reddit.com/user/{username}",
-        "YouTube": f"https://www.youtube.com/@{username}",
+        "Facebook": f"https://www.facebook.com/{username}",
         "TikTok": f"https://www.tiktok.com/@{username}",
+        "Snapchat": f"https://www.snapchat.com/add/{username}",
+        "Reddit": f"https://www.reddit.com/user/{username}",
         "Pinterest": f"https://www.pinterest.com/{username}/",
-        "Twitch": f"https://www.twitch.tv/{username}",
-        "LinkedIn": f"https://www.linkedin.com/in/{username}/",
-        "Steam": f"https://steamcommunity.com/id/{username}",
-        "Spotify": f"https://open.spotify.com/user/{username}",
-        "DeviantArt": f"https://www.deviantart.com/{username}",
-        "Medium": f"https://medium.com/@{username}",
         "Tumblr": f"https://{username}.tumblr.com",
-        "Flickr": f"https://www.flickr.com/people/{username}",
+        "LinkedIn": f"https://www.linkedin.com/in/{username}/",
+        "VK": f"https://vk.com/{username}",
+        "Telegram": f"https://t.me/{username}",
+        # Video
+        "YouTube": f"https://www.youtube.com/@{username}",
+        "Twitch": f"https://www.twitch.tv/{username}",
+        "Dailymotion": f"https://www.dailymotion.com/{username}",
+        "Rumble": f"https://rumble.com/user/{username}",
+        # Music
+        "Spotify": f"https://open.spotify.com/user/{username}",
+        "SoundCloud": f"https://soundcloud.com/{username}",
+        "Bandcamp": f"https://{username}.bandcamp.com",
+        "LastFM": f"https://www.last.fm/user/{username}",
+        "Deezer": f"https://www.deezer.com/profile/{username}",
+        # Gaming
+        "Steam": f"https://steamcommunity.com/id/{username}",
+        "Xbox": f"https://www.xbox.com/en-US/play/user/{username}",
+        "PSN": f"https://psnprofiles.com/{username}",
+        "EpicGames": f"https://www.epicgames.com/site/en-US/u/{username}",
+        "Roblox": f"https://www.roblox.com/user.aspx?username={username}",
+        "Minecraft": f"https://namemc.com/profile/{username}",
+        "Chess.com": f"https://www.chess.com/member/{username}",
+        # Dev
+        "GitHub": f"https://api.github.com/users/{username}",
         "GitLab": f"https://gitlab.com/{username}",
-        "Keybase": f"https://keybase.io/{username}",
+        "Bitbucket": f"https://bitbucket.org/{username}/",
+        "StackOverflow": f"https://stackoverflow.com/users/?tab=Accounts",
         "HackerNews": f"https://news.ycombinator.com/user?id={username}",
-        "About.me": f"https://about.me/{username}",
+        "DevTo": f"https://dev.to/{username}",
+        "CodePen": f"https://codepen.io/{username}",
+        "Replit": f"https://replit.com/@{username}",
+        "npm": f"https://www.npmjs.com/~{username}",
+        "PyPI": f"https://pypi.org/user/{username}/",
+        # Creative
+        "DeviantArt": f"https://www.deviantart.com/{username}",
+        "ArtStation": f"https://www.artstation.com/{username}",
+        "Behance": f"https://www.behance.net/{username}",
+        "Flickr": f"https://www.flickr.com/people/{username}",
+        "500px": f"https://500px.com/p/{username}",
+        # Blog
+        "Medium": f"https://medium.com/@{username}",
+        "WordPress": f"https://{username}.wordpress.com",
+        "Blogger": f"https://{username}.blogspot.com",
+        "Substack": f"https://{username}.substack.com",
+        "Ghost": f"https://{username}.ghost.io",
+        # Other
+        "Keybase": f"https://keybase.io/{username}",
         "Patreon": f"https://www.patreon.com/{username}",
+        "BuyMeACoffee": f"https://buymeacoffee.com/{username}",
+        "Ko-fi": f"https://ko-fi.com/{username}",
+        "Gravatar": f"https://en.gravatar.com/{username}",
+        "About.me": f"https://about.me/{username}",
+        "Linktree": f"https://linktr.ee/{username}",
+        "Carrd": f"https://{username}.carrd.co",
+        "NameMC": f"https://namemc.com/profile/{username}",
     }
 
     found = []

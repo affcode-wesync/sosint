@@ -1558,6 +1558,8 @@
 
             h += `<div class="section"><div class="section-title">Results for: ${data.username} (${data.found.length} found, ${data.search_time}s)</div>`;
 
+            h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadReport('${data.username}')">Download HTML Report</button></div>`;
+
             if (data.found.length > 0) {
                 h += `<table class="xp-table"><tr><th>SITE</th><th>LINK</th></tr>`;
                 for (const item of data.found) {
@@ -1570,6 +1572,23 @@
 
             h += `</div>`;
             sherlockResults.innerHTML = h;
+        }
+
+        function downloadReport(username) {
+            fetch('/api/sherlock/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            })
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `nick_report_${username}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
         }
 
         phoneInput.addEventListener('keypress', e => { if (e.key === 'Enter') lookupHLR(); });
