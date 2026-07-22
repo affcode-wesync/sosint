@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NickScope — Nick Search Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#b8cad4;color:#17384c;font:14px Arial,sans-serif}
+.shell{max-width:1100px;margin:14px auto;background:#eaf2f5;border:1px solid #526f80;box-shadow:0 14px 38px #35526566}
+.hero{height:80px;padding:18px 30px;display:flex;align-items:center;justify-content:space-between;background:radial-gradient(circle at 70% 40%,#fff,#9cc9dc 19%,transparent 41%),linear-gradient(100deg,#164965,#a9cfdf 55%,#eaf4f8)}
+.brand{display:flex;align-items:center;gap:15px}
+.mark{font:bold italic 44px Arial;color:#eef7fa;letter-spacing:-6px;text-shadow:2px 2px #143e58}
+.brand b{font-size:20px;letter-spacing:3px;color:#17384c}
+.brand small{display:block;letter-spacing:2px;color:#3a6a80}
+.hero-title{text-align:right;font-size:25px;font-weight:bold;color:#17384c}
+.hero-title small{display:block;font-size:10px;letter-spacing:2px;color:#3a6a80}
+.content{padding:22px}
+.intro{margin-bottom:18px}
+.intro h1{font-size:22px;color:#164965;border-bottom:2px solid #738d9d;padding-bottom:8px;margin-bottom:8px}
+.intro p{font-size:12px;color:#617684}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:#f8fbfc;border:1px solid #819aaa;padding:12px;text-align:center}
+.stat span{display:block;font-size:10px;text-transform:uppercase;color:#617684;letter-spacing:1px;margin-bottom:4px}
+.stat b{font-size:24px;color:#164965}
+.stat b.green{color:#228b22}
+.box{border:1px solid #819aaa;background:#f8fbfc;box-shadow:2px 3px 8px #28485d22}
+.box h2{margin:0;padding:8px 11px;font-size:11px;background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);border-bottom:1px solid #738d9d}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:linear-gradient(180deg,#164965,#1a5276);color:#fff;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{padding:9px 12px;border-bottom:1px solid #c2d0d6}
+tr:hover{background:#e8f4fd}
+a{color:#2584af;text-decoration:none}
+a:hover{text-decoration:underline}
+.found{color:#228b22;font-weight:bold}
+.nf{color:#999}
+details{margin-top:16px;border:1px solid #819aaa;background:#f8fbfc;box-shadow:2px 3px 8px #28485d22}
+details>summary{padding:10px 14px;font-size:12px;font-weight:bold;color:#164965;cursor:pointer;user-select:none;list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▶ ";font-size:10px}
+details[open]>summary::before{content:"▼ "}
+details .table-wrap{border-top:1px solid #c2d0d6}
+.foot{padding:10px 14px;text-align:center;font-size:10px;color:#888;background:linear-gradient(#fff,#c6d6de);border-top:1px solid #819aaa;display:flex;justify-content:space-between}
+@media(max-width:760px){.shell{margin:0}.summary{grid-template-columns:1fr 1fr}}
+@media(max-width:470px){.summary{grid-template-columns:1fr}.hero-title{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hero">
+<div class="brand"><div class="mark">NS</div><div><b>NICKSCOPE</b><small>USERNAME SEARCH SYSTEM</small></div></div>
+<div class="hero-title">NICK SEARCH<small>FIND THE DIGITAL TRACE</small></div>
+</header>
+<main class="content" id="results">
+<div class="intro">
+<h1>Nick Search Report</h1>
+<p>Проверка публичных URL с указанным именем пользователя.</p>
+</div>
+<div class="summary">
+<div class="stat"><span>Искомый ник</span><b id="nickValue">—</b></div>
+<div class="stat"><span>Площадок</span><b id="totalValue">0</b></div>
+<div class="stat"><span>Найдено</span><b class="green" id="foundValue">0</b></div>
+<div class="stat"><span>Время</span><b id="timeValue">0.0s</b></div>
+</div>
+<section class="box">
+<h2 id="tableTitle">РЕЗУЛЬТАТЫ</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>САЙТ</th><th>ССЫЛКА</th><th>СТАТУС</th></tr></thead>
+<tbody id="foundBody"></tbody>
+</table>
+</div>
+</section>
+<details id="nfDetails">
+<summary>Не найдено (<span id="nfCount">0</span>)</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>САЙТ</th><th>ССЫЛКА</th><th>СТАТУС</th></tr></thead>
+<tbody id="nfBody"></tbody>
+</table>
+</div>
+</details>
+</main>
+<footer class="foot">
+<span>© 2026 NICKSCOPE</span>
+<span>PUBLIC URL REPORT</span>
+</footer>
+</div>
+</body>
+</html>

@@ -495,36 +495,42 @@ async def sherlock_search(username: str) -> SherlockResult:
         )
 
     try:
-        from sherlock_project import sherlock
+        from sherlock_project.sherlock import sherlock, SitesInformation, QueryNotify
+        from sherlock_project import notify
+
+        # Load site data
+        data_path = os.path.join(
+            os.path.dirname(__import__('sherlock_project').__file__),
+            'resources', 'data.json'
+        )
+        sites_info = SitesInformation(data_path)
+
+        # Convert to dict format expected by sherlock()
+        site_dict = {name: site.information for name, site in sites_info.sites.items()}
+
+        # Create a silent notifier
+        query_notify = notify.QueryNotify()
+
+        # Run sherlock
+        result = sherlock(
+            username,
+            site_data=site_dict,
+            query_notify=query_notify,
+            timeout=10,
+        )
 
         found = []
         not_found = []
 
-        # Run sherlock
-        sherlock_path = os.path.join(os.path.dirname(__file__), "sherlock_data")
-
-        # Use sherlock's built-in function
-        result = sherlock.sherlock(
-            username,
-            site_list=None,
-            timeout=5,
-            print_found=False,
-            print_not_found=False,
-            verbose=False,
-            tor=False,
-            unique_tor=False,
-            csv=False,
-            json_output=False,
-            output_dir=None,
-            recurse=False,
-            nsfw=False,
-            disable_color=True
-        )
-
         if result:
-            for site_name, url in result.items():
-                if url and url != "False":
-                    found.append({"site": site_name, "url": url})
+            for site_name, site_result in result.items():
+                if isinstance(site_result, dict):
+                    status = site_result.get("status")
+                    url_user = site_result.get("url_user", "")
+                    if status and hasattr(status, 'status') and status.status.name == "CLAIMED":
+                        found.append({"site": site_name, "url": url_user})
+                    else:
+                        not_found.append(site_name)
                 else:
                     not_found.append(site_name)
 

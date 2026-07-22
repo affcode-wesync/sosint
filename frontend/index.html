@@ -12,7 +12,7 @@
             min-height: 100vh;
             overflow: hidden;
             position: relative;
-            background: url('wall.png') center/cover no-repeat fixed;
+            background: url('/static/wall.png') center/cover no-repeat fixed;
         }
 
         /* Desktop Icons */
@@ -415,6 +415,9 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .xp-icon-16 {
@@ -422,86 +425,21 @@
             height: 16px;
             border-radius: 2px;
             flex-shrink: 0;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .icon-email {
-            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
-            border: 1px solid #8b7355;
-        }
-
-        .icon-email::before {
-            content: '';
-            width: 20px;
-            height: 12px;
-            background: linear-gradient(180deg, #ffffcc 0%, #ffff99 100%);
-            border: 1px solid #999;
-            position: absolute;
-        }
-
-        .icon-email::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 6px solid #ccc;
-            position: absolute;
-            top: 4px;
+            background-image: url('/static/icons/email-sosint.png');
         }
 
         .icon-phone {
-            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
-            border: 1px solid #888;
-            position: relative;
-        }
-
-        .icon-phone::before {
-            content: '';
-            width: 16px;
-            height: 24px;
-            background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
-            border: 1px solid #444;
-            border-radius: 3px;
-            position: absolute;
-        }
-
-        .icon-phone::after {
-            content: '';
-            width: 8px;
-            height: 3px;
-            background: #666;
-            position: absolute;
-            bottom: 4px;
-            border-radius: 1px;
+            background-image: url('/static/icons/hlr.png');
         }
 
         .icon-search {
-            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
-            border: 1px solid #888;
-            position: relative;
-        }
-
-        .icon-search::before {
-            content: '';
-            width: 14px;
-            height: 14px;
-            border: 2px solid #333;
-            border-radius: 50%;
-            position: absolute;
-            top: 3px;
-            left: 3px;
-        }
-
-        .icon-search::after {
-            content: '';
-            width: 3px;
-            height: 8px;
-            background: #333;
-            position: absolute;
-            bottom: 4px;
-            right: 5px;
-            transform: rotate(-45deg);
-            border-radius: 1px;
+            background-image: url('/static/icons/nickname.png');
         }
 
         .icon-internet {
@@ -692,225 +630,54 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 4px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .desktop-icon-email {
-            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
-            border: 2px solid #8b7355;
-            position: relative;
-        }
-
-        .desktop-icon-email::before {
-            content: '';
-            width: 30px;
-            height: 18px;
-            background: linear-gradient(180deg, #ffffcc 0%, #ffff99 100%);
-            border: 1px solid #999;
-            position: absolute;
-        }
-
-        .desktop-icon-email::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 9px solid #ccc;
-            position: absolute;
-            top: 6px;
+            background-image: url('/static/icons/email-sosint.png');
         }
 
         .desktop-icon-phone {
-            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
-            border: 2px solid #888;
-            position: relative;
-        }
-
-        .desktop-icon-phone::before {
-            content: '';
-            width: 22px;
-            height: 34px;
-            background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
-            border: 2px solid #444;
-            border-radius: 4px;
-            position: absolute;
-        }
-
-        .desktop-icon-phone::after {
-            content: '';
-            width: 10px;
-            height: 4px;
-            background: #666;
-            position: absolute;
-            bottom: 6px;
-            border-radius: 2px;
-        }
-
-        .icon-phone-small {
-            width: 16px;
-            height: 16px;
-            background: linear-gradient(180deg, #2f2f2f, #1a1a1a);
-            border: 1px solid #444;
-            border-radius: 2px;
-            position: relative;
-        }
-
-        .icon-phone-small::after {
-            content: '';
-            width: 6px;
-            height: 2px;
-            background: #666;
-            position: absolute;
-            bottom: 2px;
-            left: 3px;
-            border-radius: 1px;
+            background-image: url('/static/icons/hlr.png');
         }
 
         .desktop-icon-search {
-            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
-            border: 2px solid #888;
-            position: relative;
-        }
-
-        .desktop-icon-search::before {
-            content: '';
-            width: 24px;
-            height: 24px;
-            border: 3px solid #333;
-            border-radius: 50%;
-            position: absolute;
-        }
-
-        .desktop-icon-search::after {
-            content: '';
-            width: 4px;
-            height: 12px;
-            background: #333;
-            position: absolute;
-            bottom: 6px;
-            right: 8px;
-            transform: rotate(-45deg);
-            border-radius: 2px;
-        }
-
-        .icon-search-small {
-            width: 16px;
-            height: 16px;
-            background: linear-gradient(180deg, #e8e8e8 0%, #c8c8c8 100%);
-            border: 1px solid #888;
-            position: relative;
-        }
-
-        .icon-search-small::before {
-            content: '';
-            width: 10px;
-            height: 10px;
-            border: 2px solid #333;
-            border-radius: 50%;
-            position: absolute;
-            top: 1px;
-            left: 1px;
-        }
-
-        .icon-search-small::after {
-            content: '';
-            width: 2px;
-            height: 5px;
-            background: #333;
-            position: absolute;
-            bottom: 1px;
-            right: 2px;
-            transform: rotate(-45deg);
+            background-image: url('/static/icons/nickname.png');
         }
 
         /* Taskbar Icon */
         .xp-taskbar-item-icon {
             width: 16px;
             height: 16px;
-            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
-            border: 1px solid #8b7355;
-            position: relative;
-        }
-
-        .xp-taskbar-item-icon::before {
-            content: '';
-            width: 10px;
-            height: 6px;
-            background: linear-gradient(180deg, #ffffcc, #ffff99);
-            border: 1px solid #999;
-            position: absolute;
-            top: 2px;
-            left: 2px;
+            background-image: url('/static/icons/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 2px;
         }
 
         /* Title Icon */
         .xp-titlebar-icon {
             width: 16px;
             height: 16px;
-            background: linear-gradient(180deg, #f5f5dc 0%, #d4c896 100%);
-            border: 1px solid #8b7355;
-            position: relative;
-        }
-
-        .xp-titlebar-icon::before {
-            content: '';
-            width: 10px;
-            height: 6px;
-            background: linear-gradient(180deg, #ffffcc, #ffff99);
-            border: 1px solid #999;
-            position: absolute;
-            top: 2px;
-            left: 2px;
+            background-image: url('/static/icons/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 2px;
+            flex-shrink: 0;
         }
 
         /* Start Logo */
         .xp-start-logo {
             width: 20px;
             height: 20px;
-            position: relative;
-        }
-
-        .xp-start-logo::before {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #ff0000;
-            border-radius: 1px;
-            top: 0;
-            left: 0;
-        }
-
-        .xp-start-logo::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #00aa00;
-            border-radius: 1px;
-            bottom: 0;
-            right: 0;
-        }
-
-        .xp-start-logo span:nth-child(1) {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #ffcc00;
-            border-radius: 1px;
-            top: 0;
-            right: 0;
-        }
-
-        .xp-start-logo span:nth-child(2) {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #0066ff;
-            border-radius: 1px;
-            bottom: 0;
-            left: 0;
+            background-image: url('/static/icons/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .xp-taskbar-items {
@@ -941,7 +708,10 @@
         .xp-taskbar-item-icon {
             width: 16px;
             height: 16px;
-            background: linear-gradient(135deg, #4169e1, #00bfff);
+            background-image: url('/static/icons/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             border-radius: 2px;
         }
 
@@ -1077,6 +847,8 @@
         .xp-badge.not_found { background: #d3d3d3; border-color: #666; color: #666; }
         .xp-badge.redirect { background: #add8e6; border-color: #00008b; color: #00008b; }
         .xp-badge.error { background: #ffb6c1; border-color: #8b0000; color: #8b0000; }
+        .xp-badge.rate_limited { background: #fff3cd; border-color: #856404; color: #856404; }
+        .xp-badge.unknown { background: #e2e3e5; border-color: #6c757d; color: #6c757d; }
 
         .xp-loading {
             display: none;
@@ -1162,7 +934,7 @@
     <div class="xp-window" id="hlrWindow" style="display:none">
         <div class="xp-titlebar" id="hlrTitlebar">
             <div class="xp-titlebar-left">
-                <div class="xp-titlebar-icon icon-phone-small"></div>
+                <div class="xp-titlebar-icon" style="background-image:url('/static/icons/hlr.png')"></div>
                 <span class="xp-titlebar-text">HLR Lookup - Numverify</span>
             </div>
             <div class="xp-titlebar-buttons">
@@ -1197,7 +969,7 @@
     <div class="xp-window" id="sherlockWindow" style="display:none">
         <div class="xp-titlebar" id="sherlockTitlebar">
             <div class="xp-titlebar-left">
-                <div class="xp-titlebar-icon icon-search-small"></div>
+                <div class="xp-titlebar-icon" style="background-image:url('/static/icons/nickname.png')"></div>
                 <span class="xp-titlebar-text">Nick Search — Sherlock</span>
             </div>
             <div class="xp-titlebar-buttons">
@@ -1322,7 +1094,7 @@
     <!-- Taskbar -->
     <div class="xp-taskbar">
         <button class="xp-start-btn" onclick="toggleStartMenu()">
-            <div class="xp-start-logo"><span></span><span></span></div>
+            <div class="xp-start-logo"></div>
             start
         </button>
         <div class="xp-taskbar-items">
@@ -1549,36 +1321,76 @@
             }
         }
 
+        let lastSherlockResult = null;
+
         function renderSherlock(data) {
+            lastSherlockResult = data;
             let h = '';
 
             if (data.error) {
-                h += `<div class="section"><div class="section-title">Error</div><div class="xp-code">${data.error}</div></div>`;
+                h += `<div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;padding:12px;margin:10px 0;color:#721c24"><b>Error:</b> ${data.error}</div>`;
             }
 
-            h += `<div class="section"><div class="section-title">Results for: ${data.username} (${data.found.length} found, ${data.search_time}s)</div>`;
+            h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadReport()">Download HTML Report</button></div>`;
 
-            h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadReport('${data.username}')">Download HTML Report</button></div>`;
+            // Summary cards
+            const total = data.found.length + data.not_found.length;
+            h += `
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Ник</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.username}</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Площадок</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${total}</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Найдено</div>
+                    <div style="font-size:16px;font-weight:bold;color:#228b22">${data.found.length}</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Время</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.search_time}s</div>
+                </div>
+            </div>`;
 
+            // Found accounts
             if (data.found.length > 0) {
-                h += `<table class="xp-table"><tr><th>SITE</th><th>LINK</th></tr>`;
-                for (const item of data.found) {
-                    h += `<tr><td><b>${item.site}</b></td><td style="font-size:10px"><a href="${item.url}" target="_blank" style="color:#003399">${item.url}</a></td></tr>`;
-                }
-                h += `</table>`;
-            } else {
-                h += `<div class="xp-code">No accounts found</div>`;
+                h += `
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">НАЙДЕННЫЕ АККАУНТЫ (${data.found.length})</div>
+                    <table class="xp-table">
+                        <tr><th>САЙТ</th><th>ССЫЛКА</th></tr>
+                        ${data.found.map(item => `<tr><td><b>${item.site}</b></td><td style="font-size:11px"><a href="${item.url}" target="_blank" style="color:#2584af">${item.url}</a></td></tr>`).join('')}
+                    </table>
+                </div>`;
             }
 
-            h += `</div>`;
+            // Not found (collapsible)
+            if (data.not_found.length > 0) {
+                h += `
+                <details style="margin:12px 0;border:1px solid #819aaa;background:#f8fbfc;border-radius:3px">
+                    <summary style="padding:10px 14px;font-size:12px;font-weight:bold;color:#164965;cursor:pointer;list-style:none">Не найдено (${data.not_found.length})</summary>
+                    <div style="border-top:1px solid #c2d0d6">
+                        <table class="xp-table">
+                            <tr><th>САЙТ</th></tr>
+                            ${data.not_found.map(site => `<tr><td>${site}</td></tr>`).join('')}
+                        </table>
+                    </div>
+                </details>`;
+            }
+
             sherlockResults.innerHTML = h;
         }
 
-        function downloadReport(username) {
+        function downloadReport() {
+            if (!lastSherlockResult) return;
+            const { username, found, not_found, search_time } = lastSherlockResult;
             fetch('/api/sherlock/export', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username })
+                body: JSON.stringify({ username, found, not_found, search_time })
             })
             .then(resp => resp.blob())
             .then(blob => {
@@ -1586,6 +1398,42 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `nick_report_${username}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function downloadEmailReport() {
+            if (!lastEmailResult) return;
+            fetch('/api/analyze/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastEmailResult)
+            })
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `email_report_${lastEmailResult.email.replace(/@/g, '_at_')}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function downloadHLRReport() {
+            if (!lastHLRResult) return;
+            fetch('/api/hlr/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastHLRResult)
+            })
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hlr_report_${lastHLRResult.phone}.html`;
                 a.click();
                 URL.revokeObjectURL(url);
             });
@@ -1615,7 +1463,9 @@
                     body: JSON.stringify({ phone, api_key: apiKey })
                 });
                 if (!resp.ok) throw new Error('HLR lookup failed');
-                renderHLR(await resp.json());
+                const data = await resp.json();
+                lastHLRResult = data;
+                renderHLR(data);
             } catch (e) {
                 alert('Error: ' + e.message);
             } finally {
@@ -1626,18 +1476,38 @@
         function renderHLR(data) {
             let h = '';
 
+            h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadHLRReport()">Download HTML Report</button></div>`;
+
             if (data.error) {
                 h += `
-                <div class="section">
-                    <div class="section-title">Error</div>
-                    <div class="xp-code">${data.error}</div>
+                <div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;padding:12px;margin:10px 0;color:#721c24">
+                    <b>Error:</b> ${data.error}
                 </div>`;
             } else {
                 h += `
-                <div class="section">
-                    <div class="section-title">HLR Results</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
+                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Телефон</div>
+                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.phone}</div>
+                    </div>
+                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Страна</div>
+                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.country || '—'}</div>
+                    </div>
+                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Оператор</div>
+                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.operator || '—'}</div>
+                    </div>
+                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Статус</div>
+                        <div style="font-size:16px;font-weight:bold;color:${data.status === 'valid' ? '#228b22' : '#8b0000'}">${data.status || '—'}</div>
+                    </div>
+                </div>
+
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PHONE DETAILS</div>
                     <table class="xp-table">
-                        <tr><th>Field</th><th>Value</th></tr>
+                        <tr><th>ПАРАМЕТР</th><th>ЗНАЧЕНИЕ</th></tr>
                         <tr><td><b>Phone</b></td><td>${data.phone}</td></tr>
                         <tr><td><b>Status</b></td><td>${data.status || '—'}</td></tr>
                         <tr><td><b>Country</b></td><td>${data.country || '—'}</td></tr>
@@ -1654,8 +1524,8 @@
 
             if (data.raw_response) {
                 h += `
-                <div class="section">
-                    <div class="section-title">Raw Response</div>
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">RAW RESPONSE</div>
                     <div class="xp-code">${data.raw_response.substring(0, 500)}</div>
                 </div>`;
             }
@@ -1676,6 +1546,9 @@
         // === Enter to analyze ===
         emailInput.addEventListener('keypress', e => { if (e.key === 'Enter') analyzeEmail(); });
 
+        let lastEmailResult = null;
+        let lastHLRResult = null;
+
         // === Analyze ===
         async function analyzeEmail() {
             const email = emailInput.value.trim();
@@ -1694,7 +1567,9 @@
                     body: JSON.stringify({ email })
                 });
                 if (!resp.ok) throw new Error('Analysis failed');
-                renderResults(await resp.json());
+                const data = await resp.json();
+                lastEmailResult = data;
+                renderResults(data);
             } catch (e) {
                 alert('Error: ' + e.message);
             } finally {
@@ -1705,18 +1580,39 @@
         function renderResults(data) {
             let h = '';
 
+            h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadEmailReport()">Download HTML Report</button></div>`;
+
+            // Summary cards
+            h += `
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Домен</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.domain}</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">SMTP статус</div>
+                    <div style="font-size:16px;font-weight:bold;color:${data.smtp.final_status === 'valid' ? '#228b22' : '#8b0000'}">${data.smtp.final_status}</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Риск</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.risk_level} (${data.risk_score}/100)</div>
+                </div>
+                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
+                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Сервисы</div>
+                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.connections ? data.connections.length : 0}</div>
+                </div>
+            </div>`;
+
             // SMTP
             h += `
-            <div class="section">
-                <div class="section-title">SMTP Results</div>
-                <div class="xp-code">{
-  "email": "${data.email}",
-  "valid_format": ${data.smtp.valid_format},
-  "mx_records": [${data.smtp.mx_records.map(r => `\n    "${r}"`).join(',')}],
-  "steps": [${data.smtp.steps.map(s => `\n    { "${s.step}": { "code": ${s.code} } }`).join(',')}],
-  "final_status": "${data.smtp.final_status}",
-  "smtp_code": ${data.smtp.smtp_code}
-}</div>
+            <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">SMTP VERIFICATION</div>
+                <div style="padding:12px">
+                    <table class="xp-table">
+                        <tr><th>ШАГ</th><th>КОД</th></tr>
+                        ${data.smtp.steps.map(s => `<tr><td>${s.step}</td><td>${s.code}</td></tr>`).join('')}
+                    </table>
+                </div>
             </div>`;
 
             // Profile
@@ -1731,39 +1627,31 @@
 
             if (data.is_gmail && data.google) {
                 h += `
-                <div class="section">
-                    <div class="section-title">Google Infrastructure</div>
-                    <div class="xp-profile">
-                        <div class="xp-avatar">
-                            ${mainAvatar ? `<img src="${mainAvatar}" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PROFILE</div>
+                    <div style="padding:12px;display:flex;gap:16px;align-items:center">
+                        <div style="width:60px;height:60px;border-radius:4px;background:linear-gradient(135deg,#4169e1,#00bfff);display:flex;align-items:center;justify-content:center;font-size:24px;color:white;flex-shrink:0;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
+                            ${mainAvatar ? `<img src="${mainAvatar}" style="width:100%;height:100%;border-radius:4px;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
                         </div>
-                        <div class="xp-profile-info">
-                            <div class="xp-info-row">
-                                <span class="xp-info-label">GOOGLE ID:</span>
-                                <span>${data.google.google_id}</span>
-                            </div>
-                            <div class="xp-info-row">
-                                <span class="xp-info-label">LAST UPDATE:</span>
-                                <span>${data.google.last_update}</span>
-                            </div>
+                        <div style="flex:1">
+                            <div style="margin-bottom:4px"><b>Google ID:</b> ${data.google.google_id}</div>
+                            <div style="margin-bottom:4px"><b>Last Update:</b> ${data.google.last_update}</div>
+                            <div>${(data.google.services || []).map(s => `<a href="${s.url}" target="_blank" style="color:#2584af;margin-right:12px;font-size:12px">${s.name}</a>`).join('')}</div>
                         </div>
-                    </div>
-                    <div class="xp-links">
-                        ${(data.google.services || []).map(s => `<a href="${s.url}" class="xp-link" target="_blank">${s.name}</a>`).join('')}
                     </div>
                 </div>`;
             } else {
                 h += `
-                <div class="section">
-                    <div class="section-title">Profile</div>
-                    <div class="xp-profile">
-                        <div class="xp-avatar">
-                            ${mainAvatar ? `<img src="${mainAvatar}" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PROFILE</div>
+                    <div style="padding:12px;display:flex;gap:16px;align-items:center">
+                        <div style="width:60px;height:60px;border-radius:4px;background:linear-gradient(135deg,#4169e1,#00bfff);display:flex;align-items:center;justify-content:center;font-size:24px;color:white;flex-shrink:0;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
+                            ${mainAvatar ? `<img src="${mainAvatar}" style="width:100%;height:100%;border-radius:4px;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
                         </div>
-                        <div class="xp-profile-info">
-                            <div class="xp-info-row"><span class="xp-info-label">EMAIL:</span><span>${data.email}</span></div>
-                            <div class="xp-info-row"><span class="xp-info-label">DOMAIN:</span><span>${data.domain}</span></div>
-                            <div class="xp-info-row"><span class="xp-info-label">STATUS:</span><span style="color:${data.smtp.final_status === 'valid' ? '#006400' : '#8b0000'}">${data.smtp.final_status}</span></div>
+                        <div style="flex:1">
+                            <div style="margin-bottom:4px"><b>Email:</b> ${data.email}</div>
+                            <div style="margin-bottom:4px"><b>Domain:</b> ${data.domain}</div>
+                            <div><b>Status:</b> <span style="color:${data.smtp.final_status === 'valid' ? '#228b22' : '#8b0000'}">${data.smtp.final_status}</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -1772,11 +1660,14 @@
             // Connections
             if (data.connections && data.connections.length) {
                 h += `
-                <div class="section">
-                    <div class="section-title">Connections</div>
+                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
+                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">SERVICE CONNECTIONS</div>
                     <table class="xp-table">
-                        <tr><th>SERVICE</th><th>LINK</th><th>STATUS</th></tr>
-                        ${data.connections.map(c => `<tr><td><b>${c.service}</b></td><td style="font-size:10px;color:#666">${c.url}</td><td><span class="xp-badge ${c.status}">${c.status}</span></td></tr>`).join('')}
+                        <tr><th>СЕРВИС</th><th>URL</th><th>СТАТУС</th></tr>
+                        ${data.connections.map(c => {
+                            const cls = c.status === 'found' ? 'found' : (c.status === 'not_found' ? 'not_found' : 'redirect');
+                            return `<tr><td><b>${c.service}</b></td><td style="font-size:10px;color:#666">${c.url}</td><td><span class="xp-badge ${cls}">${c.status}</span></td></tr>`;
+                        }).join('')}
                     </table>
                 </div>`;
             }

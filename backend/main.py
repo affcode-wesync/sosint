@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
+from typing import Optional
 from analyzer import analyze_email, EmailAnalysisResult, hlr_lookup, HLRResult, sherlock_search, SherlockResult
 import os
 
@@ -30,6 +31,41 @@ class UsernameRequest(BaseModel):
     username: str
 
 
+class ExportRequest(BaseModel):
+    username: str
+    found: list[dict] = []
+    not_found: list[str] = []
+    search_time: float = 0
+
+
+class EmailExportRequest(BaseModel):
+    email: str = ""
+    domain: str = ""
+    is_gmail: bool = False
+    smtp: dict = {}
+    google: dict = {}
+    connections: list[dict] = []
+    whois: dict = {}
+    risk_score: int = 0
+    risk_level: str = ""
+    analysis_timestamp: str = ""
+
+
+class HLRExportRequest(BaseModel):
+    phone: str = ""
+    country: Optional[str] = ""
+    region: Optional[str] = ""
+    operator: Optional[str] = ""
+    status: Optional[str] = ""
+    mnc: Optional[str] = ""
+    imsi: Optional[str] = ""
+    imei: Optional[str] = ""
+    ported: Optional[str] = ""
+    roaming: Optional[str] = ""
+    raw_response: Optional[str] = ""
+    error: Optional[str] = ""
+
+
 @app.post("/api/analyze", response_model=EmailAnalysisResult)
 async def analyze(request: EmailRequest):
     if not request.email or "@" not in request.email:
@@ -52,60 +88,163 @@ async def sherlock(request: UsernameRequest):
 
 
 @app.post("/api/sherlock/export")
-async def sherlock_export(request: UsernameRequest):
+async def sherlock_export(request: ExportRequest):
     if not request.username:
         raise HTTPException(status_code=400, detail="Username required")
 
-    result = await sherlock_search(request.username)
+    # Use cached results if provided, otherwise run search
+    if request.found or request.not_found:
+        found = request.found
+        not_found = request.not_found
+        search_time = request.search_time
+    else:
+        result = await sherlock_search(request.username)
+        found = result.found
+        not_found = result.not_found
+        search_time = result.search_time
+
+    template_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "reports", "template.html")
+    with open(template_path, "r", encoding="utf-8") as f:
+        template = f.read()
+
+    total = len(found) + len(not_found)
+    now = __import__('datetime').datetime.now().strftime('%d.%m.%Y %H:%M')
+
+    template = template.replace('id="nickValue">—', f'id="nickValue">{request.username}')
+    template = template.replace('id="totalValue">0', f'id="totalValue">{total}')
+    template = template.replace('id="foundValue">0', f'id="foundValue">{len(found)}')
+    template = template.replace('id="timeValue">0.0s', f'id="timeValue">{search_time}s')
+    template = template.replace('>РЕЗУЛЬТАТЫ<', f'>РЕЗУЛЬТАТЫ ДЛЯ: {request.username.upper()}<')
 
     found_rows = ""
-    for item in result.found:
-        found_rows += f'<tr><td>{item["site"]}</td><td><a href="{item["url"]}" target="_blank">{item["url"]}</a></td></tr>\n'
+    for item in found:
+        found_rows += f'<tr><td><b>{item["site"]}</b></td><td><a href="{item["url"]}" target="_blank" rel="noopener">{item["url"]}</a></td><td><span class="found">Найден</span></td></tr>\n'
 
-    not_found_html = ", ".join(result.not_found) if result.not_found else "None"
+    nf_rows = ""
+    for site in not_found:
+        nf_rows += f'<tr><td><b>{site}</b></td><td>—</td><td><span class="nf">Не найден</span></td></tr>\n'
 
-    html = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Nick Search Report — {result.username}</title>
-<style>
-body {{ font-family: Arial, sans-serif; background: #0a0a0a; color: #e5e5e5; padding: 40px; }}
-h1 {{ color: #22c55e; border-bottom: 2px solid #333; padding-bottom: 10px; }}
-h2 {{ color: #3b82f6; margin-top: 30px; }}
-table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
-th {{ background: #1a1a1a; padding: 10px; text-align: left; border: 1px solid #333; }}
-td {{ padding: 8px 10px; border: 1px solid #333; }}
-a {{ color: #3b82f6; }}
-.stats {{ background: #141414; padding: 15px; border-radius: 8px; margin: 20px 0; }}
-.stat {{ margin: 5px 0; }}
-.label {{ color: #888; }}
-.value {{ color: #fff; font-weight: bold; }}
-.not-found {{ color: #666; font-size: 12px; margin-top: 10px; }}
-</style>
-</head>
-<body>
-<h1>Nick Search Report</h1>
-<div class="stats">
-<div class="stat"><span class="label">Username:</span> <span class="value">{result.username}</span></div>
-<div class="stat"><span class="label">Found:</span> <span class="value" style="color:#22c55e">{len(result.found)} accounts</span></div>
-<div class="stat"><span class="label">Not Found:</span> <span class="value" style="color:#ef4444">{len(result.not_found)} sites</span></div>
-<div class="stat"><span class="label">Search Time:</span> <span class="value">{result.search_time}s</span></div>
-</div>
-<h2>Found Accounts ({len(result.found)})</h2>
-<table>
-<tr><th>SITE</th><th>LINK</th></tr>
-{found_rows}
-</table>
-<div class="not-found"><h2>Not Found</h2><p>{not_found_html}</p></div>
-<p style="margin-top:30px;color:#444;font-size:11px">Generated by SOSINT Email Analyzer</p>
-</body>
-</html>"""
+    template = template.replace('<tbody id="foundBody"></tbody>', f'<tbody id="foundBody">{found_rows}</tbody>')
+    template = template.replace('<tbody id="nfBody"></tbody>', f'<tbody id="nfBody">{nf_rows}</tbody>')
+    template = template.replace('<span id="nfCount">0</span>', f'<span id="nfCount">{len(not_found)}</span>')
 
     return Response(
-        content=html,
+        content=template,
         media_type="text/html",
-        headers={"Content-Disposition": f'attachment; filename="nick_report_{result.username}.html"'}
+        headers={"Content-Disposition": f'attachment; filename="nick_report_{request.username}.html"'}
+    )
+
+
+@app.post("/api/analyze/export")
+async def analyze_export(request: EmailExportRequest):
+    if not request.email:
+        raise HTTPException(status_code=400, detail="Email required")
+
+    template_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "reports", "email_template.html")
+    with open(template_path, "r", encoding="utf-8") as f:
+        template = f.read()
+
+    now = __import__('datetime').datetime.now().strftime('%d.%m.%Y %H:%M')
+    smtp = request.smtp
+    connections = request.connections
+    google = request.google
+
+    template = template.replace('id="reportEmail">—', f'id="reportEmail">{request.email}')
+    template = template.replace('id="reportDomain">—', f'id="reportDomain">{request.domain}')
+    template = template.replace('id="reportSmtp">—', f'id="reportSmtp">{smtp.get("final_status", "—")}')
+    template = template.replace('id="reportRisk">—', f'id="reportRisk">{request.risk_level} ({request.risk_score}/100)')
+    template = template.replace('id="reportServices">0', f'id="reportServices">{len(connections)}')
+    template = template.replace('>—<', f'>{now}<', 1)
+
+    smtp_rows = ""
+    for step in smtp.get("steps", []):
+        smtp_rows += f'<tr><td>{step.get("step", "")}</td><td>{step.get("code", "")}</td></tr>\n'
+    if not smtp_rows:
+        smtp_rows = '<tr><td colspan="2">Нет данных</td></tr>'
+    template = template.replace('<tbody id="smtpBody"></tbody>', f'<tbody id="smtpBody">{smtp_rows}</tbody>')
+
+    if request.is_gmail and google:
+        template = template.replace('id="profileSection" style="display:none"', 'id="profileSection"')
+        profile_html = '<table style="width:100%;font-size:13px">'
+        if google.get("avatar_url"):
+            profile_html += f'<tr><td><img src="{google["avatar_url"]}" style="width:80px;height:80px;border-radius:4px;border:1px solid #ccc"></td>'
+            profile_html += f'<td style="vertical-align:top;padding-left:12px">'
+        else:
+            profile_html += '<tr><td colspan="2">'
+        profile_html += f'<b>Google ID:</b> {google.get("google_id", "—")}<br>'
+        profile_html += f'<b>Last Update:</b> {google.get("last_update", "—")}<br>'
+        if google.get("services"):
+            profile_html += '<b>Services:</b><br>'
+            for svc in google["services"]:
+                profile_html += f'&nbsp;&nbsp;· <a href="{svc.get("url", "#")}" target="_blank">{svc.get("name", "")}</a><br>'
+        profile_html += '</td></tr></table>'
+        template = template.replace('<div style="padding:12px" id="profileBody"></div>', f'<div style="padding:12px" id="profileBody">{profile_html}</div>')
+
+    conn_rows = ""
+    for c in connections:
+        status_class = "badge-ok" if c.get("status") == "found" else ("badge-err" if c.get("status") == "not_found" else "badge-info")
+        conn_rows += f'<tr><td><b>{c.get("service", "")}</b></td><td style="font-size:11px">{c.get("url", "")}</td><td><span class="badge {status_class}">{c.get("status", "")}</span></td></tr>\n'
+    if not conn_rows:
+        conn_rows = '<tr><td colspan="3">Нет данных</td></tr>'
+    template = template.replace('<tbody id="connectionsBody"></tbody>', f'<tbody id="connectionsBody">{conn_rows}</tbody>')
+
+    risk_color = "#28a745" if request.risk_score < 20 else ("#ffc107" if request.risk_score < 40 else ("#fd7e14" if request.risk_score < 60 else "#dc3545"))
+    risk_html = f'<div class="risk-bar"><div class="risk-fill" style="width:{request.risk_score}%;background:{risk_color}">{request.risk_score}/100 — {request.risk_level}</div></div>'
+    template = template.replace('<div style="padding:12px" id="riskBody"></div>', f'<div style="padding:12px" id="riskBody">{risk_html}</div>')
+
+    return Response(
+        content=template,
+        media_type="text/html",
+        headers={"Content-Disposition": f'attachment; filename="email_report_{request.email.replace("@","_at_")}.html"'}
+    )
+
+
+@app.post("/api/hlr/export")
+async def hlr_export(request: HLRExportRequest):
+    if not request.phone:
+        raise HTTPException(status_code=400, detail="Phone required")
+
+    template_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "reports", "hlr_template.html")
+    with open(template_path, "r", encoding="utf-8") as f:
+        template = f.read()
+
+    now = __import__('datetime').datetime.now().strftime('%d.%m.%Y %H:%M')
+
+    template = template.replace('id="reportPhone">—', f'id="reportPhone">{request.phone}')
+    template = template.replace('id="reportCountry">—', f'id="reportCountry">{request.country or "—"}')
+    template = template.replace('id="reportOperator">—', f'id="reportOperator">{request.operator or "—"}')
+    template = template.replace('id="reportStatus">—', f'id="reportStatus">{request.status or "—"}')
+
+    fields = [
+        ("Телефон", request.phone),
+        ("Страна", request.country),
+        ("Регион", request.region),
+        ("Оператор", request.operator),
+        ("Статус", request.status),
+        ("MNC", request.mnc),
+        ("IMSI", request.imsi),
+        ("IMEI", request.imei),
+        ("Ported", request.ported),
+        ("Roaming", request.roaming),
+    ]
+
+    detail_rows = ""
+    for label, value in fields:
+        if value:
+            detail_rows += f'<tr><td><b>{label}</b></td><td>{value}</td></tr>\n'
+    if not detail_rows:
+        detail_rows = '<tr><td colspan="2">Нет данных</td></tr>'
+    template = template.replace('<tbody id="detailsBody"></tbody>', f'<tbody id="detailsBody">{detail_rows}</tbody>')
+
+    if request.raw_response:
+        template = template.replace('id="rawSection" style="display:none"', 'id="rawSection"')
+        raw = request.raw_response[:2000]
+        template = template.replace('<div class="code" id="rawBody"></div>', f'<div class="code" id="rawBody">{raw}</div>')
+
+    return Response(
+        content=template,
+        media_type="text/html",
+        headers={"Content-Disposition": f'attachment; filename="hlr_report_{request.phone}.html"'}
     )
 
 

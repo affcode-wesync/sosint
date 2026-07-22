@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Email SOSINT Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#b8cad4;color:#17384c;font:14px Arial,sans-serif}
+.shell{max-width:1100px;margin:14px auto;background:#eaf2f5;border:1px solid #526f80;box-shadow:0 14px 38px #35526566}
+.hero{height:80px;padding:18px 30px;display:flex;align-items:center;justify-content:space-between;background:radial-gradient(circle at 70% 40%,#fff,#9cc9dc 19%,transparent 41%),linear-gradient(100deg,#164965,#a9cfdf 55%,#eaf4f8)}
+.brand{display:flex;align-items:center;gap:15px}
+.mark{font:bold italic 44px Arial;color:#eef7fa;letter-spacing:-6px;text-shadow:2px 2px #143e58}
+.brand b{font-size:20px;letter-spacing:3px;color:#17384c}
+.brand small{display:block;letter-spacing:2px;color:#3a6a80}
+.hero-title{text-align:right;font-size:25px;font-weight:bold;color:#17384c}
+.hero-title small{display:block;font-size:10px;letter-spacing:2px;color:#3a6a80}
+.content{padding:22px}
+.intro{margin-bottom:18px}
+.intro h1{font-size:22px;color:#164965;border-bottom:2px solid #738d9d;padding-bottom:8px;margin-bottom:8px}
+.intro p{font-size:12px;color:#617684}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:#f8fbfc;border:1px solid #819aaa;padding:12px;text-align:center}
+.stat span{display:block;font-size:10px;text-transform:uppercase;color:#617684;letter-spacing:1px;margin-bottom:4px}
+.stat b{font-size:20px;color:#164965}
+.box{border:1px solid #819aaa;background:#f8fbfc;box-shadow:2px 3px 8px #28485d22;margin-bottom:16px}
+.box h2{margin:0;padding:8px 11px;font-size:11px;background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);border-bottom:1px solid #738d9d}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:linear-gradient(180deg,#164965,#1a5276);color:#fff;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{padding:9px 12px;border-bottom:1px solid #c2d0d6}
+tr:hover{background:#e8f4fd}
+a{color:#2584af;text-decoration:none}
+a:hover{text-decoration:underline}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:bold}
+.badge-ok{background:#d4edda;color:#155724}
+.badge-err{background:#f8d7da;color:#721c24}
+.badge-warn{background:#fff3cd;color:#856404}
+.badge-info{background:#d1ecf1;color:#0c5460}
+.code{background:#1e1e1e;color:#d4d4d4;padding:12px;font-family:Consolas,monospace;font-size:11px;line-height:1.6;border:1px solid #333;overflow-x:auto;white-space:pre-wrap;margin:12px}
+.risk-bar{height:20px;border-radius:4px;background:#e9ecef;overflow:hidden;margin:8px 0}
+.risk-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;color:#fff;font-size:11px;font-weight:bold}
+.foot{padding:10px 14px;text-align:center;font-size:10px;color:#888;background:linear-gradient(#fff,#c6d6de);border-top:1px solid #819aaa;display:flex;justify-content:space-between}
+@media(max-width:760px){.shell{margin:0}.summary{grid-template-columns:1fr 1fr}}
+@media(max-width:470px){.summary{grid-template-columns:1fr}.hero-title{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hero">
+<div class="brand"><div class="mark">ES</div><div><b>EMAIL SOSINT</b><small>OSINT EMAIL ANALYSIS</small></div></div>
+<div class="hero-title">EMAIL REPORT<small>INTELLIGENCE SUMMARY</small></div>
+</header>
+<main class="content">
+<div class="intro">
+<h1>Email Analysis Report</h1>
+<p id="reportEmail">—</p>
+</div>
+<div class="summary">
+<div class="stat"><span>Домен</span><b id="reportDomain">—</b></div>
+<div class="stat"><span>SMTP статус</span><b id="reportSmtp">—</b></div>
+<div class="stat"><span>Риск</span><b id="reportRisk">—</b></div>
+<div class="stat"><span>Сервисы</span><b id="reportServices">0</b></div>
+</div>
+
+<section class="box">
+<h2>SMTP VERIFICATION</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ШАГ</th><th>КОД</th></tr></thead>
+<tbody id="smtpBody"></tbody>
+</table>
+</div>
+</section>
+
+<section class="box" id="profileSection" style="display:none">
+<h2>PROFILE</h2>
+<div style="padding:12px" id="profileBody"></div>
+</section>
+
+<section class="box">
+<h2>SERVICE CONNECTIONS</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>СЕРВИС</th><th>URL</th><th>СТАТУС</th></tr></thead>
+<tbody id="connectionsBody"></tbody>
+</table>
+</div>
+</section>
+
+<section class="box" id="riskSection">
+<h2>RISK ASSESSMENT</h2>
+<div style="padding:12px" id="riskBody"></div>
+</section>
+</main>
+<footer class="foot">
+<span>© 2026 EMAIL SOSINT</span>
+<span>GENERATED <span id="reportTime">—</span></span>
+</footer>
+</div>
+</body>
+</html>
