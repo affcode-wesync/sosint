@@ -1182,6 +1182,33 @@
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-window">
+            <div class="login-titlebar">
+                <span class="login-titlebar-text">Log On to Windows</span>
+            </div>
+            <div class="login-body">
+                <div class="login-logo">
+                    <div class="login-logo-text">SOSINT</div>
+                </div>
+                <div class="login-form">
+                    <label class="login-label">User name:</label>
+                    <input type="text" class="login-input" id="loginKey" placeholder="Enter access key" autofocus>
+                    <div class="login-error" id="loginError">Invalid key. Please try again.</div>
+                </div>
+            </div>
+            <div class="login-buttons">
+                <button class="login-btn" onclick="doLogin()">OK</button>
+                <button class="login-btn" onclick="document.getElementById('loginKey').value=''">Cancel</button>
+            </div>
+            <div class="login-footer">
+                <span class="login-footer-text">Copyright © 1985-2001 Microsoft Corporation</span>
+            </div>
+            <div class="login-copyright">Microsoft Windows XP Home Edition</div>
+        </div>
+    </div>
+
     <!-- Desktop Icons -->
     <div class="desktop-icons">
         <div class="desktop-icon" ondblclick="openApp()">
@@ -1373,6 +1400,31 @@
         </div>
     </div>
 
+    <!-- Admin Panel Window -->
+    <div class="xp-window" id="adminWindow" style="display:none">
+        <div class="xp-titlebar" id="adminTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon icon-control"></div>
+                <span class="xp-titlebar-text">Admin Panel — Key Management</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="document.getElementById('adminWindow').style.display='none'">_</div>
+                <div class="xp-btn xp-btn-close" onclick="document.getElementById('adminWindow').style.display='none'">✕</div>
+            </div>
+        </div>
+        <div class="xp-content" style="min-height:400px;max-height:500px">
+            <div style="margin-bottom:12px">
+                <button class="xp-toolbar-btn" onclick="adminCreateKey()" style="margin-right:8px">+ Create Key</button>
+                <button class="xp-toolbar-btn" onclick="adminLoadKeys()">Refresh</button>
+            </div>
+            <div id="adminKeysList"></div>
+        </div>
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Admin Panel</div>
+            <div class="xp-statusbar-section" id="adminStatus">Ready</div>
+        </div>
+    </div>
+
     <!-- Start Menu -->
     <div class="start-menu" id="startMenu">
         <div class="start-menu-header">
@@ -1471,8 +1523,11 @@
             </div>
         </div>
         <div class="start-menu-footer">
-            <div class="start-menu-footer-btn" onclick="alert('Log Off')">
+            <div class="start-menu-footer-btn" onclick="doLogout(); toggleStartMenu();">
                 <div class="xp-icon-16 icon-logout"></div> Log Off
+            </div>
+            <div class="start-menu-footer-btn" onclick="openAdmin(); toggleStartMenu();" id="adminBtn" style="display:none">
+                <div class="xp-icon-16 icon-control"></div> Admin
             </div>
             <div class="start-menu-footer-btn" onclick="alert('Turn Off Computer')">
                 <div class="xp-icon-16 icon-shutdown"></div> Turn Off
@@ -1500,6 +1555,174 @@
     </div>
 
     <script>
+        // === Auth System ===
+        const loginOverlay = document.getElementById('loginOverlay');
+        const loginKey = document.getElementById('loginKey');
+        const loginError = document.getElementById('loginError');
+        let currentUser = null;
+        let isAdmin = false;
+
+        // Check if already logged in
+        const savedKey = sessionStorage.getItem('sosint_key');
+        if (savedKey) {
+            verifyKey(savedKey);
+        }
+
+        loginKey.addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+
+        function doLogin() {
+            const key = loginKey.value.trim();
+            if (!key) return;
+            verifyKey(key);
+        }
+
+        async function verifyKey(key) {
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.status === 'ok') {
+                    currentUser = data;
+                    isAdmin = data.role === 'admin';
+                    sessionStorage.setItem('sosint_key', key);
+                    loginOverlay.classList.add('hidden');
+                    updateAdminButton();
+                    if (isAdmin) showToast('Admin access granted');
+                } else {
+                    loginError.classList.add('show');
+                    loginError.textContent = data.detail || 'Invalid key';
+                    loginKey.value = '';
+                    loginKey.focus();
+                }
+            } catch (e) {
+                loginError.classList.add('show');
+                loginError.textContent = 'Connection error';
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('sosint_key');
+            currentUser = null;
+            isAdmin = false;
+            loginOverlay.classList.remove('hidden');
+            loginKey.value = '';
+            loginError.classList.remove('show');
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#003399;color:white;padding:12px 24px;font-size:12px;z-index:99999;border-radius:4px;font-family:Tahoma,sans-serif';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // === Admin Panel ===
+        function openAdmin() {
+            if (!isAdmin) { showToast('Admin access required'); return; }
+            document.getElementById('adminWindow').style.display = '';
+            document.getElementById('adminWindow').style.left = '50%';
+            document.getElementById('adminWindow').style.top = '80px';
+            document.getElementById('adminWindow').style.transform = 'translateX(-50%)';
+            adminLoadKeys();
+        }
+
+        async function adminLoadKeys() {
+            const key = sessionStorage.getItem('sosint_key');
+            try {
+                const resp = await fetch('/api/auth/admin/keys?key=' + encodeURIComponent(key));
+                const data = await resp.json();
+                const list = document.getElementById('adminKeysList');
+                if (!data.keys || data.keys.length === 0) {
+                    list.innerHTML = '<div style="text-align:center;padding:20px;color:#999;font-size:11px">No keys created yet</div>';
+                    return;
+                }
+                let html = '<table class="xp-table"><tr><th>KEY</th><th>USERNAME</th><th>STATUS</th><th>CREATED</th><th>LOGINS</th><th>ACTIONS</th></tr>';
+                data.keys.forEach(k => {
+                    const statusColor = k.status === 'active' ? '#228b22' : '#c53a20';
+                    html += `<tr>
+                        <td style="font-size:10px;font-family:monospace">${k.key.substring(0,12)}...</td>
+                        <td>${k.username || '—'}</td>
+                        <td style="color:${statusColor};font-weight:bold">${k.status}</td>
+                        <td style="font-size:10px">${k.created}</td>
+                        <td>${k.login_count || 0}</td>
+                        <td>
+                            <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px" onclick="adminToggleKey('${k.key}','${k.status}')">${k.status==='active'?'Block':'Unblock'}</button>
+                            <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px;color:#c53a20" onclick="adminDeleteKey('${k.key}')">Delete</button>
+                            <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px" onclick="navigator.clipboard.writeText('${k.key}');showToast('Key copied')">Copy</button>
+                        </td>
+                    </tr>`;
+                });
+                html += '</table>';
+                list.innerHTML = html;
+                document.getElementById('adminStatus').textContent = data.keys.length + ' keys';
+            } catch (e) {
+                document.getElementById('adminKeysList').innerHTML = '<div style="color:#c53a20;padding:10px">Error loading keys</div>';
+            }
+        }
+
+        async function adminCreateKey() {
+            const username = prompt('Username (optional):', '');
+            const comment = prompt('Comment (optional):', '');
+            const key = sessionStorage.getItem('sosint_key');
+            try {
+                const resp = await fetch('/api/auth/admin/keys/create?key=' + encodeURIComponent(key), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username || '', comment: comment || '' })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    showToast('Key created: ' + data.key);
+                    navigator.clipboard.writeText(data.key);
+                    adminLoadKeys();
+                } else {
+                    showToast('Error: ' + (data.detail || 'Unknown'));
+                }
+            } catch (e) {
+                showToast('Connection error');
+            }
+        }
+
+        async function adminToggleKey(targetKey, currentStatus) {
+            const action = currentStatus === 'active' ? 'block' : 'unblock';
+            const key = sessionStorage.getItem('sosint_key');
+            try {
+                await fetch('/api/auth/admin/keys/manage?key=' + encodeURIComponent(key), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: targetKey, action })
+                });
+                adminLoadKeys();
+            } catch (e) {
+                showToast('Error');
+            }
+        }
+
+        async function adminDeleteKey(targetKey) {
+            if (!confirm('Delete this key?')) return;
+            const key = sessionStorage.getItem('sosint_key');
+            try {
+                await fetch('/api/auth/admin/keys/manage?key=' + encodeURIComponent(key), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: targetKey, action: 'delete' })
+                });
+                adminLoadKeys();
+            } catch (e) {
+                showToast('Error');
+            }
+        }
+
+        // Show admin button if admin
+        function updateAdminButton() {
+            const btn = document.getElementById('adminBtn');
+            if (btn) btn.style.display = isAdmin ? '' : 'none';
+        }
+
         // === Start Menu ===
         function toggleStartMenu() {
             document.getElementById('startMenu').classList.toggle('show');
