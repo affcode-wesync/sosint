@@ -682,6 +682,38 @@
             border: 1px solid #6c5ce7 !important;
         }
 
+        .desktop-icon-reports {
+            background: linear-gradient(180deg, #ffcc00 0%, #cc9900 100%);
+            border: 2px solid #996600;
+            position: relative;
+        }
+
+        .desktop-icon-reports::before {
+            content: '';
+            width: 28px;
+            height: 6px;
+            background: #cc9900;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .desktop-icon-reports::after {
+            content: '📧📁📋🗺️';
+            font-size: 10px;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .icon-reports {
+            background: linear-gradient(180deg, #ffcc00 0%, #cc9900 100%) !important;
+            border: 1px solid #996600 !important;
+        }
+
         /* Taskbar Icon */
         .xp-taskbar-item-icon {
             width: 16px;
@@ -893,6 +925,98 @@
             color: #666;
         }
 
+        .xp-reports-folder {
+            background: linear-gradient(180deg, #fff 0%, #ece9d8 100%);
+            border: 2px outset #d4d0c8;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .xp-reports-folder:hover {
+            background: linear-gradient(180deg, #fff 0%, #ddd8c8 100%);
+            border-color: #003399;
+        }
+
+        .xp-reports-folder:active {
+            border-style: inset;
+        }
+
+        .xp-reports-folder-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .xp-reports-folder-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #003399;
+            margin-bottom: 4px;
+        }
+
+        .xp-reports-folder-count {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .xp-report-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-bottom: 1px solid #d4d0c8;
+            cursor: pointer;
+            font-size: 11px;
+            gap: 8px;
+        }
+
+        .xp-report-item:hover {
+            background: #316ac5;
+            color: white;
+        }
+
+        .xp-report-item-name {
+            flex: 1;
+        }
+
+        .xp-report-item-date {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .xp-report-item:hover .xp-report-item-date {
+            color: #ccc;
+        }
+
+        .xp-report-item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .xp-report-item-btn {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: linear-gradient(180deg, #fff, #ece9d8);
+            border: 1px outset #d4d0c8;
+            cursor: pointer;
+            font-family: 'Tahoma', sans-serif;
+        }
+
+        .xp-report-item-btn:active {
+            border-style: inset;
+        }
+
+        .xp-report-item-btn.danger {
+            color: #c53a20;
+        }
+
         .xp-loading.show { display: block; }
 
         #results { display: none; }
@@ -932,6 +1056,10 @@
         <div class="desktop-icon" ondblclick="openMap()">
             <div class="desktop-icon-img desktop-icon-map"></div>
             <div class="desktop-icon-label">SOSINT Map</div>
+        </div>
+        <div class="desktop-icon" ondblclick="openReports()">
+            <div class="desktop-icon-img desktop-icon-reports"></div>
+            <div class="desktop-icon-label">Отчёты</div>
         </div>
     </div>
 
@@ -1059,6 +1187,49 @@
         </div>
     </div>
 
+    <!-- Reports Window -->
+    <div class="xp-window" id="reportsWindow" style="display:none">
+        <div class="xp-titlebar" id="reportsTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon icon-reports"></div>
+                <span class="xp-titlebar-text">Отчёты</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="minimizeReports()">_</div>
+                <div class="xp-btn xp-btn-close" onclick="closeReports()">✕</div>
+            </div>
+        </div>
+        <div class="xp-content" id="reportsContent" style="min-height:400px;max-height:600px">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:8px">
+                <div class="xp-reports-folder" onclick="openReportFolder('email')">
+                    <div class="xp-reports-folder-icon" style="background:linear-gradient(135deg,#4169e1,#00bfff)">📧</div>
+                    <div class="xp-reports-folder-name">Email SOSINT</div>
+                    <div class="xp-reports-folder-count" id="emailReportCount">0 отчётов</div>
+                </div>
+                <div class="xp-reports-folder" onclick="openReportFolder('hlr')">
+                    <div class="xp-reports-folder-icon" style="background:linear-gradient(135deg,#e8e8e8,#c8c8c8)">📱</div>
+                    <div class="xp-reports-folder-name">HLR Query</div>
+                    <div class="xp-reports-folder-count" id="hlrReportCount">0 отчётов</div>
+                </div>
+                <div class="xp-reports-folder" onclick="openReportFolder('nick')">
+                    <div class="xp-reports-folder-icon" style="background:linear-gradient(135deg,#90ee90,#228b22)">🔍</div>
+                    <div class="xp-reports-folder-name">Nick Search</div>
+                    <div class="xp-reports-folder-count" id="nickReportCount">0 отчётов</div>
+                </div>
+                <div class="xp-reports-folder" onclick="openReportFolder('map')">
+                    <div class="xp-reports-folder-icon" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">🗺️</div>
+                    <div class="xp-reports-folder-name">SOSINT Map</div>
+                    <div class="xp-reports-folder-count" id="mapReportCount">0 отчётов</div>
+                </div>
+            </div>
+            <div id="reportFolderContent" style="padding:8px"></div>
+        </div>
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Отчёты</div>
+            <div class="xp-statusbar-section" id="reportsStatus">Выберите папку</div>
+        </div>
+    </div>
+
     <!-- Start Menu -->
     <div class="start-menu" id="startMenu">
         <div class="start-menu-header">
@@ -1093,6 +1264,13 @@
                     <div class="start-menu-item-text">
                         <div class="start-menu-item-title">SOSINT Map</div>
                         <div class="start-menu-item-desc">Interactive investigation chain</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="openReports(); toggleStartMenu();">
+                    <div class="xp-icon icon-reports"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Отчёты</div>
+                        <div class="start-menu-item-desc">Saved reports</div>
                     </div>
                 </div>
                 <div class="start-menu-separator"></div>
@@ -1442,6 +1620,108 @@
             }
         }
 
+        // === Reports System ===
+        const reportsWin = document.getElementById('reportsWindow');
+
+        document.getElementById('reportsTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            isDragging = false;
+        });
+
+        function openReports() {
+            reportsWin.style.display = '';
+            reportsWin.style.left = '50%';
+            reportsWin.style.top = '80px';
+            reportsWin.style.transform = 'translateX(-50%)';
+            updateReportCounts();
+        }
+
+        function closeReports() {
+            reportsWin.style.display = 'none';
+        }
+
+        function minimizeReports() {
+            reportsWin.style.display = 'none';
+        }
+
+        function getReports(type) {
+            return JSON.parse(localStorage.getItem('reports_' + type) || '[]');
+        }
+
+        function saveReport(type, report) {
+            const reports = getReports(type);
+            report.id = Date.now();
+            report.date = new Date().toLocaleString('ru-RU');
+            reports.unshift(report);
+            localStorage.setItem('reports_' + type, JSON.stringify(reports));
+            updateReportCounts();
+        }
+
+        function deleteReport(type, id) {
+            let reports = getReports(type);
+            reports = reports.filter(r => r.id !== id);
+            localStorage.setItem('reports_' + type, JSON.stringify(reports));
+            updateReportCounts();
+            openReportFolder(type);
+        }
+
+        function updateReportCounts() {
+            document.getElementById('emailReportCount').textContent = getReports('email').length + ' отчётов';
+            document.getElementById('hlrReportCount').textContent = getReports('hlr').length + ' отчётов';
+            document.getElementById('nickReportCount').textContent = getReports('nick').length + ' отчётов';
+            document.getElementById('mapReportCount').textContent = getReports('map').length + ' отчётов';
+        }
+
+        function openReportFolder(type) {
+            const reports = getReports(type);
+            const container = document.getElementById('reportFolderContent');
+            const names = {email: 'Email SOSINT', hlr: 'HLR Query', nick: 'Nick Search', map: 'SOSINT Map'};
+            document.getElementById('reportsStatus').textContent = names[type] + ' — ' + reports.length + ' отчётов';
+
+            if (reports.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;font-size:11px">Нет сохранённых отчётов.<br>Отчёты автоматически сохраняются при скачивании.</div>';
+                return;
+            }
+
+            let html = `<div style="margin-bottom:8px;font-size:11px;font-weight:bold;color:#003399">${names[type]} (${reports.length})</div>`;
+            reports.forEach(r => {
+                html += `
+                <div class="xp-report-item">
+                    <span style="font-size:14px">${type === 'email' ? '📧' : type === 'hlr' ? '📱' : type === 'nick' ? '🔍' : '🗺️'}</span>
+                    <span class="xp-report-item-name">${r.name || r.email || r.phone || r.username || 'Без имени'}</span>
+                    <span class="xp-report-item-date">${r.date}</span>
+                    <div class="xp-report-item-actions">
+                        <button class="xp-report-item-btn" onclick="viewReport('${type}', ${r.id})">Просмотр</button>
+                        <button class="xp-report-item-btn" onclick="downloadSavedReport('${type}', ${r.id})">Скачать</button>
+                        <button class="xp-report-item-btn danger" onclick="deleteReport('${type}', ${r.id})">✕</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function viewReport(type, id) {
+            const reports = getReports(type);
+            const report = reports.find(r => r.id === id);
+            if (!report || !report.html) return;
+            const w = window.open('', '_blank');
+            w.document.write(report.html);
+            w.document.close();
+        }
+
+        function downloadSavedReport(type, id) {
+            const reports = getReports(type);
+            const report = reports.find(r => r.id === id);
+            if (!report || !report.html) return;
+            const blob = new Blob([report.html], {type: 'text/html'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = report.filename || `${type}_report.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         usernameInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchSherlock(); });
 
         async function searchSherlock() {
@@ -1540,8 +1820,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, found, not_found, search_time })
             })
-            .then(resp => resp.blob())
-            .then(blob => {
+            .then(resp => resp.text())
+            .then(html => {
+                // Auto-save to reports
+                saveReport('nick', { name: username, username, found: found.length, not_found: not_found.length, html, filename: `nick_report_${username}.html` });
+                // Download
+                const blob = new Blob([html], {type: 'text/html'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -1558,8 +1842,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(lastEmailResult)
             })
-            .then(resp => resp.blob())
-            .then(blob => {
+            .then(resp => resp.text())
+            .then(html => {
+                // Auto-save to reports
+                saveReport('email', { name: lastEmailResult.email, email: lastEmailResult.email, html, filename: `email_report_${lastEmailResult.email.replace(/@/g, '_at_')}.html` });
+                // Download
+                const blob = new Blob([html], {type: 'text/html'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -1576,8 +1864,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(lastHLRResult)
             })
-            .then(resp => resp.blob())
-            .then(blob => {
+            .then(resp => resp.text())
+            .then(html => {
+                // Auto-save to reports
+                saveReport('hlr', { name: lastHLRResult.phone, phone: lastHLRResult.phone, html, filename: `hlr_report_${lastHLRResult.phone}.html` });
+                // Download
+                const blob = new Blob([html], {type: 'text/html'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
