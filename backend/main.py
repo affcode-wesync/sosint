@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -279,6 +279,137 @@ async def auth_callback(code: str = None):
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+# ===== Auth System =====
+import json
+import secrets
+from datetime import datetime
+
+KEYS_FILE = os.path.join(os.path.dirname(__file__), "keys.json")
+ADMIN_KEY = "67zovpokoyo"
+
+def load_keys():
+    if not os.path.exists(KEYS_FILE):
+        return {"admin_key": ADMIN_KEY, "keys": []}
+    with open(KEYS_FILE, "r") as f:
+        return json.load(f)
+
+def save_keys(data):
+    with open(KEYS_FILE, "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def get_client_ip(request):
+    return request.client.host if request.client else "unknown"
+
+
+class LoginRequest(BaseModel):
+    key: str
+
+class KeyCreateRequest(BaseModel):
+    username: str = ""
+    comment: str = ""
+
+class KeyManageRequest(BaseModel):
+    key: str
+    action: str  # "block", "unblock", "delete"
+
+
+@app.post("/api/auth/login")
+async def auth_login(request: LoginRequest, req: Request = None):
+    data = load_keys()
+
+    # Check admin key
+    if request.key == data.get("admin_key"):
+        return {"status": "ok", "role": "admin", "message": "Admin access granted"}
+
+    # Check user keys
+    for k in data.get("keys", []):
+        if k["key"] == request.key and k.get("status") == "active":
+            k["last_login"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            k["login_count"] = k.get("login_count", 0) + 1
+            save_keys(data)
+            return {"status": "ok", "role": "user", "username": k.get("username", ""), "message": "Access granted"}
+
+    raise HTTPException(status_code=401, detail="Invalid key")
+
+
+@app.post("/api/auth/admin/check")
+async def auth_admin_check(request: LoginRequest):
+    data = load_keys()
+    if request.key == data.get("admin_key"):
+        return {"status": "ok", "is_admin": True}
+    raise HTTPException(status_code=401, detail="Admin access denied")
+
+
+@app.get("/api/auth/admin/keys")
+async def auth_admin_get_keys(key: str = ""):
+    data = load_keys()
+    if key != data.get("admin_key"):
+        raise HTTPException(status_code=401, detail="Admin access denied")
+    return {"keys": data.get("keys", [])}
+
+
+@app.post("/api/auth/admin/keys/create")
+async def auth_admin_create_key(request: KeyCreateRequest, key: str = ""):
+    data = load_keys()
+    if key != data.get("admin_key"):
+        raise HTTPException(status_code=401, detail="Admin access denied")
+
+    new_key = secrets.token_urlsafe(16)
+    entry = {
+        "key": new_key,
+        "username": request.username,
+        "comment": request.comment,
+        "status": "active",
+        "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "last_login": None,
+        "login_count": 0
+    }
+    data.setdefault("keys", []).append(entry)
+    save_keys(data)
+    return {"status": "ok", "key": new_key, "message": "Key created"}
+
+
+@app.post("/api/auth/admin/keys/manage")
+async def auth_admin_manage_key(request: KeyManageRequest, key: str = ""):
+    data = load_keys()
+    if key != data.get("admin_key"):
+        raise HTTPException(status_code=401, detail="Admin access denied")
+
+    keys = data.get("keys", [])
+    target = None
+    for k in keys:
+        if k["key"] == request.key:
+            target = k
+            break
+
+    if not target:
+        raise HTTPException(status_code=404, detail="Key not found")
+
+    if request.action == "block":
+        target["status"] = "blocked"
+    elif request.action == "unblock":
+        target["status"] = "active"
+    elif request.action == "delete":
+        data["keys"] = [k for k in keys if k["key"] != request.key]
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action")
+
+    save_keys(data)
+    return {"status": "ok", "message": f"Key {request.action}ed"}
+
+
+@app.post("/api/auth/admin/change_password")
+async def auth_admin_change_password(request: LoginRequest, key: str = ""):
+    data = load_keys()
+    if key != data.get("admin_key"):
+        raise HTTPException(status_code=401, detail="Admin access denied")
+    if not request.key or len(request.key) < 4:
+        raise HTTPException(status_code=400, detail="Password too short")
+    data["admin_key"] = request.key
+    save_keys(data)
+    return {"status": "ok", "message": "Admin password changed"}
 
 
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")

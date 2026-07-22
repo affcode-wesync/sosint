@@ -26,19 +26,24 @@ body{font-family:'Tahoma','Segoe UI',sans-serif;overflow:hidden;background:#3a6e
 .xp-topbar-btn:active{border-style:inset;background:#ddd8c8}
 
 /* Canvas */
-.canvas-wrap{position:fixed;top:32px;left:48px;right:0;bottom:0;overflow:hidden;cursor:crosshair;background:#3a6ea5}
-.canvas-wrap.panning{cursor:grab}
+.canvas-wrap{position:fixed;top:32px;left:48px;right:0;bottom:0;overflow:hidden;cursor:none;background:#3a6ea5}
+.canvas-wrap.panning{cursor:none}
+
+/* Custom Cursor */
+.custom-cursor{position:fixed;width:12px;height:12px;background:#000;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,background 0.2s,opacity 0.2s;opacity:1}
+.custom-cursor.hovering{width:24px;height:24px;background:rgba(0,0,0,0.5);opacity:0.7}
+.custom-cursor.connecting{width:16px;height:16px;background:#c53a20}
 #canvas{position:absolute;transform-origin:0 0;width:8000px;height:8000px}
 .canvas-wrap::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 1px,transparent 1px);background-size:20px 20px;pointer-events:none;z-index:0}
 
 /* Nodes */
-.node{position:absolute;min-width:140px;border:1px solid #8b7355;box-shadow:2px 2px 6px rgba(0,0,0,0.3);cursor:move;transition:box-shadow 0.1s}
+.node{position:absolute;min-width:140px;border:1px solid #8b7355;box-shadow:2px 2px 6px rgba(0,0,0,0.3);cursor:none;transition:box-shadow 0.1s}
 .node:hover{box-shadow:3px 3px 10px rgba(0,0,0,0.4)}
 .node.selected{outline:2px solid #003399;outline-offset:1px}
 .node.chain-highlight{outline:2px dashed #c53a20;outline-offset:2px}
 
-.node-titlebar{padding:3px 6px;font-size:10px;font-weight:bold;color:#003399;border-bottom:1px solid rgba(0,0,0,0.1);cursor:move;display:flex;justify-content:space-between;align-items:center}
-.node-titlebar-close{width:14px;height:14px;background:linear-gradient(180deg,#e08356,#c53a20);border:1px outset #aaa;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;line-height:1}
+.node-titlebar{padding:3px 6px;font-size:10px;font-weight:bold;color:#003399;border-bottom:1px solid rgba(0,0,0,0.1);cursor:none;display:flex;justify-content:space-between;align-items:center}
+.node-titlebar-close{width:14px;height:14px;background:linear-gradient(180deg,#e08356,#c53a20);border:1px outset #aaa;border-radius:2px;cursor:none;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;line-height:1}
 .node-titlebar-close:hover{background:#c53a20}
 
 .node-body{padding:8px;min-height:50px;outline:none;font-size:12px;line-height:1.4;color:#333;word-wrap:break-word}
@@ -196,6 +201,7 @@ body{font-family:'Tahoma','Segoe UI',sans-serif;overflow:hidden;background:#3a6e
   <button class="zoom-btn" onclick="zoomReset()">⌂</button>
 </div>
 
+<div class="custom-cursor" id="customCursor"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -569,6 +575,38 @@ function exportHTML(){
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
 
 saveHistory();toast('SOSINT Map — N: заметка, C: связь, X: цепочка');
+
+// Custom Cursor
+const cursor=document.getElementById('customCursor');
+document.addEventListener('mousemove',e=>{
+  cursor.style.left=e.clientX+'px';
+  cursor.style.top=e.clientY+'px';
+});
+document.addEventListener('mouseenter',()=>cursor.style.display='block');
+document.addEventListener('mouseleave',()=>cursor.style.display='none');
+
+// Hover detection for nodes
+const observer=new MutationObserver(()=>{
+  document.querySelectorAll('.node').forEach(n=>{
+    n.removeEventListener('mouseenter',nodeEnter);
+    n.removeEventListener('mouseleave',nodeLeave);
+    n.addEventListener('mouseenter',nodeEnter);
+    n.addEventListener('mouseleave',nodeLeave);
+  });
+});
+observer.observe(canvas,{childList:true});
+document.querySelectorAll('.node').forEach(n=>{n.addEventListener('mouseenter',nodeEnter);n.addEventListener('mouseleave',nodeLeave);});
+
+function nodeEnter(){cursor.classList.add('hovering');}
+function nodeLeave(){cursor.classList.remove('hovering');}
+
+// Tool-specific cursor
+const origSel=sel;
+sel=function(t){
+  origSel(t);
+  cursor.classList.remove('connecting');
+  if(t==='connect'||t==='chain')cursor.classList.add('connecting');
+};
 </script>
 </body>
 </html>
