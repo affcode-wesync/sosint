@@ -94,6 +94,11 @@
             display: none;
         }
 
+        #mapWindow {
+            display: none;
+            flex-direction: column;
+        }
+
         /* Title Bar */
         .xp-titlebar {
             background: linear-gradient(180deg, #0a246a 0%, #0f3795 3%, #2f6fce 6%, #2f6fce 90%, #0f3795 97%, #0a246a 100%);
@@ -647,6 +652,36 @@
             background-image: url('/static/icons/nickname.png');
         }
 
+        .desktop-icon-map {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            border: 2px solid #6c5ce7;
+            position: relative;
+        }
+
+        .desktop-icon-map::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            border: 3px solid white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .desktop-icon-map::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .icon-map {
+            background-image: url('/static/icons/nickname.png');
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%) !important;
+            border: 1px solid #6c5ce7 !important;
+        }
+
         /* Taskbar Icon */
         .xp-taskbar-item-icon {
             width: 16px;
@@ -894,6 +929,10 @@
             <div class="desktop-icon-img desktop-icon-search"></div>
             <div class="desktop-icon-label">Nick Search</div>
         </div>
+        <div class="desktop-icon" ondblclick="openMap()">
+            <div class="desktop-icon-img desktop-icon-map"></div>
+            <div class="desktop-icon-label">SOSINT Map</div>
+        </div>
     </div>
 
     <!-- XP Window -->
@@ -998,6 +1037,28 @@
         </div>
     </div>
 
+    <!-- SOSINT Map Window -->
+    <div class="xp-window" id="mapWindow" style="display:none">
+        <div class="xp-titlebar" id="mapTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe);border-radius:50%"></div>
+                <span class="xp-titlebar-text">SOSINT Map — Investigation Chain</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="minimizeMap()">_</div>
+                <div class="xp-btn xp-btn-maximize" id="mapMaxBtn" onclick="toggleMaximizeMap()">□</div>
+                <div class="xp-btn xp-btn-close" onclick="closeMap()">✕</div>
+            </div>
+        </div>
+        <div style="flex:1;overflow:hidden;background:#e8ecf0">
+            <iframe src="/map/index.html" style="width:100%;height:100%;border:none" id="mapFrame"></iframe>
+        </div>
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">SOSINT Map</div>
+            <div class="xp-statusbar-section">Interactive investigation chain builder</div>
+        </div>
+    </div>
+
     <!-- Start Menu -->
     <div class="start-menu" id="startMenu">
         <div class="start-menu-header">
@@ -1025,6 +1086,13 @@
                     <div class="start-menu-item-text">
                         <div class="start-menu-item-title">Nick Search</div>
                         <div class="start-menu-item-desc">Sherlock username lookup</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="openMap(); toggleStartMenu();">
+                    <div class="xp-icon icon-map"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">SOSINT Map</div>
+                        <div class="start-menu-item-desc">Interactive investigation chain</div>
                     </div>
                 </div>
                 <div class="start-menu-separator"></div>
@@ -1101,6 +1169,10 @@
             <div class="xp-taskbar-item" id="taskbarItem" onclick="restoreWindow()">
                 <div class="xp-taskbar-item-icon"></div>
                 Email Analyzer
+            </div>
+            <div class="xp-taskbar-item" id="mapTaskbarItem" onclick="restoreMap()" style="display:none">
+                <div class="xp-taskbar-item-icon" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)"></div>
+                SOSINT Map
             </div>
         </div>
         <div class="xp-taskbar-clock" id="taskbarClock"></div>
@@ -1292,6 +1364,82 @@
 
         function minimizeSherlock() {
             sherlockWin.style.display = 'none';
+        }
+
+        // === SOSINT Map Window ===
+        const mapWin = document.getElementById('mapWindow');
+        let mapMaximized = false;
+        let mapState = { x: 0, y: 0 };
+
+        let mapDragging = false;
+        let mapDragX = 0, mapDragY = 0;
+
+        document.getElementById('mapTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            if (mapMaximized) return;
+            mapDragging = true;
+            const rect = mapWin.getBoundingClientRect();
+            mapDragX = e.clientX - rect.left;
+            mapDragY = e.clientY - rect.top;
+            mapWin.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!mapDragging) return;
+            mapWin.style.left = (e.clientX - mapDragX) + 'px';
+            mapWin.style.top = (e.clientY - mapDragY) + 'px';
+            mapWin.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', () => {
+            mapDragging = false;
+            mapWin.style.transition = '';
+        });
+
+        function openMap() {
+            mapWin.style.display = 'flex';
+            mapWin.style.left = '50%';
+            mapWin.style.top = '60px';
+            mapWin.style.width = '1100px';
+            mapWin.style.height = 'calc(100vh - 100px)';
+            mapWin.style.transform = 'translateX(-50%)';
+            document.getElementById('mapTaskbarItem').style.display = '';
+        }
+
+        function closeMap() {
+            mapWin.style.display = 'none';
+            document.getElementById('mapTaskbarItem').style.display = 'none';
+        }
+
+        function minimizeMap() {
+            mapWin.style.display = 'none';
+        }
+
+        function restoreMap() {
+            mapWin.style.display = 'flex';
+            mapWin.classList.remove('maximized');
+            mapMaximized = false;
+            document.getElementById('mapMaxBtn').textContent = '□';
+        }
+
+        function toggleMaximizeMap() {
+            if (mapMaximized) {
+                mapMaximized = false;
+                mapWin.classList.remove('maximized');
+                mapWin.style.left = mapState.x + 'px';
+                mapWin.style.top = mapState.y + 'px';
+                mapWin.style.width = '1100px';
+                mapWin.style.height = 'calc(100vh - 100px)';
+                mapWin.style.transform = 'none';
+                document.getElementById('mapMaxBtn').textContent = '□';
+            } else {
+                mapState.x = mapWin.offsetLeft;
+                mapState.y = mapWin.offsetTop;
+                mapMaximized = true;
+                mapWin.classList.add('maximized');
+                mapWin.style.display = 'flex';
+                document.getElementById('mapMaxBtn').textContent = '❐';
+            }
         }
 
         usernameInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchSherlock(); });

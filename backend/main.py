@@ -282,7 +282,9 @@ async def health():
 
 
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+map_dir = os.path.join(os.path.dirname(__file__), "..", "sosint-map")
 app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+app.mount("/map", StaticFiles(directory=map_dir), name="static-map")
 
 
 @app.get("/")

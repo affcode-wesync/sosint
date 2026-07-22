@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOSINT Map — Investigation Chain</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tahoma','Segoe UI',sans-serif;overflow:hidden;background:#3a6ea5;height:100vh;user-select:none}
+
+/* XP Toolbar */
+.xp-toolbar{position:fixed;left:0;top:0;bottom:0;width:48px;background:linear-gradient(180deg,#f2f0e8,#e6e2d6);border-right:1px solid #aca899;display:flex;flex-direction:column;align-items:center;padding:6px 0;z-index:100}
+.xp-tbtn{width:38px;height:38px;border:1px solid transparent;background:transparent;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#444;transition:all 0.1s}
+.xp-tbtn:hover{border:1px outset #dfdfdf;background:linear-gradient(180deg,#fff,#ece9d8)}
+.xp-tbtn:active{border-style:inset}
+.xp-tbtn.active{border:1px inset #aca899;background:linear-gradient(180deg,#ddd8c8,#ece9d8)}
+.xp-tbtn svg{width:18px;height:18px}
+.xp-tsep{width:28px;height:1px;background:#aca899;margin:4px 0}
+.xp-tbottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px}
+
+/* XP Top Bar */
+.xp-topbar{position:fixed;top:0;left:48px;right:0;height:32px;background:linear-gradient(180deg,#f2f0e8,#e6e2d6);border-bottom:1px solid #aca899;display:flex;align-items:center;padding:0 8px;z-index:99;gap:6px}
+.xp-topbar-title{font-size:11px;font-weight:bold;color:#003399}
+.xp-topbar-btn{padding:3px 10px;font-size:11px;font-family:'Tahoma',sans-serif;background:linear-gradient(180deg,#fff 0%,#ece9d8 100%);border:2px outset #d4d0c8;cursor:pointer;font-weight:bold}
+.xp-topbar-btn:hover{background:linear-gradient(180deg,#fff 0%,#ddd8c8 100%)}
+.xp-topbar-btn:active{border-style:inset;background:#ddd8c8}
+.xp-topbar-btn.primary{background:linear-gradient(180deg,#3c9b47,#1e6b27);color:white;border-color:#4caf50}
+
+/* Canvas */
+.canvas-wrap{position:fixed;top:32px;left:48px;right:0;bottom:0;overflow:hidden;cursor:crosshair;background:#3a6ea5}
+.canvas-wrap.panning{cursor:grab}
+.canvas-wrap.connecting{cursor:crosshair}
+#canvas{position:absolute;transform-origin:0 0;width:6000px;height:6000px}
+
+/* Grid dots */
+.canvas-wrap::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.15) 1px,transparent 1px);background-size:20px 20px;pointer-events:none;z-index:0}
+
+/* Nodes - XP Sticky Notes */
+.node{position:absolute;min-width:140px;min-height:90px;border:1px solid #8b7355;box-shadow:2px 2px 6px rgba(0,0,0,0.3);cursor:move;transition:box-shadow 0.1s}
+.node:hover{box-shadow:3px 3px 10px rgba(0,0,0,0.4)}
+.node.selected{outline:2px solid #003399;outline-offset:1px}
+
+.node-titlebar{padding:3px 6px;font-size:10px;font-weight:bold;color:#003399;border-bottom:1px solid rgba(0,0,0,0.1);cursor:move;display:flex;justify-content:space-between;align-items:center}
+.node-titlebar-close{width:14px;height:14px;background:linear-gradient(180deg,#e08356,#c53a20);border:1px outset #aaa;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;line-height:1}
+.node-titlebar-close:hover{background:#c53a20}
+
+.node-body{padding:8px;min-height:60px;outline:none;font-size:12px;line-height:1.4;color:#333;word-wrap:break-word}
+.node-body:empty::before{content:'Введите текст...';color:#999;font-style:italic}
+
+.node-img{width:100%;max-height:180px;object-fit:cover;display:block;border-top:1px solid rgba(0,0,0,0.1)}
+
+.node-resize{position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;opacity:0}
+.node:hover .node-resize{opacity:1}
+.node-resize::after{content:'';position:absolute;bottom:2px;right:2px;width:6px;height:6px;border-right:2px solid #8b7355;border-bottom:2px solid #8b7355}
+
+/* XP Colors */
+.color-yellow{background:#ffd93d}
+.color-orange{background:#ffb347}
+.color-blue{background:#87ceeb}
+.color-purple{background:#dda0dd}
+.color-green{background:#90ee90}
+.color-pink{background:#ffb6c1}
+.color-red{background:#ff7675}
+.color-white{background:#fffef0}
+.color-gray{background:#d3d3d3}
+
+/* Connection SVG */
+.connection-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.connection-svg path{fill:none;stroke:#003399;stroke-width:2;pointer-events:stroke;cursor:pointer}
+.connection-svg path:hover{stroke:#c53a20;stroke-width:3}
+.connection-svg path.selected{stroke:#c53a20;stroke-width:3}
+.connection-svg marker path{fill:#003399}
+
+.connection-label{position:absolute;background:#fffef0;padding:2px 8px;border:1px solid #8b7355;font-size:10px;color:#003399;pointer-events:auto;cursor:pointer;white-space:nowrap;z-index:2;font-family:'Tahoma',sans-serif}
+
+.temp-line{stroke:#c53a20;stroke-width:2;stroke-dasharray:6 3;pointer-events:none}
+
+/* Chain indicator */
+.chain-badge{position:absolute;top:-8px;right:-8px;background:#003399;color:white;font-size:8px;padding:2px 4px;border-radius:8px;font-weight:bold;display:none;z-index:3}
+.node.in-chain .chain-badge{display:block}
+
+/* Context Menu - XP Style */
+.ctx-menu{position:fixed;background:#ece9d8;border:2px outset #dfdfdf;z-index:200;min-width:160px;padding:2px;display:none;font-size:11px}
+.ctx-menu.show{display:block}
+.ctx-item{padding:4px 20px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ctx-item:hover{background:#316ac5;color:white}
+.ctx-item.danger{color:#c53a20}
+.ctx-item.danger:hover{background:#c53a20;color:white}
+.ctx-sep{height:1px;background:#aca899;margin:2px 4px}
+
+/* Color Picker - XP */
+.xp-colorpicker{position:fixed;background:#ece9d8;border:2px outset #dfdfdf;z-index:200;padding:6px;display:none;flex-wrap:wrap;gap:3px}
+.xp-colorpicker.show{display:flex}
+.xp-cswatch{width:24px;height:24px;border:1px solid #8b7355;cursor:pointer}
+.xp-cswatch:hover{border:2px solid #003399}
+
+/* Connection Label Input */
+.conn-label-input{position:fixed;background:#fff;border:2px inset #d4d0c8;padding:3px 6px;font-size:11px;font-family:'Tahoma',sans-serif;z-index:200;outline:none;width:120px;display:none}
+
+/* Toast */
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#003399;color:white;padding:6px 16px;font-size:11px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;font-family:'Tahoma',sans-serif}
+.toast.show{opacity:1}
+
+/* Zoom Controls */
+.zoom-ctrl{position:fixed;bottom:8px;right:8px;display:flex;gap:2px;z-index:50}
+.zoom-btn{width:24px;height:24px;border:2px outset #d4d0c8;background:linear-gradient(180deg,#fff,#ece9d8);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-family:'Tahoma',sans-serif}
+.zoom-btn:active{border-style:inset}
+.zoom-lbl{padding:0 6px;font-size:10px;color:#fff;display:flex;align-items:center;text-shadow:1px 1px 2px rgba(0,0,0,0.5)}
+
+/* Chain Panel */
+.chain-panel{position:fixed;right:8px;top:40px;width:200px;background:#ece9d8;border:2px outset #dfdfdf;z-index:50;display:none}
+.chain-panel.show{display:block}
+.chain-panel-header{background:linear-gradient(180deg,#0a246a,#2f6fce);padding:4px 8px;color:white;font-size:11px;font-weight:bold}
+.chain-panel-body{padding:6px;max-height:300px;overflow-y:auto}
+.chain-item{padding:4px 6px;font-size:11px;cursor:pointer;border:1px solid transparent;display:flex;justify-content:space-between}
+.chain-item:hover{background:#316ac5;color:white;border-color:#316ac5}
+.chain-item.active{background:#ddd8c8;border:1px inset #aca899}
+.chain-item-del{color:#c53a20;cursor:pointer;font-weight:bold}
+.chain-item-del:hover{color:white}
+.chain-add{padding:4px;text-align:center}
+.chain-add-btn{width:100%;padding:3px;font-size:10px;background:linear-gradient(180deg,#3c9b47,#1e6b27);color:white;border:1px outset #4caf50;cursor:pointer;font-family:'Tahoma',sans-serif}
+.chain-add-btn:active{border-style:inset}
+</style>
+</head>
+<body>
+
+<!-- XP Toolbar -->
+<div class="xp-toolbar">
+  <button class="xp-tbtn active" data-tool="select" title="Выделение (V)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+  </button>
+  <button class="xp-tbtn" data-tool="pan" title="Перемещение (H)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+  </button>
+  <div class="xp-tsep"></div>
+  <button class="xp-tbtn" data-tool="note" title="Заметка (N)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>
+  </button>
+  <button class="xp-tbtn" data-tool="image" title="Фото (I)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+  </button>
+  <button class="xp-tbtn" data-tool="text" title="Текст (T)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9.5" y1="20" x2="14.5" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+  </button>
+  <div class="xp-tsep"></div>
+  <button class="xp-tbtn" data-tool="connect" title="Связь (C)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  </button>
+  <button class="xp-tbtn" data-tool="chain" title="Цепочка (X)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+  </button>
+  <div class="xp-tsep"></div>
+  <button class="xp-tbtn" data-tool="color" title="Цвет">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+  </button>
+  <div class="xp-tbottom">
+    <button class="xp-tbtn" onclick="undo()" title="Отменить (Ctrl+Z)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+    </button>
+    <button class="xp-tbtn" onclick="redo()" title="Повторить (Ctrl+Y)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.13-9.36L23 10"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- XP Top Bar -->
+<div class="xp-topbar">
+  <span class="xp-topbar-title">SOSINT Map</span>
+  <button class="xp-topbar-btn" onclick="newMap()">Новая</button>
+  <button class="xp-topbar-btn" onclick="saveMap()">Сохранить</button>
+  <button class="xp-topbar-btn" onclick="loadMap()">Загрузить</button>
+  <button class="xp-topbar-btn" onclick="exportHTML()">Экспорт HTML</button>
+  <button class="xp-topbar-btn" onclick="exportJSON()">Экспорт JSON</button>
+  <button class="xp-topbar-btn" onclick="toggleChains()">Цепочки</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importJSON(event)">
+</div>
+
+<!-- Canvas -->
+<div class="canvas-wrap" id="canvasWrap">
+  <div id="canvas">
+    <svg class="connection-svg" id="connSvg">
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+          <path d="M0 0 L10 3.5 L0 7 Z"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<!-- Chain Panel -->
+<div class="chain-panel" id="chainPanel">
+  <div class="chain-panel-header">Цепочки расследования</div>
+  <div class="chain-panel-body" id="chainList"></div>
+  <div class="chain-add">
+    <button class="chain-add-btn" onclick="addChain()">+ Новая цепочка</button>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="duplicateNode()">Копировать</div>
+  <div class="ctx-item" onclick="changeNodeColor()">Цвет</div>
+  <div class="ctx-item" onclick="addImageToNode()">Фото</div>
+  <div class="ctx-item" onclick="addToChain()">В цепочку</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="deleteSelected()">Удалить</div>
+</div>
+
+<!-- Color Picker -->
+<div class="xp-colorpicker" id="colorPicker">
+  <div class="xp-cswatch" style="background:#ffd93d" data-color="color-yellow"></div>
+  <div class="xp-cswatch" style="background:#ffb347" data-color="color-orange"></div>
+  <div class="xp-cswatch" style="background:#87ceeb" data-color="color-blue"></div>
+  <div class="xp-cswatch" style="background:#dda0dd" data-color="color-purple"></div>
+  <div class="xp-cswatch" style="background:#90ee90" data-color="color-green"></div>
+  <div class="xp-cswatch" style="background:#ffb6c1" data-color="color-pink"></div>
+  <div class="xp-cswatch" style="background:#ff7675" data-color="color-red"></div>
+  <div class="xp-cswatch" style="background:#fffef0" data-color="color-white"></div>
+  <div class="xp-cswatch" style="background:#d3d3d3" data-color="color-gray"></div>
+</div>
+
+<!-- Connection Label Input -->
+<input class="conn-label-input" id="connLabelInput" placeholder="Подпись...">
+
+<!-- Zoom -->
+<div class="zoom-ctrl">
+  <button class="zoom-btn" onclick="zoomIn()">+</button>
+  <span class="zoom-lbl" id="zoomLabel">100%</span>
+  <button class="zoom-btn" onclick="zoomOut()">−</button>
+  <button class="zoom-btn" onclick="zoomReset()">⌂</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== State =====
+let nodes = [];
+let connections = [];
+let chains = []; // [{id, name, nodeIds: []}]
+let activeChainId = null;
+let nodeIdCounter = 0;
+let connIdCounter = 0;
+let chainIdCounter = 0;
+
+let currentTool = 'select';
+let selectedNode = null;
+let selectedConn = null;
+let currentColor = 'color-yellow';
+
+let isDragging = false;
+let isPanning = false;
+let isConnecting = false;
+let dragOffset = {x:0,y:0};
+let panOffset = {x:0,y:0};
+let panStart = {x:0,y:0};
+let connectStart = null;
+let tempLine = null;
+
+let zoom = 1;
+let history = [];
+let historyIndex = -1;
+
+const canvas = document.getElementById('canvas');
+const canvasWrap = document.getElementById('canvasWrap');
+const connSvg = document.getElementById('connSvg');
+
+// ===== Tools =====
+document.querySelectorAll('.xp-tbtn[data-tool]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.xp-tbtn[data-tool]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTool = btn.dataset.tool;
+    canvasWrap.className = 'canvas-wrap' + (currentTool === 'pan' ? ' panning' : '') + (currentTool === 'connect' || currentTool === 'chain' ? ' connecting' : '');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.isContentEditable || e.target.tagName === 'INPUT') return;
+  if (e.key === 'v') selectTool('select');
+  if (e.key === 'h') selectTool('pan');
+  if (e.key === 'n') selectTool('note');
+  if (e.key === 'i') selectTool('image');
+  if (e.key === 't') selectTool('text');
+  if (e.key === 'c' && !e.ctrlKey) selectTool('connect');
+  if (e.key === 'x') selectTool('chain');
+  if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected();
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveMap(); }
+});
+
+function selectTool(tool) {
+  document.querySelectorAll('.xp-tbtn[data-tool]').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-tool="${tool}"]`);
+  if (btn) btn.classList.add('active');
+  currentTool = tool;
+  canvasWrap.className = 'canvas-wrap' + (tool === 'pan' ? ' panning' : '') + (tool === 'connect' || tool === 'chain' ? ' connecting' : '');
+}
+
+// ===== Canvas Events =====
+canvasWrap.addEventListener('mousedown', e => {
+  if (e.target === canvasWrap || e.target === canvas || e.target.tagName === 'svg') {
+    hideMenus();
+    if (currentTool === 'pan' || e.button === 1) {
+      isPanning = true;
+      panStart = {x: e.clientX - panOffset.x, y: e.clientY - panOffset.y};
+      canvasWrap.classList.add('panning');
+    } else if (['note','text','image'].includes(currentTool)) {
+      const pos = screenToCanvas(e.clientX, e.clientY);
+      createNode(currentTool, pos.x - 70, pos.y - 45);
+    } else {
+      deselectAll();
+    }
+  }
+});
+
+canvasWrap.addEventListener('mousemove', e => {
+  if (isPanning) {
+    panOffset.x = e.clientX - panStart.x;
+    panOffset.y = e.clientY - panStart.y;
+    updateTransform();
+  }
+  if (isDragging && selectedNode) {
+    const pos = screenToCanvas(e.clientX, e.clientY);
+    selectedNode.x = pos.x - dragOffset.x;
+    selectedNode.y = pos.y - dragOffset.y;
+    updateNodePos(selectedNode);
+    updateConnections();
+  }
+  if (isConnecting && tempLine) {
+    const pos = screenToCanvas(e.clientX, e.clientY);
+    tempLine.setAttribute('x2', pos.x);
+    tempLine.setAttribute('y2', pos.y);
+  }
+});
+
+canvasWrap.addEventListener('mouseup', e => {
+  if (isPanning) { isPanning = false; canvasWrap.classList.remove('panning'); }
+  if (isDragging) { isDragging = false; saveHistory(); }
+  if (isConnecting && connectStart) {
+    const target = findNodeAt(e.clientX, e.clientY);
+    if (target && target.id !== connectStart.id) {
+      createConnection(connectStart, target);
+    }
+    isConnecting = false;
+    connectStart = null;
+    if (tempLine) { tempLine.remove(); tempLine = null; }
+  }
+});
+
+canvasWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const d = e.deltaY > 0 ? -0.1 : 0.1;
+  const nz = Math.max(0.2, Math.min(3, zoom + d));
+  const r = canvasWrap.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  panOffset.x = mx - (mx - panOffset.x) * (nz / zoom);
+  panOffset.y = my - (my - panOffset.y) * (nz / zoom);
+  zoom = nz;
+  updateTransform();
+  document.getElementById('zoomLabel').textContent = Math.round(zoom * 100) + '%';
+});
+
+// ===== Nodes =====
+function createNode(type, x, y, data) {
+  const id = 'n' + (nodeIdCounter++);
+  const node = {
+    id, type, x, y,
+    color: data?.color || currentColor,
+    text: data?.text || '',
+    width: data?.width || (type === 'image' ? 200 : 160),
+    imageUrl: data?.imageUrl || null
+  };
+  nodes.push(node);
+  renderNode(node);
+  saveHistory();
+  return node;
+}
+
+function renderNode(node) {
+  const el = document.createElement('div');
+  el.className = `node ${node.color}`;
+  el.id = node.id;
+  el.style.left = node.x + 'px';
+  el.style.top = node.y + 'px';
+  el.style.width = node.width + 'px';
+
+  // Check if in chain
+  const inChain = chains.some(c => c.nodeIds.includes(node.id));
+  if (inChain) el.classList.add('in-chain');
+
+  const chainNum = getChainNumber(node.id);
+  let html = `<div class="node-titlebar"><span>${node.type === 'image' ? 'Фото' : node.type === 'text' ? 'Текст' : 'Заметка'}${chainNum ? ' ['+chainNum+']' : ''}</span><div class="node-titlebar-close" onclick="event.stopPropagation();deleteNode('${node.id}')">✕</div></div>`;
+  html += `<div class="node-body" contenteditable="true">${node.text}</div>`;
+  if (node.imageUrl) html += `<img class="node-img" src="${node.imageUrl}" draggable="false">`;
+  html += `<div class="node-resize"></div>`;
+  html += `<div class="chain-badge">${chainNum || ''}</div>`;
+  el.innerHTML = html;
+
+  el.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('node-titlebar-close') || e.target.classList.contains('node-resize')) {
+      if (e.target.classList.contains('node-resize')) return startResize(e, node);
+      return;
+    }
+    if (e.target.isContentEditable) return;
+    e.stopPropagation();
+    if (currentTool === 'connect' || currentTool === 'chain') {
+      startConnection(node, e);
+      return;
+    }
+    selectNode(node);
+    isDragging = true;
+    const pos = screenToCanvas(e.clientX, e.clientY);
+    dragOffset = {x: pos.x - node.x, y: pos.y - node.y};
+  });
+
+  el.addEventListener('dblclick', e => {
+    el.querySelector('.node-body').focus();
+  });
+
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    selectNode(node);
+    showCtxMenu(e.clientX, e.clientY);
+  });
+
+  el.querySelector('.node-body').addEventListener('input', e => {
+    node.text = e.target.innerHTML;
+  });
+
+  canvas.appendChild(el);
+}
+
+function updateNodePos(node) {
+  const el = document.getElementById(node.id);
+  if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+}
+
+function selectNode(node) {
+  deselectAll();
+  selectedNode = node;
+  const el = document.getElementById(node.id);
+  if (el) el.classList.add('selected');
+}
+
+function deselectAll() {
+  selectedNode = null;
+  selectedConn = null;
+  document.querySelectorAll('.node.selected').forEach(n => n.classList.remove('selected'));
+  document.querySelectorAll('.connection-svg path.selected').forEach(p => p.classList.remove('selected'));
+}
+
+function deleteNode(id) {
+  connections = connections.filter(c => c.from !== id && c.to !== id);
+  chains.forEach(c => c.nodeIds = c.nodeIds.filter(nid => nid !== id));
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  nodes = nodes.filter(n => n.id !== id);
+  updateConnections();
+  renderChains();
+  saveHistory();
+}
+
+// ===== Resize =====
+function startResize(e, node) {
+  e.stopPropagation();
+  const sx = e.clientX, sy = e.clientY, sw = node.width;
+  function onMove(ev) {
+    node.width = Math.max(100, sw + (ev.clientX - sx) / zoom);
+    const el = document.getElementById(node.id);
+    if (el) el.style.width = node.width + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    saveHistory();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+// ===== Connections =====
+function startConnection(node, e) {
+  isConnecting = true;
+  connectStart = node;
+  const pos = screenToCanvas(e.clientX, e.clientY);
+  tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  tempLine.classList.add('temp-line');
+  tempLine.setAttribute('x1', node.x + node.width / 2);
+  tempLine.setAttribute('y1', node.y + 40);
+  tempLine.setAttribute('x2', pos.x);
+  tempLine.setAttribute('y2', pos.y);
+  connSvg.appendChild(tempLine);
+}
+
+function findNodeAt(cx, cy) {
+  const pos = screenToCanvas(cx, cy);
+  for (const n of nodes) {
+    if (pos.x >= n.x && pos.x <= n.x + n.width && pos.y >= n.y && pos.y <= n.y + 80) return n;
+  }
+  return null;
+}
+
+function createConnection(from, to, data) {
+  const id = 'c' + (connIdCounter++);
+  const conn = { id, from: from.id, to: to.id, label: data?.label || '' };
+  connections.push(conn);
+  renderConnection(conn);
+  saveHistory();
+  return conn;
+}
+
+function renderConnection(conn) {
+  const from = nodes.find(n => n.id === conn.from);
+  const to = nodes.find(n => n.id === conn.to);
+  if (!from || !to) return;
+
+  const x1 = from.x + from.width / 2, y1 = from.y + 40;
+  const x2 = to.x + to.width / 2, y2 = to.y + 40;
+  const dx = (x2 - x1) * 0.4;
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`);
+  path.setAttribute('marker-end', 'url(#arrowhead)');
+  path.dataset.connId = conn.id;
+  path.style.cursor = 'pointer';
+
+  path.addEventListener('click', e => { e.stopPropagation(); deselectAll(); selectedConn = conn; path.classList.add('selected'); });
+  path.addEventListener('dblclick', e => { e.stopPropagation(); showConnLabel(conn, e.clientX, e.clientY); });
+  path.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (confirm('Удалить связь?')) {
+      connections = connections.filter(c => c.id !== conn.id);
+      updateConnections();
+      saveHistory();
+    }
+  });
+
+  connSvg.appendChild(path);
+
+  if (conn.label) {
+    const lbl = document.createElement('div');
+    lbl.className = 'connection-label';
+    lbl.textContent = conn.label;
+    lbl.style.left = ((x1 + x2) / 2 - 20) + 'px';
+    lbl.style.top = ((y1 + y2) / 2 - 10) + 'px';
+    lbl.addEventListener('dblclick', e => { e.stopPropagation(); showConnLabel(conn, e.clientX, e.clientY); });
+    canvas.appendChild(lbl);
+  }
+}
+
+function showConnLabel(conn, x, y) {
+  const input = document.getElementById('connLabelInput');
+  input.style.display = 'block';
+  input.style.left = x + 'px';
+  input.style.top = y + 'px';
+  input.value = conn.label;
+  input.focus();
+  input.onblur = () => { conn.label = input.value; input.style.display = 'none'; updateConnections(); saveHistory(); };
+  input.onkeydown = e => { if (e.key === 'Enter') input.blur(); };
+}
+
+function updateConnections() {
+  connSvg.innerHTML = `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>`;
+  canvas.querySelectorAll('.connection-label').forEach(l => l.remove());
+  connections.forEach(c => renderConnection(c));
+}
+
+// ===== Chains =====
+function addChain() {
+  const name = prompt('Имя цепочки:', 'Цепочка ' + (chains.length + 1));
+  if (!name) return;
+  const chain = { id: 'ch' + (chainIdCounter++), name, nodeIds: [] };
+  chains.push(chain);
+  activeChainId = chain.id;
+  renderChains();
+  toast('Цепочка "' + name + '" создана');
+  saveHistory();
+}
+
+function addToChain() {
+  if (!selectedNode) return;
+  if (chains.length === 0) { addChain(); }
+  const chainId = prompt('ID цепочки (или создайте новую):', chains[0]?.id || '');
+  const chain = chains.find(c => c.id === chainId);
+  if (!chain) { toast('Цепочка не найдена'); return; }
+  if (!chain.nodeIds.includes(selectedNode.id)) {
+    chain.nodeIds.push(selectedNode.id);
+  }
+  // Auto-connect chain nodes
+  if (chain.nodeIds.length >= 2) {
+    const prev = nodes.find(n => n.id === chain.nodeIds[chain.nodeIds.length - 2]);
+    const curr = selectedNode;
+    if (prev && !connections.some(c => c.from === prev.id && c.to === curr.id)) {
+      createConnection(prev, curr, { label: chain.name });
+    }
+  }
+  renderChains();
+  updateNodeClasses();
+  hideMenus();
+  saveHistory();
+  toast('Добавлено в цепочку "' + chain.name + '"');
+}
+
+function removeFromChain(chainId, nodeId) {
+  const chain = chains.find(c => c.id === chainId);
+  if (!chain) return;
+  chain.nodeIds = chain.nodeIds.filter(id => id !== nodeId);
+  if (chain.nodeIds.length === 0) {
+    chains = chains.filter(c => c.id !== chainId);
+  }
+  renderChains();
+  updateNodeClasses();
+  saveHistory();
+}
+
+function deleteChain(chainId) {
+  chains = chains.filter(c => c.id !== chainId);
+  renderChains();
+  updateNodeClasses();
+  saveHistory();
+}
+
+function renderChains() {
+  const list = document.getElementById('chainList');
+  list.innerHTML = '';
+  chains.forEach(chain => {
+    const div = document.createElement('div');
+    div.className = 'chain-item' + (chain.id === activeChainId ? ' active' : '');
+    div.innerHTML = `<span>${chain.name} (${chain.nodeIds.length})</span><span class="chain-item-del" onclick="event.stopPropagation();deleteChain('${chain.id}')">✕</span>`;
+    div.onclick = () => { activeChainId = chain.id; renderChains(); highlightChain(chain); };
+    list.appendChild(div);
+  });
+}
+
+function highlightChain(chain) {
+  deselectAll();
+  chain.nodeIds.forEach((nid, i) => {
+    const node = nodes.find(n => n.id === nid);
+    if (node) {
+      const el = document.getElementById(nid);
+      if (el) el.classList.add('selected');
+    }
+  });
+}
+
+function getChainNumber(nodeId) {
+  for (const chain of chains) {
+    const idx = chain.nodeIds.indexOf(nodeId);
+    if (idx !== -1) return idx + 1;
+  }
+  return null;
+}
+
+function updateNodeClasses() {
+  nodes.forEach(node => {
+    const el = document.getElementById(node.id);
+    if (!el) return;
+    const inChain = chains.some(c => c.nodeIds.includes(node.id));
+    el.classList.toggle('in-chain', inChain);
+    const badge = el.querySelector('.chain-badge');
+    if (badge) badge.textContent = getChainNumber(node.id) || '';
+  });
+}
+
+function toggleChains() {
+  document.getElementById('chainPanel').classList.toggle('show');
+}
+
+// ===== Context Menu =====
+function showCtxMenu(x, y) {
+  const menu = document.getElementById('ctxMenu');
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.classList.add('show');
+}
+
+function hideMenus() {
+  document.getElementById('ctxMenu').classList.remove('show');
+  document.getElementById('colorPicker').classList.remove('show');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ctx-menu') && !e.target.closest('.xp-colorpicker')) hideMenus();
+});
+
+function deleteSelected() {
+  if (selectedNode) deleteNode(selectedNode.id);
+  else if (selectedConn) {
+    connections = connections.filter(c => c.id !== selectedConn.id);
+    selectedConn = null;
+    updateConnections();
+    saveHistory();
+  }
+  hideMenus();
+}
+
+function duplicateNode() {
+  if (!selectedNode) return;
+  const n = createNode(selectedNode.type, selectedNode.x + 30, selectedNode.y + 30, { ...selectedNode });
+  selectNode(n);
+  hideMenus();
+}
+
+function changeNodeColor() {
+  if (!selectedNode) return;
+  const pk = document.getElementById('colorPicker');
+  pk.style.left = '56px';
+  pk.style.top = '200px';
+  pk.classList.add('show');
+  hideMenus();
+}
+
+document.querySelectorAll('.xp-cswatch').forEach(s => {
+  s.addEventListener('click', () => {
+    if (selectedNode) {
+      selectedNode.color = s.dataset.color;
+      const el = document.getElementById(selectedNode.id);
+      el.className = `node ${selectedNode.color}` + (selectedNode === selectedNode ? ' selected' : '');
+      if (chains.some(c => c.nodeIds.includes(selectedNode.id))) el.classList.add('in-chain');
+    }
+    hideMenus();
+  });
+});
+
+function addImageToNode() {
+  if (!selectedNode) return;
+  hideMenus();
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      selectedNode.imageUrl = ev.target.result;
+      const el = document.getElementById(selectedNode.id);
+      const old = el.querySelector('.node-img');
+      if (old) old.remove();
+      const img = document.createElement('img');
+      img.className = 'node-img';
+      img.src = ev.target.result;
+      img.draggable = false;
+      el.appendChild(img);
+      saveHistory();
+    };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+
+// ===== Transform =====
+function updateTransform() {
+  canvas.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`;
+}
+
+function screenToCanvas(cx, cy) {
+  const r = canvasWrap.getBoundingClientRect();
+  return { x: (cx - r.left - panOffset.x) / zoom, y: (cy - r.top - panOffset.y) / zoom };
+}
+
+function zoomIn() { setZoom(zoom + 0.2); }
+function zoomOut() { setZoom(zoom - 0.2); }
+function zoomReset() { zoom = 1; panOffset = {x:0,y:0}; updateTransform(); document.getElementById('zoomLabel').textContent = '100%'; }
+function setZoom(z) { zoom = Math.max(0.2, Math.min(3, z)); updateTransform(); document.getElementById('zoomLabel').textContent = Math.round(zoom * 100) + '%'; }
+
+// ===== History =====
+function saveHistory() {
+  history = history.slice(0, historyIndex + 1);
+  history.push(JSON.stringify({nodes, connections, chains, nodeIdCounter, connIdCounter, chainIdCounter}));
+  historyIndex = history.length - 1;
+  if (history.length > 50) { history.shift(); historyIndex--; }
+}
+
+function undo() {
+  if (historyIndex <= 0) return;
+  historyIndex--;
+  restoreHistory();
+}
+
+function redo() {
+  if (historyIndex >= history.length - 1) return;
+  historyIndex++;
+  restoreHistory();
+}
+
+function restoreHistory() {
+  const s = JSON.parse(history[historyIndex]);
+  canvas.querySelectorAll('.node').forEach(n => n.remove());
+  connSvg.innerHTML = `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>`;
+  canvas.querySelectorAll('.connection-label').forEach(l => l.remove());
+  nodes = s.nodes; connections = s.connections; chains = s.chains || [];
+  nodeIdCounter = s.nodeIdCounter; connIdCounter = s.connIdCounter; chainIdCounter = s.chainIdCounter || 0;
+  nodes.forEach(n => renderNode(n));
+  connections.forEach(c => renderConnection(c));
+  renderChains();
+  updateNodeClasses();
+}
+
+// ===== Save / Load =====
+function saveMap() {
+  const d = {nodes, connections, chains, nodeIdCounter, connIdCounter, chainIdCounter, panOffset, zoom};
+  localStorage.setItem('sosint-map', JSON.stringify(d));
+  toast('Сохранено');
+}
+
+function loadMap() {
+  const raw = localStorage.getItem('sosint-map');
+  if (!raw) { toast('Нет сохранений'); return; }
+  const d = JSON.parse(raw);
+  canvas.querySelectorAll('.node').forEach(n => n.remove());
+  connSvg.innerHTML = `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>`;
+  canvas.querySelectorAll('.connection-label').forEach(l => l.remove());
+  nodes = d.nodes||[]; connections = d.connections||[]; chains = d.chains||[];
+  nodeIdCounter = d.nodeIdCounter||0; connIdCounter = d.connIdCounter||0; chainIdCounter = d.chainIdCounter||0;
+  panOffset = d.panOffset||{x:0,y:0}; zoom = d.zoom||1;
+  nodes.forEach(n => renderNode(n));
+  connections.forEach(c => renderConnection(c));
+  updateTransform();
+  document.getElementById('zoomLabel').textContent = Math.round(zoom*100)+'%';
+  renderChains();
+  updateNodeClasses();
+  saveHistory();
+  toast('Загружено');
+}
+
+function newMap() {
+  if (!confirm('Новая карта? Несохранённые данные будут потеряны.')) return;
+  canvas.querySelectorAll('.node').forEach(n => n.remove());
+  connSvg.innerHTML = `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>`;
+  canvas.querySelectorAll('.connection-label').forEach(l => l.remove());
+  nodes=[]; connections=[]; chains=[];
+  nodeIdCounter=0; connIdCounter=0; chainIdCounter=0;
+  panOffset={x:0,y:0}; zoom=1;
+  updateTransform();
+  document.getElementById('zoomLabel').textContent='100%';
+  renderChains();
+  saveHistory();
+  toast('Новая карта');
+}
+
+// ===== Export / Import =====
+function exportJSON() {
+  const d = {nodes, connections, chains};
+  const b = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a');
+  a.href = u; a.download = 'sosint-map.json'; a.click();
+  URL.revokeObjectURL(u);
+  toast('JSON экспортирован');
+}
+
+function exportHTML() {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  nodes.forEach(n => {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + (n.width || 160));
+    maxY = Math.max(maxY, n.y + 100);
+  });
+  const pad = 80;
+  const w = maxX - minX + pad * 2;
+  const h = maxY - minY + pad * 2;
+
+  const colorMap = {
+    'color-yellow': '#ffd93d', 'color-orange': '#ffb347', 'color-blue': '#87ceeb',
+    'color-purple': '#dda0dd', 'color-green': '#90ee90', 'color-pink': '#ffb6c1',
+    'color-red': '#ff7675', 'color-white': '#fffef0', 'color-gray': '#d3d3d3'
+  };
+
+  let nodesHtml = '';
+  nodes.forEach(n => {
+    const bg = colorMap[n.color] || '#ffd93d';
+    const imgHtml = n.imageUrl ? `<img src="${n.imageUrl}" style="width:100%;max-height:180px;object-fit:cover;display:block;border-top:1px solid rgba(0,0,0,0.1)">` : '';
+    const chainNum = getChainNumber(n.id);
+    nodesHtml += `
+    <div style="position:absolute;left:${n.x - minX + pad}px;top:${n.y - minY + pad}px;width:${n.width || 160}px;background:${bg};border:1px solid #8b7355;box-shadow:2px 2px 6px rgba(0,0,0,0.3)">
+      <div style="padding:3px 6px;font-size:10px;font-weight:bold;color:#003399;border-bottom:1px solid rgba(0,0,0,0.1);font-family:Tahoma,sans-serif">${n.type === 'image' ? 'Фото' : n.type === 'text' ? 'Текст' : 'Заметка'}${chainNum ? ' ['+chainNum+']' : ''}</div>
+      <div style="padding:8px;font-size:12px;line-height:1.4;color:#333;min-height:50px;font-family:Tahoma,sans-serif;word-wrap:break-word">${n.text || ''}</div>
+      ${imgHtml}
+    </div>`;
+  });
+
+  let svgPaths = '';
+  connections.forEach(c => {
+    const from = nodes.find(n => n.id === c.from);
+    const to = nodes.find(n => n.id === c.to);
+    if (!from || !to) return;
+    const x1 = from.x - minX + pad + (from.width || 160) / 2;
+    const y1 = from.y - minY + pad + 40;
+    const x2 = to.x - minX + pad + (to.width || 160) / 2;
+    const y2 = to.y - minY + pad + 40;
+    const dx = (x2 - x1) * 0.4;
+    svgPaths += `<path d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" fill="none" stroke="#003399" stroke-width="2" marker-end="url(#ah)"/>`;
+    if (c.label) {
+      const lx = (x1 + x2) / 2;
+      const ly = (y1 + y2) / 2 - 8;
+      svgPaths += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="10" fill="#003399" font-family="Tahoma,sans-serif" style="font-weight:bold">${c.label}</text>`;
+    }
+  });
+
+  let chainsHtml = '';
+  if (chains.length > 0) {
+    chainsHtml = '<div style="margin-top:30px;padding:20px;background:#ece9d8;border:2px outset #dfdfdf;font-family:Tahoma,sans-serif">';
+    chainsHtml += '<h3 style="color:#003399;font-size:14px;margin-bottom:10px">Цепочки расследования</h3>';
+    chains.forEach(ch => {
+      chainsHtml += `<div style="margin-bottom:8px;padding:8px;background:white;border:1px solid #aca899"><b>${ch.name}</b> — ${ch.nodeIds.length} узлов</div>`;
+    });
+    chainsHtml += '</div>';
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>SOSINT Map — ${new Date().toLocaleDateString('ru-RU')}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#3a6ea5;font-family:Tahoma,sans-serif;padding:20px}</style>
+</head>
+<body>
+<div style="max-width:${w}px;margin:0 auto;background:#ece9d8;border:3px outset #dfdfdf;border-radius:4px">
+  <div style="background:linear-gradient(180deg,#0a246a,#2f6fce);padding:6px 12px;color:white;font-size:12px;font-weight:bold;border-radius:2px 2px 0 0">SOSINT Map — Investigation Chain</div>
+  <div style="position:relative;width:${w}px;height:${h}px;background:#3a6ea5;overflow:hidden">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1">
+      <defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>
+      ${svgPaths}
+    </svg>
+    ${nodesHtml}
+  </div>
+  ${chainsHtml}
+  <div style="padding:4px 12px;font-size:10px;color:#666;background:#f2f0e8;border-top:1px solid #aca899">SOSINT Map — ${nodes.length} элементов, ${connections.length} связей — ${new Date().toLocaleString('ru-RU')}</div>
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sosint-map.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('HTML экспортирован');
+}
+
+function importJSON(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      canvas.querySelectorAll('.node').forEach(n => n.remove());
+      connSvg.innerHTML = `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>`;
+      nodes = d.nodes||[]; connections = d.connections||[]; chains = d.chains||[];
+      nodes.forEach(n => renderNode(n));
+      connections.forEach(c => renderConnection(c));
+      renderChains();
+      updateNodeClasses();
+      saveHistory();
+      toast('Импортировано');
+    } catch(err) { toast('Ошибка чтения'); }
+  };
+  r.readAsText(f);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ===== Init =====
+saveHistory();
+toast('SOSINT Map — N: заметка, C: связь, X: цепочка');
+</script>
+</body>
+</html>
