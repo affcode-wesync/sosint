@@ -1340,7 +1340,7 @@
     </div>
 
     <!-- Face Search Window -->
-    <div class="xp-window" id="faceSearchWindow" style="display:none;width:850px">
+    <div class="xp-window" id="faceSearchWindow" style="display:none;width:650px">
         <div class="xp-titlebar" id="faceSearchTitlebar">
             <div class="xp-titlebar-left">
                 <div class="xp-titlebar-icon" style="background:linear-gradient(135deg,#e74c3c,#f39c12);border-radius:50%"></div>
@@ -1352,41 +1352,32 @@
             </div>
         </div>
 
-        <div class="xp-content" style="min-height:400px;max-height:550px">
-            <div style="display:flex;gap:16px;margin-bottom:16px;align-items:flex-start">
-                <div style="flex-shrink:0">
-                    <div id="faceDropZone" style="width:180px;height:180px;border:2px dashed #aaa;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center;overflow:hidden;cursor:pointer;transition:border-color 0.2s" onclick="document.getElementById('faceFileInput').click()">
-                        <div id="facePreviewContent">
-                            <div style="font-size:28px;margin-bottom:4px">📷</div>
-                            <div>Перетащите фото</div>
-                            <div>или Ctrl+V</div>
-                            <div style="margin-top:4px;font-size:10px;color:#bbb">или нажмите здесь</div>
-                        </div>
+        <div class="xp-content" style="min-height:300px;max-height:450px;padding:10px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <div id="faceDropZone" style="width:120px;height:120px;border:2px dashed #aaa;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;text-align:center;overflow:hidden;cursor:pointer;flex-shrink:0" onclick="document.getElementById('faceFileInput').click()">
+                    <div id="facePreviewContent">
+                        <div style="font-size:24px;margin-bottom:2px">📷</div>
+                        <div>Перетащите фото</div>
+                        <div>или Ctrl+V</div>
                     </div>
-                    <div style="margin-top:8px;display:flex;gap:4px">
-                        <label class="xp-toolbar-btn" style="cursor:pointer;text-align:center">
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+                        <label class="xp-toolbar-btn" style="cursor:pointer;font-size:10px;padding:3px 8px">
                             📁 Галерея
                             <input type="file" id="faceFileInput" accept="image/*" style="display:none" onchange="previewFace(this)">
                         </label>
-                        <button class="xp-toolbar-btn" onclick="pasteFromClipboard()" title="Вставить из буфера (Ctrl+V)">📋 Вставить</button>
+                        <button class="xp-toolbar-btn" onclick="pasteFromClipboard()" style="font-size:10px;padding:3px 8px">📋 Вставить</button>
+                        <button class="xp-toolbar-btn" onclick="searchFace()" id="faceSearchBtn" style="font-size:10px;padding:3px 8px">🔍 Найти</button>
+                        <button class="xp-toolbar-btn" onclick="clearFaceSearch()" style="font-size:10px;padding:3px 8px">✕ Очистить</button>
                     </div>
-                </div>
-                <div style="flex:1">
-                    <div style="font-size:11px;font-weight:bold;color:#003399;margin-bottom:8px">Поиск по лицу в VK и Одноклассниках</div>
-                    <div style="font-size:11px;color:#666;margin-bottom:12px">
-                        Загрузите фото человека для поиска его профилей в социальных сетях.
-                        Поддерживается: перетаскивание, вставка из буфера (Ctrl+V), выбор из файлов.
+                    <div style="display:flex;gap:4px;margin-bottom:6px">
+                        <input type="text" id="faceUrlInput" class="xp-toolbar-input" placeholder="URL изображения (необязательно)" style="flex:1;font-size:10px;padding:3px 6px">
                     </div>
-                    <div style="margin-bottom:8px">
-                        <span style="font-size:11px;color:#666">Или вставьте URL:</span>
-                        <input type="text" id="faceUrlInput" class="xp-toolbar-input" placeholder="https://example.com/photo.jpg" style="width:100%;margin-top:4px">
-                    </div>
-                    <button class="xp-toolbar-btn" onclick="searchFace()" id="faceSearchBtn">🔍 Найти</button>
-                    <button class="xp-toolbar-btn" onclick="clearFaceSearch()" style="margin-left:4px">Очистить</button>
-                    <div id="faceSearchStatus" style="margin-top:8px;font-size:11px;color:#666"></div>
+                    <div id="faceSearchStatus" style="font-size:10px;color:#666"></div>
                 </div>
             </div>
-            <div id="faceSearchResults"></div>
+            <div id="faceSearchResults" style="margin-top:8px"></div>
         </div>
 
         <div class="xp-statusbar">
