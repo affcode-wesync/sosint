@@ -2,7 +2,7 @@ import httpx
 import re
 import json
 import uuid
-import os
+import html as html_module
 from typing import Optional
 from pydantic import BaseModel
 
@@ -21,44 +21,68 @@ class FaceSearchResponse(BaseModel):
     ok_profiles: list[FaceSearchResult] = []
     other_results: list[FaceSearchResult] = []
     total_found: int = 0
+    search_url: str = ""
     error: str = ""
 
 
 def _extract_social_links(text: str) -> list[FaceSearchResult]:
-    """Extract VK and OK profile links from HTML/JSON text."""
+    """Extract VK and OK profile links from text."""
     results = []
     seen = set()
 
-    # VK patterns
-    vk_patterns = [
-        r'https?://(?:vk\.com|vk\.ru)/[a-zA-Z0-9_.]+',
-        r'https?://(?:m\.vk\.com)/[a-zA-Z0-9_.]+',
+    patterns = [
+        (r'https?://(?:vk\.com|vk\.ru)/[a-zA-Z0-9_.]+', 'VK'),
+        (r'https?://m\.vk\.com/[a-zA-Z0-9_.]+', 'VK'),
+        (r'https?://(?:odnoklassniki\.ru|ok\.ru)/[a-zA-Z0-9_/]+', 'OK'),
     ]
 
-    # OK patterns
-    ok_patterns = [
-        r'https?://(?:odnoklassniki\.ru|ok\.ru)/[a-zA-Z0-9_/]+',
-    ]
+    skip_words = ['/search', '/feed', '/friends', '/groups', '/games', '/market',
+                  '/video', '/doc', '/poll', '/note', '/product', '/im',
+                  '/photo', '/club', '/apps', '/al', '/e-', '/login',
+                  'vk.com/audio', 'vk.com/video', 'vk.com/write']
 
-    for pattern in vk_patterns + ok_patterns:
+    for pattern, source in patterns:
         for match in re.finditer(pattern, text):
             url = match.group(0).rstrip('/')
-            # Skip generic VK/OK URLs (not profiles)
-            if any(skip in url for skip in ['/search', '/feed', '/friends', '/groups',
-                                             '/games', '/market', '/video', '/doc',
-                                             '/poll', '/note', '/product']):
+            if any(skip in url for skip in skip_words):
                 continue
-            # Skip if just vk.com or ok.ru without profile path
             path = url.split('/', 3)[-1] if '/' in url.split('://')[1] else ''
-            if not path or path in ['feed', 'search']:
+            if not path or len(path) < 2:
                 continue
-
             if url not in seen:
                 seen.add(url)
-                source = 'VK' if 'vk' in url else 'OK'
                 results.append(FaceSearchResult(url=url, source=source))
 
     return results
+
+
+def _extract_state_data(html_text: str) -> dict:
+    """Extract embedded JavaScript state data from Yandex HTML."""
+    # Look for window.__INIT_STATE__ or similar embedded state
+    state_patterns = [
+        r'window\.__INIT_STATE__\s*=\s*({.*?});',
+        r'data-state="([^"]+)"',
+        r'"serpList"\s*:\s*({[^}]+})',
+    ]
+
+    all_data = {}
+
+    for pattern in state_patterns:
+        matches = re.findall(pattern, html_text, re.DOTALL)
+        for match in matches:
+            try:
+                if match.startswith('{'):
+                    data = json.loads(match)
+                    all_data.update(data)
+                else:
+                    # HTML-encoded JSON
+                    decoded = html_module.unescape(match)
+                    data = json.loads(decoded)
+                    all_data.update(data)
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+    return all_data
 
 
 async def face_search_yandex(image_bytes: bytes, filename: str = "photo.jpg") -> FaceSearchResponse:
@@ -68,7 +92,7 @@ async def face_search_yandex(image_bytes: bytes, filename: str = "photo.jpg") ->
     try:
         async with httpx.AsyncClient(
             follow_redirects=True,
-            timeout=20,
+            timeout=25,
             headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -78,11 +102,7 @@ async def face_search_yandex(image_bytes: bytes, filename: str = "photo.jpg") ->
             # Step 1: Upload image to Yandex
             upload_resp = await client.post(
                 "https://yandex.ru/images/search",
-                params={
-                    "rpt": "imageview",
-                    "format": "json",
-                    "request": '{"blocks":[{"block":"cbir-collections__get-cbir-id"}]}',
-                },
+                params={"rpt": "imageview"},
                 files={"upfile": (filename, image_bytes, "image/jpeg")},
             )
 
@@ -90,83 +110,48 @@ async def face_search_yandex(image_bytes: bytes, filename: str = "photo.jpg") ->
                 response.error = f"Yandex upload failed: HTTP {upload_resp.status_code}"
                 return response
 
-            try:
-                data = upload_resp.json()
-            except Exception:
-                response.error = "Failed to parse Yandex response"
-                return response
+            html_text = upload_resp.text
 
-            # Extract CBIR ID from response
-            cbir_id = None
-            try:
-                blocks = data.get("images_found", {}).get("blocks", [])
-                for block in blocks:
-                    if block.get("block") == "cbir-collections__get-cbir-id":
-                        cbir_id = block.get("data", {}).get("cbir_id")
-                        break
-            except Exception:
-                pass
+            # Extract serp-id
+            serp_ids = re.findall(r'serp[_-]?id["\s:=]+["\']([^"\']+)', html_text)
+            if serp_ids:
+                response.query_id = serp_ids[0]
 
-            if not cbir_id:
-                # Try alternative response structure
-                cbir_id = data.get("images_found", {}).get("cbir_id")
-                if not cbir_id:
-                    # Try to get it from text response
-                    text = upload_resp.text
-                    match = re.search(r'"cbir_id"\s*:\s*"([^"]+)"', text)
-                    if match:
-                        cbir_id = match.group(1)
+            # Build search URL for user
+            response.search_url = str(upload_resp.url)
 
-            if not cbir_id:
-                response.error = "Could not extract search ID from Yandex"
-                # Try to find any social links in the raw response
-                links = _extract_social_links(upload_resp.text)
-                for link in links:
-                    if link.source == 'VK':
-                        response.vk_profiles.append(link)
-                    else:
-                        response.ok_profiles.append(link)
-                response.results = links
-                response.total_found = len(links)
-                return response
+            # Extract cbir-id from embedded state
+            cbir_match = re.search(r'"cbirId"\s*:\s*"([^"]+)"', html_text)
+            cbir_id = cbir_match.group(1) if cbir_match else ""
 
-            response.query_id = cbir_id
+            # Try to extract image search results from embedded state
+            # Look for cbirSites, cbirSimilar, etc. in the HTML
+            all_text = html_text
 
-            # Step 2: Get search results using CBIR ID
-            results_resp = await client.get(
-                "https://yandex.ru/images/search",
-                params={
-                    "rpt": "imageview",
-                    "cbir_id": cbir_id,
-                    "format": "json",
-                    "request": json.dumps({
-                        "blocks": [
-                            {"block": "b-page_type_search-by-image__link"},
-                            {"block": "b-page_type_search-by-image__serp-list"},
-                        ]
-                    }),
-                },
-            )
+            # Extract from embedded JSON state blocks
+            state_data = _extract_state_data(html_text)
+            if state_data:
+                # Look for sites/references in state data
+                all_text += json.dumps(state_data)
 
-            # Parse results
-            all_text = results_resp.text
+            # If we have a cbir-id, try the apphost API for more results
+            if cbir_id:
+                try:
+                    apphost_resp = await client.get(
+                        "https://yandex.ru/images/search",
+                        params={
+                            "rpt": "imageview",
+                            "cbir_id": cbir_id,
+                        },
+                        headers={"Referer": upload_resp.url},
+                    )
+                    all_text += apphost_resp.text
+                except Exception:
+                    pass
 
-            # Also try to get more results pages
-            try:
-                rdata = results_resp.json()
-                # Extract all URLs from JSON
-                all_text += json.dumps(rdata)
-            except Exception:
-                pass
-
-            # Extract all links from the response
+            # Extract all social links
             all_links = _extract_social_links(all_text)
 
-            # Also extract image thumbnails from Yandex results
-            thumb_pattern = r'"url"\s*:\s*"(https?://avatars\.mdsrcdn\.net[^"]+)"'
-            thumbnails = re.findall(thumb_pattern, all_text)
-
-            # Categorize results
             for link in all_links:
                 if link.source == 'VK':
                     response.vk_profiles.append(link)
@@ -174,10 +159,14 @@ async def face_search_yandex(image_bytes: bytes, filename: str = "photo.jpg") ->
                     response.ok_profiles.append(link)
 
             response.results = all_links
-            response.other_results = [
-                r for r in all_links if r.source not in ('VK', 'OK')
-            ]
+            response.other_results = [r for r in all_links if r.source not in ('VK', 'OK')]
             response.total_found = len(all_links)
+
+            if response.total_found == 0:
+                # No social links found in HTML — results are loaded via JS in browser
+                # Return the search URL so frontend can redirect or show message
+                response.error = ""
+                response.search_url = f"https://yandex.ru/images/search?rpt=imageview"
 
     except httpx.TimeoutException:
         response.error = "Search timed out. Please try again."
@@ -194,34 +183,30 @@ async def face_search_url(image_url: str) -> FaceSearchResponse:
     try:
         async with httpx.AsyncClient(
             follow_redirects=True,
-            timeout=20,
+            timeout=25,
             headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "ru-RU,ru;q=0.9",
             }
         ) as client:
-            # Search by URL
             search_resp = await client.get(
                 "https://yandex.ru/images/search",
-                params={
-                    "rpt": "imageview",
-                    "url": image_url,
-                    "format": "json",
-                    "request": json.dumps({
-                        "blocks": [
-                            {"block": "b-page_type_search-by-image__link"},
-                        ]
-                    }),
-                },
+                params={"rpt": "imageview", "url": image_url},
             )
 
-            all_text = search_resp.text
+            html_text = search_resp.text
+            response.search_url = str(search_resp.url)
 
-            # Extract CBIR ID for potential follow-up
-            match = re.search(r'"cbir_id"\s*:\s*"([^"]+)"', all_text)
-            if match:
-                response.query_id = match.group(1)
+            serp_ids = re.findall(r'serp[_-]?id["\s:=]+["\']([^"\']+)', html_text)
+            if serp_ids:
+                response.query_id = serp_ids[0]
 
-            # Extract social links
+            all_text = html_text
+            state_data = _extract_state_data(html_text)
+            if state_data:
+                all_text += json.dumps(state_data)
+
             all_links = _extract_social_links(all_text)
 
             for link in all_links:
