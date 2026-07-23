@@ -1355,21 +1355,27 @@
         <div class="xp-content" style="min-height:400px;max-height:550px">
             <div style="display:flex;gap:16px;margin-bottom:16px;align-items:flex-start">
                 <div style="flex-shrink:0">
-                    <div id="facePreview" style="width:180px;height:180px;border:2px inset #d4d0c8;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center;overflow:hidden">
-                        Загрузите фото
+                    <div id="faceDropZone" style="width:180px;height:180px;border:2px dashed #aaa;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center;overflow:hidden;cursor:pointer;transition:border-color 0.2s" onclick="document.getElementById('faceFileInput').click()">
+                        <div id="facePreviewContent">
+                            <div style="font-size:28px;margin-bottom:4px">📷</div>
+                            <div>Перетащите фото</div>
+                            <div>или Ctrl+V</div>
+                            <div style="margin-top:4px;font-size:10px;color:#bbb">или нажмите здесь</div>
+                        </div>
                     </div>
                     <div style="margin-top:8px;display:flex;gap:4px">
                         <label class="xp-toolbar-btn" style="cursor:pointer;text-align:center">
-                            📁 Фото
+                            📁 Галерея
                             <input type="file" id="faceFileInput" accept="image/*" style="display:none" onchange="previewFace(this)">
                         </label>
+                        <button class="xp-toolbar-btn" onclick="pasteFromClipboard()" title="Вставить из буфера (Ctrl+V)">📋 Вставить</button>
                     </div>
                 </div>
                 <div style="flex:1">
                     <div style="font-size:11px;font-weight:bold;color:#003399;margin-bottom:8px">Поиск по лицу в VK и Одноклассниках</div>
                     <div style="font-size:11px;color:#666;margin-bottom:12px">
                         Загрузите фото человека для поиска его профилей в социальных сетях.
-                        Поиск выполняется через Яндекс обратный поиск изображений.
+                        Поддерживается: перетаскивание, вставка из буфера (Ctrl+V), выбор из файлов.
                     </div>
                     <div style="margin-bottom:8px">
                         <span style="font-size:11px;color:#666">Или вставьте URL:</span>
@@ -1985,13 +1991,78 @@
         function previewFace(input) {
             if (input.files && input.files[0]) {
                 faceSelectedFile = input.files[0];
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('facePreview').innerHTML =
-                        '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover">';
-                };
-                reader.readAsDataURL(input.files[0]);
-                document.getElementById('faceSearchStatus').textContent = 'Файл: ' + input.files[0].name;
+                showFacePreview(input.files[0]);
+            }
+        }
+
+        function showFacePreview(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('facePreviewContent').innerHTML =
+                    '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover">';
+                document.getElementById('faceDropZone').style.border = '2px solid #228b22';
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('faceSearchStatus').textContent = 'Файл: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+        }
+
+        function handleFaceFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                faceSelectedFile = file;
+                showFacePreview(file);
+            }
+        }
+
+        // Drag and Drop
+        (function() {
+            var dz = document.getElementById('faceDropZone');
+            if (!dz) return;
+            dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.style.borderColor = '#316ac5'; dz.style.background = '#e8f0fe'; });
+            dz.addEventListener('dragleave', function(e) { e.preventDefault(); dz.style.borderColor = '#aaa'; dz.style.background = '#f8f8f8'; });
+            dz.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dz.style.borderColor = '#aaa';
+                dz.style.background = '#f8f8f8';
+                var files = e.dataTransfer.files;
+                if (files.length > 0) handleFaceFile(files[0]);
+            });
+        })();
+
+        // Paste from clipboard (Ctrl+V)
+        document.addEventListener('paste', function(e) {
+            var items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    var file = items[i].getAsFile();
+                    if (file) {
+                        handleFaceFile(file);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
+        });
+
+        async function pasteFromClipboard() {
+            try {
+                var items = await navigator.clipboard.read();
+                for (var i = 0; i < items.length; i++) {
+                    var types = items[i].types;
+                    for (var j = 0; j < types.length; j++) {
+                        if (types[j].startsWith('image/')) {
+                            var blob = await items[i].getType(types[j]);
+                            var file = new File([blob], 'clipboard.png', { type: types[j] });
+                            handleFaceFile(file);
+                            return;
+                        }
+                    }
+                }
+                document.getElementById('faceSearchStatus').textContent = 'Нет изображения в буфере обмена';
+                document.getElementById('faceSearchStatus').style.color = '#c53a20';
+            } catch (err) {
+                document.getElementById('faceSearchStatus').textContent = 'Не удалось прочитать буфер: ' + err.message;
+                document.getElementById('faceSearchStatus').style.color = '#c53a20';
             }
         }
 
@@ -2095,7 +2166,13 @@
 
         function clearFaceSearch() {
             faceSelectedFile = null;
-            document.getElementById('facePreview').innerHTML = 'Загрузите фото';
+            document.getElementById('facePreviewContent').innerHTML =
+                '<div style="font-size:28px;margin-bottom:4px">📷</div>' +
+                '<div>Перетащите фото</div>' +
+                '<div>или Ctrl+V</div>' +
+                '<div style="margin-top:4px;font-size:10px;color:#bbb">или нажмите здесь</div>';
+            document.getElementById('faceDropZone').style.border = '2px dashed #aaa';
+            document.getElementById('faceDropZone').style.background = '#f8f8f8';
             document.getElementById('faceFileInput').value = '';
             document.getElementById('faceUrlInput').value = '';
             document.getElementById('faceSearchStatus').textContent = '';
