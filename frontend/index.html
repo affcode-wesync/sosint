@@ -2259,9 +2259,34 @@
         // === Reports System ===
         const reportsWin = document.getElementById('reportsWindow');
 
+        // === Reports Drag ===
         document.getElementById('reportsTitlebar').addEventListener('mousedown', (e) => {
             if (e.target.closest('.xp-titlebar-buttons')) return;
-            isDragging = false;
+            var win = reportsWin;
+            var ox = e.clientX - win.offsetLeft, oy = e.clientY - win.offsetTop;
+            function mv(ev) { win.style.left = (ev.clientX - ox) + 'px'; win.style.top = (ev.clientY - oy) + 'px'; win.style.transform = 'none'; }
+            function up() { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); }
+            document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+        });
+
+        // === Face Search Drag ===
+        document.getElementById('faceSearchTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            var win = document.getElementById('faceSearchWindow');
+            var ox = e.clientX - win.offsetLeft, oy = e.clientY - win.offsetTop;
+            function mv(ev) { win.style.left = (ev.clientX - ox) + 'px'; win.style.top = (ev.clientY - oy) + 'px'; win.style.transform = 'none'; }
+            function up() { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); }
+            document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+        });
+
+        // === Admin Drag ===
+        document.getElementById('adminTitlebar').addEventListener('mousedown', (e) => {
+            if (e.target.closest('.xp-titlebar-buttons')) return;
+            var win = document.getElementById('adminWindow');
+            var ox = e.clientX - win.offsetLeft, oy = e.clientY - win.offsetTop;
+            function mv(ev) { win.style.left = (ev.clientX - ox) + 'px'; win.style.top = (ev.clientY - oy) + 'px'; win.style.transform = 'none'; }
+            function up() { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); }
+            document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
         });
 
         function openReports() {
