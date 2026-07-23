@@ -1223,6 +1223,10 @@
             <div class="desktop-icon-img desktop-icon-search"></div>
             <div class="desktop-icon-label">Nick Search</div>
         </div>
+        <div class="desktop-icon" ondblclick="openFaceSearch()">
+            <div class="desktop-icon-img" style="background:linear-gradient(135deg,#e74c3c,#f39c12);border:2px solid #e74c3c;display:flex;align-items:center;justify-content:center;font-size:28px">👤</div>
+            <div class="desktop-icon-label">Face Search</div>
+        </div>
         <div class="desktop-icon" ondblclick="openMap()">
             <div class="desktop-icon-img desktop-icon-map"></div>
             <div class="desktop-icon-label">SOSINT Map</div>
@@ -1332,6 +1336,56 @@
         <div class="xp-statusbar">
             <div class="xp-statusbar-section">Ready</div>
             <div class="xp-statusbar-section">Powered by sherlock-project</div>
+        </div>
+    </div>
+
+    <!-- Face Search Window -->
+    <div class="xp-window" id="faceSearchWindow" style="display:none;width:850px">
+        <div class="xp-titlebar" id="faceSearchTitlebar">
+            <div class="xp-titlebar-left">
+                <div class="xp-titlebar-icon" style="background:linear-gradient(135deg,#e74c3c,#f39c12);border-radius:50%"></div>
+                <span class="xp-titlebar-text">Face Search — VK / OK</span>
+            </div>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-btn xp-btn-minimize" onclick="document.getElementById('faceSearchWindow').style.display='none'">_</div>
+                <div class="xp-btn xp-btn-close" onclick="document.getElementById('faceSearchWindow').style.display='none'">✕</div>
+            </div>
+        </div>
+
+        <div class="xp-content" style="min-height:400px;max-height:550px">
+            <div style="display:flex;gap:16px;margin-bottom:16px;align-items:flex-start">
+                <div style="flex-shrink:0">
+                    <div id="facePreview" style="width:180px;height:180px;border:2px inset #d4d0c8;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center;overflow:hidden">
+                        Загрузите фото
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:4px">
+                        <label class="xp-toolbar-btn" style="cursor:pointer;text-align:center">
+                            📁 Фото
+                            <input type="file" id="faceFileInput" accept="image/*" style="display:none" onchange="previewFace(this)">
+                        </label>
+                    </div>
+                </div>
+                <div style="flex:1">
+                    <div style="font-size:11px;font-weight:bold;color:#003399;margin-bottom:8px">Поиск по лицу в VK и Одноклассниках</div>
+                    <div style="font-size:11px;color:#666;margin-bottom:12px">
+                        Загрузите фото человека для поиска его профилей в социальных сетях.
+                        Поиск выполняется через Яндекс обратный поиск изображений.
+                    </div>
+                    <div style="margin-bottom:8px">
+                        <span style="font-size:11px;color:#666">Или вставьте URL:</span>
+                        <input type="text" id="faceUrlInput" class="xp-toolbar-input" placeholder="https://example.com/photo.jpg" style="width:100%;margin-top:4px">
+                    </div>
+                    <button class="xp-toolbar-btn" onclick="searchFace()" id="faceSearchBtn">🔍 Найти</button>
+                    <button class="xp-toolbar-btn" onclick="clearFaceSearch()" style="margin-left:4px">Очистить</button>
+                    <div id="faceSearchStatus" style="margin-top:8px;font-size:11px;color:#666"></div>
+                </div>
+            </div>
+            <div id="faceSearchResults"></div>
+        </div>
+
+        <div class="xp-statusbar">
+            <div class="xp-statusbar-section">Face Search</div>
+            <div class="xp-statusbar-section" id="faceSearchStatusBar">Ready</div>
         </div>
     </div>
 
@@ -1452,6 +1506,13 @@
                     <div class="start-menu-item-text">
                         <div class="start-menu-item-title">Nick Search</div>
                         <div class="start-menu-item-desc">Sherlock username lookup</div>
+                    </div>
+                </div>
+                <div class="start-menu-item" onclick="openFaceSearch(); toggleStartMenu();">
+                    <div class="xp-icon" style="background:linear-gradient(135deg,#e74c3c,#f39c12);border:1px solid #e74c3c"></div>
+                    <div class="start-menu-item-text">
+                        <div class="start-menu-item-title">Face Search</div>
+                        <div class="start-menu-item-desc">VK / OK photo lookup</div>
                     </div>
                 </div>
                 <div class="start-menu-item" onclick="openMap(); toggleStartMenu();">
@@ -1908,6 +1969,138 @@
 
         function minimizeSherlock() {
             sherlockWin.style.display = 'none';
+        }
+
+        // === Face Search Window ===
+        let faceSelectedFile = null;
+
+        function openFaceSearch() {
+            var win = document.getElementById('faceSearchWindow');
+            win.style.display = '';
+            win.style.left = '50%';
+            win.style.top = '60px';
+            win.style.transform = 'translateX(-50%)';
+        }
+
+        function previewFace(input) {
+            if (input.files && input.files[0]) {
+                faceSelectedFile = input.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('facePreview').innerHTML =
+                        '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover">';
+                };
+                reader.readAsDataURL(input.files[0]);
+                document.getElementById('faceSearchStatus').textContent = 'Файл: ' + input.files[0].name;
+            }
+        }
+
+        async function searchFace() {
+            var statusEl = document.getElementById('faceSearchStatus');
+            var resultsEl = document.getElementById('faceSearchResults');
+            var statusBar = document.getElementById('faceSearchStatusBar');
+            var urlInput = document.getElementById('faceUrlInput').value.trim();
+
+            if (!faceSelectedFile && !urlInput) {
+                statusEl.textContent = 'Загрузите фото или вставьте URL';
+                statusEl.style.color = '#c53a20';
+                return;
+            }
+
+            statusEl.textContent = 'Поиск...';
+            statusEl.style.color = '#666';
+            statusBar.textContent = 'Searching...';
+            resultsEl.innerHTML = '<div style="text-align:center;padding:30px;color:#999"><p>🔍 Выполняется поиск через Яндекс...</p><p style="margin-top:8px;font-size:10px">Это может занять 10-20 секунд</p></div>';
+
+            try {
+                var resp;
+                if (faceSelectedFile) {
+                    var formData = new FormData();
+                    formData.append('file', faceSelectedFile);
+                    resp = await fetch('/api/face-search', { method: 'POST', body: formData });
+                } else {
+                    resp = await fetch('/api/face-search/url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: urlInput })
+                    });
+                }
+
+                if (!resp.ok) throw new Error('Search failed: HTTP ' + resp.status);
+                var data = await resp.json();
+
+                if (data.error) {
+                    statusEl.textContent = data.error;
+                    statusEl.style.color = '#c53a20';
+                    statusBar.textContent = 'Error';
+                    resultsEl.innerHTML = '<div style="padding:16px;color:#c53a20;font-size:11px">Ошибка: ' + data.error + '</div>';
+                    return;
+                }
+
+                var html = '';
+
+                // VK profiles
+                if (data.vk_profiles && data.vk_profiles.length > 0) {
+                    html += '<div style="margin-bottom:16px">';
+                    html += '<div style="font-size:11px;font-weight:bold;color:#003399;margin-bottom:8px;border-bottom:1px solid #7f9db9;padding-bottom:4px">VK — Найдено: ' + data.vk_profiles.length + '</div>';
+                    data.vk_profiles.forEach(function(p) {
+                        html += renderProfileCard(p);
+                    });
+                    html += '</div>';
+                }
+
+                // OK profiles
+                if (data.ok_profiles && data.ok_profiles.length > 0) {
+                    html += '<div style="margin-bottom:16px">';
+                    html += '<div style="font-size:11px;font-weight:bold;color:#d35400;margin-bottom:8px;border-bottom:1px solid #7f9db9;padding-bottom:4px">Одноклассники — Найдено: ' + data.ok_profiles.length + '</div>';
+                    data.ok_profiles.forEach(function(p) {
+                        html += renderProfileCard(p);
+                    });
+                    html += '</div>';
+                }
+
+                // No results
+                if (data.total_found === 0) {
+                    html = '<div style="text-align:center;padding:30px;color:#999">' +
+                        '<p style="font-size:32px;margin-bottom:12px">😕</p>' +
+                        '<p>Профили не найдены</p>' +
+                        '<p style="font-size:10px;margin-top:8px">Попробуйте другое фото или проверьте качество изображения</p>' +
+                        '</div>';
+                }
+
+                resultsEl.innerHTML = html;
+                statusEl.textContent = 'Найдено: ' + data.total_found + ' (VK: ' + (data.vk_profiles ? data.vk_profiles.length : 0) + ', OK: ' + (data.ok_profiles ? data.ok_profiles.length : 0) + ')';
+                statusEl.style.color = '#228b22';
+                statusBar.textContent = 'Found: ' + data.total_found;
+
+            } catch (e) {
+                statusEl.textContent = 'Ошибка: ' + e.message;
+                statusEl.style.color = '#c53a20';
+                statusBar.textContent = 'Error';
+                resultsEl.innerHTML = '<div style="padding:16px;color:#c53a20;font-size:11px">Ошибка: ' + e.message + '</div>';
+            }
+        }
+
+        function renderProfileCard(profile) {
+            var sourceColor = profile.source === 'VK' ? '#003399' : '#d35400';
+            var sourceBg = profile.source === 'VK' ? '#e8f0fe' : '#fef3e8';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #d4d0c8;border-radius:3px;margin-bottom:6px;background:' + sourceBg + '">' +
+                '<div style="width:16px;height:16px;border-radius:2px;background:' + sourceColor + ';color:white;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">' + profile.source + '</div>' +
+                '<div style="flex:1;min-width:0">' +
+                    '<a href="' + profile.url + '" target="_blank" style="font-size:11px;color:#003399;text-decoration:none;word-break:break-all">' + profile.url + '</a>' +
+                '</div>' +
+                '<a href="' + profile.url + '" target="_blank" class="xp-toolbar-btn" style="padding:2px 8px;font-size:10px;text-decoration:none">Открыть</a>' +
+                '</div>';
+        }
+
+        function clearFaceSearch() {
+            faceSelectedFile = null;
+            document.getElementById('facePreview').innerHTML = 'Загрузите фото';
+            document.getElementById('faceFileInput').value = '';
+            document.getElementById('faceUrlInput').value = '';
+            document.getElementById('faceSearchStatus').textContent = '';
+            document.getElementById('faceSearchResults').innerHTML = '';
+            document.getElementById('faceSearchStatusBar').textContent = 'Ready';
         }
 
         // === SOSINT Map Window ===

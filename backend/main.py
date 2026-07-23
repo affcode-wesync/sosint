@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -274,6 +274,27 @@ async def auth_callback(code: str = None):
     if not code:
         return HTMLResponse("<h1>Error: No code provided</h1>")
     return HTMLResponse("<h1>Authorization complete! You can close this window.</h1>")
+
+
+class FaceSearchURLRequest(BaseModel):
+    url: str
+
+
+@app.post("/api/face-search")
+async def face_search_upload(file: UploadFile = File(...)):
+    from face_search import face_search_yandex
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+    return await face_search_yandex(contents, file.filename or "photo.jpg")
+
+
+@app.post("/api/face-search/url")
+async def face_search_by_url(request: FaceSearchURLRequest):
+    from face_search import face_search_url
+    if not request.url:
+        raise HTTPException(status_code=400, detail="URL required")
+    return await face_search_url(request.url)
 
 
 @app.get("/api/health")
