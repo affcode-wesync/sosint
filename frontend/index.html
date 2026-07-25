@@ -20,9 +20,9 @@
             --text: #e8e8f0;
             --text-dim: #8888a0;
             --text-muted: #555568;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.15);
+            --accent: #3a3a42;
+            --accent-hover: #4a4a55;
+            --accent-glow: rgba(255, 255, 255, 0.05);
             --danger: #ef4444;
             --success: #22c55e;
             --warning: #f59e0b;
@@ -48,7 +48,7 @@
         @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.2); } 50% { box-shadow: 0 0 40px rgba(99,102,241,0.4); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.03); } 50% { box-shadow: 0 0 40px rgba(255,255,255,0.05); } }
 
         /* === Login Screen === */
         .login-overlay {
@@ -74,7 +74,7 @@
         .login-body { padding: 24px 20px; display: flex; gap: 20px; align-items: flex-start; }
         .login-logo {
             width: 64px; height: 64px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
@@ -89,7 +89,7 @@
             font-family: inherit; background: var(--surface2); color: var(--text);
             margin-bottom: 12px; transition: var(--transition);
         }
-        .login-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .login-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-glow); }
         .login-input::placeholder { color: var(--text-muted); }
         .login-error { color: var(--danger); font-size: 12px; margin-bottom: 8px; display: none; }
         .login-error.show { display: block; }
@@ -99,10 +99,10 @@
         }
         .login-btn {
             padding: 8px 24px; font-size: 13px; font-family: inherit;
-            background: var(--accent); border: none; border-radius: var(--radius-sm);
+            background: #2a2a30; border: none; border-radius: var(--radius-sm);
             cursor: pointer; font-weight: 600; color: white; transition: var(--transition);
         }
-        .login-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .login-btn:hover { background: #3a3a42; transform: translateY(-1px); }
         .login-btn:active { transform: translateY(0); }
         .login-footer { padding: 0 20px 16px; }
         .login-footer-text { color: var(--text-muted); font-size: 11px; }
@@ -128,9 +128,10 @@
         .desktop-icon:nth-child(6) { animation-delay: 0.3s; }
         .desktop-icon:hover { background: rgba(255,255,255,0.06); }
         .desktop-icon:active { transform: scale(0.95); }
+        .desktop-icon.drag-over { border-top: 2px solid #666; opacity: 0.7; }
         .desktop-icon-img {
             width: 48px; height: 48px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -138,7 +139,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             transition: var(--transition);
         }
-        .desktop-icon:hover .desktop-icon-img { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.3); }
+        .desktop-icon:hover .desktop-icon-img { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
         .desktop-icon-label {
             font-size: 11px; color: var(--text-dim); text-align: center;
             line-height: 1.3; font-weight: 500;
@@ -174,7 +175,7 @@
         .xp-titlebar-left { display: flex; align-items: center; gap: 10px; }
         .xp-titlebar-icon {
             width: 20px; height: 20px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             border-radius: 5px; flex-shrink: 0;
         }
         .xp-titlebar-text { color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -203,15 +204,15 @@
             font-family: inherit; background: var(--surface); color: var(--text);
             transition: var(--transition);
         }
-        .xp-toolbar-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .xp-toolbar-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-glow); }
         .xp-toolbar-input::placeholder { color: var(--text-muted); }
         .xp-toolbar-btn {
             padding: 8px 16px; font-size: 12px; font-family: inherit;
-            background: var(--accent); border: none; border-radius: var(--radius-sm);
+            background: #2a2a30; border: none; border-radius: var(--radius-sm);
             cursor: pointer; font-weight: 600; color: white; transition: var(--transition);
             white-space: nowrap;
         }
-        .xp-toolbar-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .xp-toolbar-btn:hover { background: #3a3a42; transform: translateY(-1px); }
         .xp-toolbar-btn:active { transform: translateY(0); }
 
         /* === Content === */
@@ -245,14 +246,14 @@
             backdrop-filter: blur(20px);
         }
         .xp-start-btn {
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             color: white; padding: 6px 16px 6px 10px;
             border: none; border-radius: var(--radius-sm);
             font-size: 13px; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 6px;
             font-family: inherit; transition: var(--transition);
         }
-        .xp-start-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+        .xp-start-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
         .xp-start-btn:active { transform: translateY(0); }
 
         /* === Start Menu === */
@@ -266,7 +267,7 @@
         }
         .start-menu.show { display: block; }
         .start-menu-header {
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             padding: 14px 16px; display: flex; align-items: center; gap: 12px;
         }
         .start-menu-avatar {
@@ -285,7 +286,7 @@
             padding: 8px 14px; font-size: 12px; cursor: pointer;
             transition: var(--transition); color: var(--text);
         }
-        .start-menu-item:hover { background: var(--accent-glow); color: var(--accent-hover); }
+        .start-menu-item:hover { background: rgba(255,255,255,0.03); color: #ccc; }
         .start-menu-item-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .start-menu-item-text { flex: 1; }
         .start-menu-item-title { font-weight: 500; }
@@ -321,17 +322,17 @@
         .icon-email { background-image: url('/static/icons/email-sosint.png'); }
         .icon-phone { background-image: url('/static/icons/hlr.png'); }
         .icon-search { background-image: url('/static/icons/nickname.png'); }
-        .icon-internet { background: linear-gradient(135deg, #6366f1, #3b82f6); border: none; }
+        .icon-internet { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
         .icon-internet::after { content: ''; width: 14px; height: 14px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .icon-outlook { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; }
+        .icon-outlook { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
         .icon-outlook::before { content: ''; width: 12px; height: 8px; background: white; border-radius: 2px; position: absolute; }
         .icon-notepad { background: var(--surface3); border: 1px solid var(--border); }
         .icon-notepad::before { content: ''; width: 14px; height: 16px; background: repeating-linear-gradient(0deg, var(--text-muted) 0px, var(--text-muted) 1px, transparent 1px, transparent 3px); position: absolute; border-radius: 2px; }
         .icon-calc { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-calc::before { content: ''; width: 12px; height: 8px; background: var(--accent); border-radius: 2px; position: absolute; top: 4px; }
-        .icon-folder { background: linear-gradient(135deg, var(--warning), #d97706); border: none; }
+        .icon-calc::before { content: ''; width: 12px; height: 8px; background: #2a2a30; border-radius: 2px; position: absolute; top: 4px; }
+        .icon-folder { background: linear-gradient(135deg, #3a3a3a, #2a2a2a); border: none; }
         .icon-folder::before { content: ''; width: 10px; height: 3px; background: #d97706; position: absolute; top: 2px; left: 2px; border-radius: 2px 2px 0 0; }
-        .icon-pictures { background: linear-gradient(135deg, #3b82f6, #1e40af); border: none; }
+        .icon-pictures { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
         .icon-pictures::before { content: ''; width: 12px; height: 10px; background: linear-gradient(135deg, #22c55e, #15803d); border-radius: 50% 50% 0 0; position: absolute; }
         .icon-music { background: var(--surface3); border: 1px solid var(--border); }
         .icon-music::before { content: '♪'; font-size: 14px; color: var(--text-dim); }
@@ -340,10 +341,10 @@
         .icon-computer::after { content: ''; width: 8px; height: 3px; background: var(--border-light); position: absolute; bottom: 4px; border-radius: 1px; }
         .icon-control { background: var(--surface3); border: 1px solid var(--border); }
         .icon-control::before { content: ''; width: 14px; height: 14px; border: 2px solid var(--text-muted); border-radius: 50%; position: absolute; }
-        .icon-control::after { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; }
-        .icon-logout { background: linear-gradient(135deg, #3b82f6, #1e40af); border: none; }
+        .icon-control::after { content: ''; width: 6px; height: 6px; background: #2a2a30; border-radius: 50%; position: absolute; }
+        .icon-logout { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
         .icon-logout::before { content: ''; width: 8px; height: 8px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .icon-shutdown { background: linear-gradient(135deg, var(--danger), #991b1b); border: none; }
+        .icon-shutdown { background: linear-gradient(135deg, #3a2a2a, #2a1a1a); border: none; }
         .icon-shutdown::before { content: ''; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; position: absolute; }
 
         /* Desktop Icon Images */
@@ -351,11 +352,11 @@
         .desktop-icon-email { background-image: url('/static/icons/email-sosint.png'); }
         .desktop-icon-phone { background-image: url('/static/icons/hlr.png'); }
         .desktop-icon-search { background-image: url('/static/icons/nickname.png'); }
-        .desktop-icon-map { background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; }
+        .desktop-icon-map { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
         .desktop-icon-map::before { content: ''; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; position: absolute; }
         .desktop-icon-map::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; }
-        .icon-map { background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; border: none !important; }
-        .desktop-icon-reports { background: linear-gradient(135deg, var(--warning), #d97706); border: none; }
+        .icon-map { background: linear-gradient(135deg, #2a2a30, #1a1a1f) !important; border: none !important; }
+        .desktop-icon-reports { background: linear-gradient(135deg, #3a3a3a, #2a2a2a); border: none; }
         .desktop-icon-reports::before { content: ''; width: 24px; height: 4px; background: rgba(255,255,255,0.5); position: absolute; top: 6px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
         .desktop-icon-reports::after { content: '📧📁📋🗺️'; font-size: 8px; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
         .icon-reports { background: linear-gradient(135deg, var(--warning), #d97706) !important; border: none !important; }
@@ -385,7 +386,7 @@
         /* === Results === */
         .section { margin-bottom: 16px; animation: fadeIn 0.3s ease-out; }
         .section-title {
-            font-size: 12px; font-weight: 600; color: var(--accent);
+            font-size: 12px; font-weight: 600; color: var(--text);
             margin-bottom: 8px; padding-bottom: 6px;
             border-bottom: 1px solid var(--border);
         }
@@ -402,7 +403,7 @@
         }
         .xp-avatar {
             width: 80px; height: 80px; border: 1px solid var(--border);
-            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
             display: flex; align-items: center; justify-content: center;
             font-size: 28px; font-weight: 700; color: white;
             flex-shrink: 0; overflow: hidden; border-radius: var(--radius);
@@ -410,7 +411,7 @@
         .xp-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .xp-profile-info { flex: 1; }
         .xp-info-row { display: flex; gap: 8px; margin-bottom: 4px; font-size: 12px; }
-        .xp-info-label { font-weight: 600; color: var(--accent); min-width: 100px; }
+        .xp-info-label { font-weight: 600; color: var(--text); min-width: 100px; }
         .xp-links {
             display: flex; gap: 8px; margin-top: 12px;
             padding-top: 10px; border-top: 1px solid var(--border);
@@ -418,10 +419,10 @@
         .xp-link {
             padding: 8px 14px; background: var(--surface2);
             border: 1px solid var(--border); border-radius: var(--radius-sm);
-            text-decoration: none; color: var(--accent); font-size: 12px; font-weight: 600;
+            text-decoration: none; color: var(--text); font-size: 12px; font-weight: 600;
             transition: var(--transition);
         }
-        .xp-link:hover { background: var(--surface3); border-color: var(--accent); transform: translateY(-1px); }
+        .xp-link:hover { background: var(--surface3); border-color: var(--text); transform: translateY(-1px); }
         .xp-link:active { transform: translateY(0); }
 
         /* === Table === */
@@ -436,20 +437,20 @@
         }
         .xp-table td { border-bottom: 1px solid var(--border); padding: 8px 12px; }
         .xp-table tr { transition: var(--transition); }
-        .xp-table tr:hover { background: var(--accent-glow); }
+        .xp-table tr:hover { background: rgba(255,255,255,0.03); }
 
         /* === Badges === */
         .xp-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: none; }
         .xp-badge.found { background: rgba(34,197,94,0.15); color: #22c55e; }
         .xp-badge.not_found { background: rgba(136,136,160,0.15); color: #8888a0; }
-        .xp-badge.redirect { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .xp-badge.redirect { background: rgba(136,136,160,0.15); color: #aaa; }
         .xp-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
         .xp-badge.rate_limited { background: rgba(245,158,11,0.15); color: #f59e0b; }
         .xp-badge.unknown { background: rgba(136,136,160,0.1); color: #8888a0; }
 
         /* === Loading === */
         .xp-loading { display: none; text-align: center; padding: 40px; font-size: 12px; color: var(--text-muted); }
-        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: #555; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
 
         /* === Reports === */
         .xp-reports-folder {
@@ -457,7 +458,7 @@
             padding: 16px; text-align: center; cursor: pointer;
             transition: var(--transition); border-radius: var(--radius);
         }
-        .xp-reports-folder:hover { background: var(--surface3); border-color: var(--accent); transform: translateY(-2px); }
+        .xp-reports-folder:hover { background: var(--surface3); border-color: var(--text); transform: translateY(-2px); }
         .xp-reports-folder:active { transform: translateY(0); }
         .xp-reports-folder-icon {
             width: 48px; height: 48px; margin: 0 auto 8px;
@@ -472,7 +473,7 @@
             border-bottom: 1px solid var(--border); cursor: pointer;
             font-size: 12px; gap: 8px; transition: var(--transition);
         }
-        .xp-report-item:hover { background: var(--accent-glow); }
+        .xp-report-item:hover { background: rgba(255,255,255,0.03); }
         .xp-report-item-name { flex: 1; }
         .xp-report-item-date { font-size: 10px; color: var(--text-muted); }
         .xp-report-item:hover .xp-report-item-date { color: var(--text-dim); }
@@ -1284,6 +1285,57 @@
         function minimizeSherlock() {
             sherlockWin.style.display = 'none';
         }
+
+        // === Desktop Icon Drag & Drop ===
+        (function() {
+            var container = document.querySelector('.desktop-icons');
+            if (!container) return;
+            var icons = container.querySelectorAll('.desktop-icon');
+            var dragSrc = null;
+
+            icons.forEach(function(icon) {
+                icon.setAttribute('draggable', 'true');
+
+                icon.addEventListener('dragstart', function(e) {
+                    dragSrc = this;
+                    this.style.opacity = '0.4';
+                    this.style.transform = 'scale(0.9)';
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', '');
+                });
+
+                icon.addEventListener('dragend', function() {
+                    this.style.opacity = '';
+                    this.style.transform = '';
+                    icons.forEach(function(i) { i.classList.remove('drag-over'); });
+                });
+
+                icon.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    this.classList.add('drag-over');
+                });
+
+                icon.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+
+                icon.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    if (dragSrc !== this) {
+                        var allIcons = Array.from(container.children);
+                        var srcIdx = allIcons.indexOf(dragSrc);
+                        var dropIdx = allIcons.indexOf(this);
+                        if (srcIdx < dropIdx) {
+                            container.insertBefore(dragSrc, this.nextSibling);
+                        } else {
+                            container.insertBefore(dragSrc, this);
+                        }
+                    }
+                });
+            });
+        })();
 
         // === Face Search Window ===
         let faceSelectedFile = null;
