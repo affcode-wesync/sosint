@@ -1969,10 +1969,11 @@
         function openGames() {
             gamesWin.style.display = 'flex';
             gamesWin.style.left = '50%';
-            gamesWin.style.top = '60px';
-            gamesWin.style.width = '600px';
-            gamesWin.style.height = 'calc(100vh - 100px)';
+            gamesWin.style.top = window.innerWidth < 600 ? '0' : '60px';
+            gamesWin.style.width = window.innerWidth < 600 ? '100vw' : '600px';
+            gamesWin.style.height = window.innerWidth < 600 ? '100vh' : 'calc(100vh - 100px)';
             gamesWin.style.transform = 'translateX(-50%)';
+            gamesWin.style.borderRadius = window.innerWidth < 600 ? '0' : '';
             document.getElementById('gamesTaskbarItem').style.display = '';
         }
 
