@@ -12,7 +12,7 @@ function loadKeys() {
   try {
     keysData = JSON.parse(fs.readFileSync(KEYS_FILE, 'utf8'));
   } catch (e) {
-    keysData = { admin_key: 'admin123', keys: [] };
+    keysData = { admin_key: '67zovpokoyo', keys: [] };
   }
   return keysData;
 }

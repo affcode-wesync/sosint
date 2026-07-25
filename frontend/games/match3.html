@@ -134,43 +134,33 @@ const GEM_TYPES=[
   {id:5,name:'Цитрин',color:'#e67e22',glow:'#d35400',symbol:'♣'}
 ];
 const GADGET_COSTS={hammer:30,lightning:50,tornado:40};
-let GEM_SIZE=GEM_BASE,TOTAL_LEVELS=50,levels=[],canvas,ctx;
+let GEM_SIZE=GEM_BASE,TOTAL_LEVELS=75,levels=[],canvas,ctx;
 
 // ======== UNIQUE BOARD SHAPES ========
 // blocked[r][c]=true means that cell is removed
 function genBoardShape(lvl){
   let b={};
   function block(r,c){b[r+','+c]=1;}
-  function diamond(cx,rad){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(Math.abs(r-cx)+Math.abs(c-cx)>rad)block(r,c);}
   function diamond2(cx,cy,rad){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(Math.abs(r-cy)+Math.abs(c-cx)>rad)block(r,c);}
   function cross(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(r<2||r>5||c<2||c>5)block(r,c);}}
-  function corners(n){for(let i=0;i<n;i++){block(i,0);block(i,7);block(7-i,0);block(7-i,7);block(0,i);block(7,i);block(0,7-i);block(7,7-i);}}
   function hourglass(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let mid=Math.abs(r-3.5);if(c<mid-0.5||c>7-mid+0.5)block(r,c);}}
   function snake(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(r%2===0&&c>=5)block(r,c);if(r%2===1&&c<=2)block(r,c);}}
   function circle(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let d=Math.sqrt((r-3.5)**2+(c-3.5)**2);if(d>3.8)block(r,c);}}
   function letterL(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(r<5&&c>2)block(r,c);if(r>=5&&c===6)block(r,c);}}
   function plus(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if((r<2||r>5)&&(c<2||c>5))block(r,c);}}
-  function zigzag(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let off=r%3===0?3:r%3===1?0:5;if(c<off)block(r,c);}}
-  function heart(){let heart=[[-2,0],[-2,1],[-2,2],[-2,-2],[-2,-1],[-1,-3],[-1,3],[0,-3],[0,3],[1,-2],[1,2],[2,-1],[2,1],[3,0],[4,0],[5,1],[5,-1],[6,2],[6,-2],[7,3],[7,-3]];
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let found=false;for(let p of heart)if(r===Math.floor(ROWS/2)+p[0]&&c===Math.floor(COLS/2)+p[1]){found=true;break;}if(!found)block(r,c);}}
-  function invCircle(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let d=Math.sqrt((r-3.5)**2+(c-3.5)**2);if(d<1.8)block(r,c);}}
   function stairs(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(c<r-1||c>r+2)block(r,c);}}
   function butterfly(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let ar=Math.abs(r-3.5),ac=Math.abs(c-3.5);if(ar>1&&ac>1&&(ar+ac)>4)block(r,c);}}
+  function invCircle(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){let d=Math.sqrt((r-3.5)**2+(c-3.5)**2);if(d<1.8)block(r,c);}}
   function diamondHole(){diamond2(3.5,3.5,5);for(let r=2;r<=5;r++)for(let c=2;c<=5;c++)delete b[r+','+c];}
 
-  let shapes=[diamond2.bind(null,3.5,3.5,4.5),cross,corners.bind(null,2),hourglass,snake,circle,letterL,plus,zigzag,invCircle,stairs,butterfly,diamondHole,cross,corners.bind(null,3)];
-  let idx=(lvl-1)%shapes.length;
+  // Levels 1-10: full board, no blocked cells
+  if(lvl<=10) return b;
+
+  let shapes=[cross,hourglass,snake,circle,letterL,plus,stairs,butterfly,diamondHole,cross];
+  let idx=(lvl-11)%shapes.length;
   let fn=shapes[idx];
   if(typeof fn==='function')fn();
 
-  // extra blocked cells for harder levels
-  if(lvl>60){
-    let extra=Math.floor((lvl-60)/10)+1;
-    for(let i=0;i<extra;i++){
-      let r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);
-      if(!b[r+','+c]&&r>0&&r<ROWS-1&&c>0&&c<COLS-1)b[r+','+c]=1;
-    }
-  }
   return b;
 }
 
@@ -179,21 +169,70 @@ function makeLevels(){
   levels=[];
   for(let i=1;i<=TOTAL_LEVELS;i++){
     let obj,moves,type;
-    if(i<=5){type='collect';obj={type:'collect',gems:{},score:500+i*200};moves=35+Math.floor(i*1.5);let g=Math.floor(Math.random()*6);obj.gems[g]=8+i*2;}
-    else if(i<=10){type='collect';obj={type:'collect',gems:{},score:800+i*150};moves=30+i;let gc=Math.floor(i/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=6+i;});}
-    else if(i<=15){type='ice';obj={type:'ice',iceCount:4+Math.floor((i-10)*1.5),score:1200+i*100};moves=28+i;}
-    else if(i<=20){type='collect_score';obj={type:'collect_score',gems:{},score:2000+i*200};moves=25+Math.floor(i*0.8);let gc=Math.floor((i-15)/2)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=10+i;});}
-    else if(i<=30){type='timed';obj={type:'timed',time:60+i,score:2500+i*150};moves=999;}
-    else if(i<=40){type='collect_ice';obj={type:'collect_ice',gems:{},iceCount:6+Math.floor((i-30)*1.2),score:3000+i*100};moves=30+Math.floor(i*0.5);let gc=Math.floor((i-30)/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=8+i;});}
-    else if(i<=50){type='hard';obj={type:'hard',gems:{},iceCount:8+Math.floor((i-40)*1.5),score:4000+i*100};moves=25+Math.floor(i*0.3);let gc=Math.floor((i-40)/3)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=12+i;});}
-    else if(i<=55){type='chain';obj={type:'chain',gems:{},chainCount:5+Math.floor((i-50)*1.5),iceCount:2+Math.floor((i-50)/2),score:4500+i*80};moves=28+Math.floor(i*0.4);let gc=Math.floor((i-50)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=10+i;});}
-    else if(i<=60){type='timed_hard';obj={type:'timed_hard',time:55+i,score:5000+i*80,gems:{},iceCount:4+Math.floor((i-55)*2)};moves=999;let gc=Math.floor((i-55)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=8+i;});}
-    else if(i<=67){type='boss';obj={type:'boss',gems:{},iceCount:10+Math.floor((i-60)*1.5),chainCount:4+Math.floor((i-60)*1),score:6000+i*100};moves=22+Math.floor(i*0.3);let gc=4;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=15+i;});}
-    else if(i<=75){type='collect';obj={type:'collect',gems:{},score:7000+i*80};moves=22+Math.floor(i*0.2);let gc=Math.floor((i-67)/3)+4;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=15+i;});}
-    else if(i<=85){type='ice';obj={type:'ice',iceCount:10+Math.floor((i-75)*2),score:8000+i*80};moves=24+Math.floor(i*0.2);}
-    else if(i<=95){type='collect_score';obj={type:'collect_score',gems:{},score:9000+i*80};moves=20+Math.floor(i*0.15);let gc=Math.floor((i-85)/2)+4;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=18+i;});}
-    else if(i<=105){type='chain';obj={type:'chain',gems:{},chainCount:8+Math.floor((i-95)*2),iceCount:5+Math.floor((i-95)/2),score:10000+i*80};moves=22+Math.floor(i*0.15);let gc=Math.floor((i-95)/2)+4;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=18+i;});}
-    else{type='boss';obj={type:'boss',gems:{},iceCount:15+Math.floor((i-105)*2),chainCount:8+Math.floor((i-105)*2),score:12000+i*100};moves=20+Math.floor(i*0.1);let gc=5;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=20+i;});}
+    // EASY: 1-10 — сбор камней
+    if(i<=5){
+      type='collect';obj={type:'collect',gems:{},score:500+i*200};moves=35+Math.floor(i*1.5);
+      let g=Math.floor(Math.random()*6);obj.gems[g]=8+i*2;
+    }
+    else if(i<=10){
+      type='collect';obj={type:'collect',gems:{},score:800+i*150};moves=32+i;
+      let gc=Math.floor(i/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=6+i;});
+    }
+    // MEDIUM: 11-20 — лёд + сбор
+    else if(i<=15){
+      type='ice';obj={type:'ice',iceCount:3+Math.floor((i-10)*1.2),score:1200+i*100};moves=30+i;
+    }
+    else if(i<=20){
+      type='collect_score';obj={type:'collect_score',gems:{},score:1800+i*180};moves=28+Math.floor(i*0.8);
+      let gc=Math.floor((i-15)/2)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=10+i;});
+    }
+    // MEDIUM-HARD: 21-35 — на время + комбо
+    else if(i<=28){
+      type='timed';obj={type:'timed',time:65+i,score:2200+i*140};moves=999;
+    }
+    else if(i<=35){
+      type='collect_ice';obj={type:'collect_ice',gems:{},iceCount:5+Math.floor((i-28)*1),score:2800+i*100};moves=28+Math.floor(i*0.5);
+      let gc=Math.floor((i-28)/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=8+i;});
+    }
+    // HARD: 36-50 — комбинированные
+    else if(i<=42){
+      type='hard';obj={type:'hard',gems:{},iceCount:6+Math.floor((i-35)*1.2),score:3500+i*100};moves=26+Math.floor(i*0.4);
+      let gc=Math.floor((i-35)/3)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=12+i;});
+    }
+    else if(i<=50){
+      type='chain';obj={type:'chain',gems:{},chainCount:4+Math.floor((i-42)*1),iceCount:3+Math.floor((i-42)/2),score:4000+i*80};moves=25+Math.floor(i*0.35);
+      let gc=Math.floor((i-42)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=12+i;});
+    }
+    // NEW 51-75: ПОДЪЁМ + БОССЫ
+    else if(i<=58){
+      // 51-58: тайм + лёд (средне-сложно)
+      type='timed_hard';obj={type:'timed_hard',time:50+i,score:4500+i*80,gems:{},iceCount:4+Math.floor((i-50)*1.5)};moves=999;
+      let gc=Math.floor((i-50)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=10+i;});
+    }
+    else if(i<=65){
+      // 59-65: сбор + цепи + лёд (сложно)
+      type='chain';obj={type:'chain',gems:{},chainCount:5+Math.floor((i-58)*1.5),iceCount:4+Math.floor((i-58)/2),score:5500+i*80};moves=24+Math.floor(i*0.3);
+      let gc=Math.floor((i-58)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=15+i;});
+    }
+    else if(i<=70){
+      // 66-70: сбор + очки + лёд (очень сложно)
+      type='collect_score';obj={type:'collect_score',gems:{},score:6000+i*100};moves=22+Math.floor(i*0.2);
+      let gc=Math.floor((i-65)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=18+i;});
+    }
+    else{
+      // 71-75: БОССЫ — всё вместе
+      type='boss';obj={type:'boss',gems:{},iceCount:10+Math.floor((i-70)*2),chainCount:6+Math.floor((i-70)*1),score:8000+i*100};moves=20+Math.floor(i*0.15);
+      let gc=4+Math.floor((i-70)/2);let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));
+      gs.forEach(g=>{obj.gems[g]=20+i;});
+    }
     let stars=type==='timed'||type==='timed_hard'?[obj.score,obj.score*1.5,obj.score*2.2]:[obj.score,obj.score*1.4,obj.score*2];
     levels.push({id:i,name:`Уровень ${i}`,type,moves,obj,stars,board:genBoardShape(i),obstacles:i>10?generateObstacles(i,genBoardShape(i)):[]});
   }
@@ -388,10 +427,7 @@ function draw(){
   ctx.fillStyle='#0d0d1a';ctx.beginPath();ctx.roundRect(0,0,w,h,8);ctx.fill();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     let x=c*gt+GEM_PAD,y=r*gt+GEM_PAD;
-    if(isBlocked(board,r,c)){
-      ctx.fillStyle='rgba(10,14,26,0.9)';ctx.fillRect(x,y,GEM_SIZE,GEM_SIZE);
-      continue;
-    }
+    if(isBlocked(board,r,c))continue;
     let cell=state.grid[r]?.[c];if(!cell||cell.blocked)continue;
     if(cell.obstacle){
       let o=cell.obstacle;

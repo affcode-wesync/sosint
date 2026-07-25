@@ -82,16 +82,8 @@
   status = 200
   force = true
 
-# Map page
-[[redirects]]
-  from = "/map"
-  to = "/map/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/map/*"
-  to = "/map/:splat"
-  status = 200
+# Map page - served directly from frontend/map/
+# No redirect needed
 
 # Cache static assets
 [[headers]]

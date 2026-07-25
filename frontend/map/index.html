@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOSINT Map — Investigation Chain</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#141419;--surface2:#1c1c24;--surface3:#24242e;
+  --border:#2a2a35;--border-light:#35354a;--text:#e8e8f0;--text-dim:#8888a0;
+  --text-muted:#555568;--accent:#3a3a42;--accent-hover:#4a4a55;
+  --danger:#ef4444;--success:#22c55e;--warning:#f59e0b;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 8px 32px rgba(0,0,0,0.4);--shadow-lg:0 16px 48px rgba(0,0,0,0.6);
+  --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;background:var(--bg);height:100vh;user-select:none;color:var(--text)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(255,255,255,.03)}50%{box-shadow:0 0 40px rgba(255,255,255,.06)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Sidebar */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:52px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;z-index:100;backdrop-filter:blur(20px)}
+.sbtn{width:36px;height:36px;border:none;background:transparent;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:var(--transition);margin-bottom:2px}
+.sbtn:hover{background:var(--surface3);color:var(--text)}
+.sbtn:active{transform:scale(0.92)}
+.sbtn.active{background:var(--surface3);color:var(--text)}
+.sbtn svg{width:18px;height:18px}
+.ssep{width:24px;height:1px;background:var(--border);margin:4px 0}
+.sbottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px}
+
+/* Top Bar */
+.topbar{position:fixed;top:0;left:52px;right:0;height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;z-index:99;gap:6px;backdrop-filter:blur(20px)}
+.topbar-title{font-size:13px;font-weight:600;color:var(--text);margin-right:12px}
+.topbtn{padding:5px 12px;font-size:11px;font-family:inherit;background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-weight:500;color:var(--text-dim);border-radius:var(--radius-sm);transition:var(--transition);display:flex;align-items:center;gap:4px}
+.topbtn:hover{background:var(--surface3);color:var(--text);border-color:var(--border-light)}
+.topbtn:active{transform:scale(0.97)}
+
+/* Canvas */
+.canvas-wrap{position:fixed;top:40px;left:52px;right:0;bottom:0;overflow:hidden;cursor:crosshair;background:var(--bg)}
+.canvas-wrap::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:0}
+#canvas{position:absolute;transform-origin:0 0;width:10000px;height:10000px}
+
+/* Nodes */
+.node{position:absolute;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);cursor:default;transition:box-shadow .2s,border-color .2s;animation:slideIn .2s ease-out}
+.node:hover{box-shadow:var(--shadow-lg);border-color:var(--border-light)}
+.node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,255,255,.05),var(--shadow-lg)}
+.node.chain-highlight{border-color:var(--warning);box-shadow:0 0 0 3px rgba(245,158,11,.1),var(--shadow-lg)}
+
+.node-titlebar{padding:6px 10px;font-size:10px;font-weight:600;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface2)}
+.node-titlebar-close{width:16px;height:16px;background:transparent;border:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted);transition:var(--transition)}
+.node-titlebar-close:hover{background:var(--danger);color:white}
+
+.node-body{padding:10px;min-height:50px;outline:none;font-size:12px;line-height:1.5;color:var(--text);word-wrap:break-word;font-family:inherit}
+.node-body:empty::before{content:'Введите текст...';color:var(--text-muted);font-style:italic}
+
+.node-img{width:100%;max-height:180px;object-fit:cover;display:block;border-top:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius)}
+
+.node-resize{position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;opacity:0;transition:opacity .15s}
+.node:hover .node-resize{opacity:1}
+.node-resize::after{content:'';position:absolute;bottom:3px;right:3px;width:6px;height:6px;border-right:2px solid var(--border-light);border-bottom:2px solid var(--border-light)}
+
+.node-port{position:absolute;width:10px;height:10px;background:var(--border-light);border:2px solid var(--surface);border-radius:50%;cursor:crosshair;opacity:0;transition:opacity .15s,background .15s;transform:translate(-50%,-50%);z-index:5}
+.node:hover .node-port,.node.selected .node-port{opacity:1}
+.node-port.port-in{top:0;left:50%;transform:translate(-50%,-50%)}
+.node-port.port-out{bottom:0;left:50%;transform:translate(-50%,50%)}
+.node-port:hover{background:var(--text);transform:translate(-50%,-50%) scale(1.4)}
+
+/* Node Colors */
+.node-color-amber{border-left:3px solid #f59e0b}
+.node-color-blue{border-left:3px solid #3b82f6}
+.node-color-green{border-left:3px solid #22c55e}
+.node-color-red{border-left:3px solid #ef4444}
+.node-color-purple{border-left:3px solid #8b5cf6}
+.node-color-pink{border-left:3px solid #ec4899}
+.node-color-cyan{border-left:3px solid #06b6d4}
+.node-color-gray{border-left:3px solid #6b7280}
+
+/* SVG Connections */
+.conn-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.conn-svg path{fill:none;stroke:var(--border-light);stroke-width:2;pointer-events:stroke;cursor:pointer;transition:stroke .2s,stroke-width .2s}
+.conn-svg path:hover{stroke:var(--text-dim);stroke-width:3}
+.conn-svg path.selected{stroke:var(--text);stroke-width:3}
+.conn-svg marker path{fill:var(--border-light)}
+
+.conn-label{position:absolute;background:var(--surface2);padding:2px 8px;border:1px solid var(--border);font-size:10px;color:var(--text-dim);pointer-events:auto;cursor:pointer;white-space:nowrap;z-index:2;font-family:inherit;border-radius:4px}
+
+.temp-line{stroke:var(--text-dim);stroke-width:2;stroke-dasharray:6 3;pointer-events:none}
+
+/* Chain Panel */
+.chain-panel{position:fixed;right:8px;top:48px;width:240px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);z-index:50;display:none;max-height:calc(100vh - 100px);overflow:hidden;box-shadow:var(--shadow-lg);animation:slideIn .2s ease-out}
+.chain-panel.show{display:flex;flex-direction:column}
+.chain-header{background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.chain-header-close{cursor:pointer;color:var(--text-muted);transition:var(--transition)}
+.chain-header-close:hover{color:var(--text)}
+.chain-body{flex:1;overflow-y:auto;padding:6px;max-height:400px}
+.chain-body::-webkit-scrollbar{width:4px}
+.chain-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.chain-item{padding:6px 8px;font-size:11px;cursor:pointer;border-radius:var(--radius-sm);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center;transition:var(--transition)}
+.chain-item:hover{background:var(--surface3)}
+.chain-item.active{background:var(--surface3);border:1px solid var(--border)}
+.chain-item-del{color:var(--text-muted);cursor:pointer;font-weight:bold;padding:0 4px;border-radius:4px;transition:var(--transition)}
+.chain-item-del:hover{color:var(--danger);background:rgba(239,68,68,.1)}
+.chain-item-count{font-size:10px;color:var(--text-muted);margin-left:4px}
+.chain-item:hover .chain-item-count{color:var(--text-dim)}
+.chain-footer{padding:8px;border-top:1px solid var(--border)}
+.chain-add-btn{width:100%;padding:6px;font-size:11px;background:var(--surface3);color:var(--text-dim);border:1px solid var(--border);cursor:pointer;border-radius:var(--radius-sm);transition:var(--transition);font-family:inherit;font-weight:500}
+.chain-add-btn:hover{background:var(--border);color:var(--text)}
+.chain-nodes{margin-top:4px;max-height:200px;overflow-y:auto}
+.chain-node-item{padding:4px 8px;font-size:10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:var(--transition)}
+.chain-node-item:hover{background:var(--surface3)}
+.chain-node-num{width:16px;height:16px;background:var(--accent);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;margin-right:6px}
+.chain-node-remove{color:var(--text-muted);cursor:pointer;font-size:10px;border-radius:4px;padding:2px 4px;transition:var(--transition)}
+.chain-node-remove:hover{color:var(--danger);background:rgba(239,68,68,.1)}
+
+/* Context Menu */
+.ctx-menu{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);z-index:200;min-width:160px;padding:4px;display:none;box-shadow:var(--shadow-lg);animation:slideIn .15s ease-out}
+.ctx-menu.show{display:block}
+.ctx-item{padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:var(--radius-sm);transition:var(--transition);font-size:12px;color:var(--text-dim)}
+.ctx-item:hover{background:var(--surface3);color:var(--text)}
+.ctx-item.danger{color:var(--danger)}
+.ctx-item.danger:hover{background:rgba(239,68,68,.1);color:var(--danger)}
+.ctx-sep{height:1px;background:var(--border);margin:4px 8px}
+
+/* Color Picker */
+.colorpicker{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);z-index:200;padding:8px;display:none;flex-wrap:wrap;gap:4px;box-shadow:var(--shadow-lg);animation:slideIn .15s ease-out}
+.colorpicker.show{display:flex}
+.cswatch{width:28px;height:28px;border:2px solid var(--border);cursor:pointer;border-radius:6px;transition:var(--transition)}
+.cswatch:hover{border-color:var(--text-dim);transform:scale(1.1)}
+
+/* Connection Label Input */
+.conn-label-input{position:fixed;background:var(--surface);border:1px solid var(--border);padding:6px 10px;font-size:12px;font-family:inherit;z-index:200;outline:none;width:140px;display:none;border-radius:var(--radius-sm);color:var(--text)}
+.conn-label-input:focus{border-color:var(--accent)}
+
+/* Toast */
+.toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);padding:8px 20px;font-size:12px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);border-radius:var(--radius-sm);font-weight:500;box-shadow:var(--shadow)}
+.toast.show{opacity:1}
+
+/* Zoom */
+.zoom-ctrl{position:fixed;bottom:12px;right:12px;display:flex;gap:2px;z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px}
+.zoom-btn{width:28px;height:28px;border:none;background:transparent;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);border-radius:4px;transition:var(--transition);font-family:inherit}
+.zoom-btn:hover{background:var(--surface3);color:var(--text)}
+.zoom-btn:active{transform:scale(0.9)}
+.zoom-lbl{padding:0 8px;font-size:11px;color:var(--text-dim);display:flex;align-items:center;font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <button class="sbtn active" data-tool="select" title="Выделение (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg></button>
+  <button class="sbtn" data-tool="pan" title="Перемещение (H)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg></button>
+  <div class="ssep"></div>
+  <button class="sbtn" data-tool="note" title="Заметка (N)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></button>
+  <button class="sbtn" data-tool="image" title="Фото (I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
+  <button class="sbtn" data-tool="text" title="Текст (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9.5" y1="20" x2="14.5" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button>
+  <div class="ssep"></div>
+  <button class="sbtn" data-tool="connect" title="Связь (C)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+  <button class="sbtn" data-tool="chain" title="Цепочка (X)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></button>
+  <div class="ssep"></div>
+  <button class="sbtn" data-tool="color" title="Цвет"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg></button>
+  <div class="sbottom">
+    <button class="sbtn" onclick="undo()" title="Отменить (Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></button>
+    <button class="sbtn" onclick="redo()" title="Повторить (Ctrl+Y)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.13-9.36L23 10"/></svg></button>
+  </div>
+</div>
+
+<div class="topbar">
+  <span class="topbar-title">SOSINT Map</span>
+  <button class="topbtn" onclick="newMap()">Новая</button>
+  <button class="topbtn" onclick="saveMap()">Сохранить</button>
+  <button class="topbtn" onclick="loadMap()">Загрузить</button>
+  <button class="topbtn" onclick="exportHTML()">Экспорт HTML</button>
+  <button class="topbtn" onclick="exportJSON()">Экспорт JSON</button>
+  <button class="topbtn" onclick="toggleChains()">Цепочки</button>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap">
+  <div id="canvas">
+    <svg class="conn-svg" id="connSvg">
+      <defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>
+    </svg>
+  </div>
+</div>
+
+<div class="chain-panel" id="chainPanel">
+  <div class="chain-header"><span>Цепочки</span><span class="chain-header-close" onclick="toggleChains()">✕</span></div>
+  <div class="chain-body" id="chainList"></div>
+  <div class="chain-footer"><button class="chain-add-btn" onclick="addChain()">+ Новая цепочка</button></div>
+</div>
+
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="duplicateNode()">Копировать</div>
+  <div class="ctx-item" onclick="changeNodeColor()">Цвет</div>
+  <div class="ctx-item" onclick="addImageToNode()">Фото</div>
+  <div class="ctx-item" onclick="addToActiveChain()">В цепочку</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="deleteSelected()">Удалить</div>
+</div>
+
+<div class="colorpicker" id="colorPicker">
+  <div class="cswatch" style="background:#f59e0b" data-color="node-color-amber"></div>
+  <div class="cswatch" style="background:#3b82f6" data-color="node-color-blue"></div>
+  <div class="cswatch" style="background:#22c55e" data-color="node-color-green"></div>
+  <div class="cswatch" style="background:#ef4444" data-color="node-color-red"></div>
+  <div class="cswatch" style="background:#8b5cf6" data-color="node-color-purple"></div>
+  <div class="cswatch" style="background:#ec4899" data-color="node-color-pink"></div>
+  <div class="cswatch" style="background:#06b6d4" data-color="node-color-cyan"></div>
+  <div class="cswatch" style="background:#6b7280" data-color="node-color-gray"></div>
+</div>
+
+<input class="conn-label-input" id="connLabelInput" placeholder="Подпись...">
+
+<div class="zoom-ctrl">
+  <button class="zoom-btn" onclick="zoomIn()">+</button>
+  <span class="zoom-lbl" id="zoomLabel">100%</span>
+  <button class="zoom-btn" onclick="zoomOut()">−</button>
+  <button class="zoom-btn" onclick="zoomReset()">⌂</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let nodes=[],connections=[],chains=[],activeChainId=null;
+let nodeIdCounter=0,connIdCounter=0,chainIdCounter=0;
+let currentTool='select',selectedNode=null,selectedConn=null,currentColor='node-color-amber';
+let isDragging=false,isPanning=false,isConnecting=false;
+let dragOffset={x:0,y:0},panOffset={x:0,y:0},panStart={x:0,y:0};
+let connectStart=null,tempLine=null;
+let zoom=1,history=[],historyIndex=-1;
+
+const canvas=document.getElementById('canvas');
+const canvasWrap=document.getElementById('canvasWrap');
+const connSvg=document.getElementById('connSvg');
+
+// Tools
+document.querySelectorAll('.sbtn[data-tool]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.sbtn[data-tool]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');currentTool=b.dataset.tool;
+  });
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.target.isContentEditable||e.target.tagName==='INPUT')return;
+  if(e.key==='v')sel('select');if(e.key==='h')sel('pan');if(e.key==='n')sel('note');
+  if(e.key==='i')sel('image');if(e.key==='t')sel('text');if(e.key==='c'&&!e.ctrlKey)sel('connect');
+  if(e.key==='x')sel('chain');if(e.key==='Delete'||e.key==='Backspace')deleteSelected();
+  if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();}
+  if(e.ctrlKey&&e.key==='y'){e.preventDefault();redo();}
+  if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveMap();}
+});
+
+function sel(t){
+  document.querySelectorAll('.sbtn[data-tool]').forEach(b=>b.classList.remove('active'));
+  const b=document.querySelector(`[data-tool="${t}"]`);if(b)b.classList.add('active');
+  currentTool=t;
+}
+
+// Canvas events
+canvasWrap.addEventListener('mousedown',e=>{
+  if(e.target===canvasWrap||e.target===canvas||e.target.tagName==='svg'){
+    hideMenus();
+    if(currentTool==='pan'||e.button===1){isPanning=true;panStart={x:e.clientX-panOffset.x,y:e.clientY-panOffset.y};}
+    else if(['note','text','image'].includes(currentTool)){const p=s2c(e.clientX,e.clientY);createNode(currentTool,p.x-70,p.y-45);}
+    else deselectAll();
+  }
+});
+
+canvasWrap.addEventListener('mousemove',e=>{
+  if(isPanning){panOffset.x=e.clientX-panStart.x;panOffset.y=e.clientY-panStart.y;updateTransform();}
+  if(isDragging&&selectedNode){const p=s2c(e.clientX,e.clientY);selectedNode.x=p.x-dragOffset.x;selectedNode.y=p.y-dragOffset.y;updateNodePos(selectedNode);updateConnections();}
+  if(isConnecting&&tempLine){const p=s2c(e.clientX,e.clientY);tempLine.setAttribute('x2',p.x);tempLine.setAttribute('y2',p.y);}
+});
+
+canvasWrap.addEventListener('mouseup',e=>{
+  if(isPanning){isPanning=false;}
+  if(isDragging){isDragging=false;saveHistory();}
+  if(isConnecting&&connectStart){
+    const t=findNodeAt(e.clientX,e.clientY);
+    if(t&&t.id!==connectStart.id)createConnection(connectStart,t);
+    isConnecting=false;connectStart=null;
+    if(tempLine){tempLine.remove();tempLine=null;}
+  }
+});
+
+canvasWrap.addEventListener('wheel',e=>{
+  e.preventDefault();const d=e.deltaY>0?-0.1:0.1;
+  const nz=Math.max(0.15,Math.min(4,zoom+d));
+  const r=canvasWrap.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  panOffset.x=mx-(mx-panOffset.x)*(nz/zoom);panOffset.y=my-(my-panOffset.y)*(nz/zoom);
+  zoom=nz;updateTransform();document.getElementById('zoomLabel').textContent=Math.round(zoom*100)+'%';
+});
+
+// Nodes
+function createNode(type,x,y,data){
+  const id='n'+(nodeIdCounter++);
+  const node={id,type,x,y,color:data?.color||currentColor,text:data?.text||'',width:data?.width||(type==='image'?200:160),imageUrl:data?.imageUrl||null};
+  nodes.push(node);renderNode(node);saveHistory();return node;
+}
+
+function renderNode(node){
+  const el=document.createElement('div');
+  el.className=`node ${node.color}`;el.id=node.id;
+  el.style.left=node.x+'px';el.style.top=node.y+'px';el.style.width=node.width+'px';
+
+  let html=`<div class="node-titlebar"><span>${node.type==='image'?'Фото':node.type==='text'?'Текст':'Заметка'}</span><button class="node-titlebar-close" onclick="event.stopPropagation();deleteNode('${node.id}')">✕</button></div>`;
+  html+=`<div class="node-body" contenteditable="true">${node.text}</div>`;
+  if(node.imageUrl)html+=`<img class="node-img" src="${node.imageUrl}" draggable="false">`;
+  html+=`<div class="node-resize"></div>`;
+  html+=`<div class="node-port port-in" data-port="in" data-node="${node.id}"></div>`;
+  html+=`<div class="node-port port-out" data-port="out" data-node="${node.id}"></div>`;
+  el.innerHTML=html;
+
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('node-titlebar-close')||e.target.classList.contains('node-resize')){
+      if(e.target.classList.contains('node-resize'))return startResize(e,node);return;
+    }
+    if(e.target.classList.contains('node-port')){startConnection(node,e);return;}
+    if(e.target.isContentEditable)return;e.stopPropagation();
+    if(currentTool==='connect'||currentTool==='chain'){startConnection(node,e);return;}
+    selectNode(node);isDragging=true;
+    const p=s2c(e.clientX,e.clientY);dragOffset={x:p.x-node.x,y:p.y-node.y};
+  });
+
+  el.addEventListener('dblclick',()=>el.querySelector('.node-body').focus());
+  el.addEventListener('contextmenu',e=>{e.preventDefault();selectNode(node);showCtx(e.clientX,e.clientY);});
+  el.querySelector('.node-body').addEventListener('input',e=>{node.text=e.target.innerHTML;});
+  canvas.appendChild(el);
+}
+
+function updateNodePos(node){const el=document.getElementById(node.id);if(el){el.style.left=node.x+'px';el.style.top=node.y+'px';}}
+function selectNode(node){deselectAll();selectedNode=node;const el=document.getElementById(node.id);if(el)el.classList.add('selected');}
+function deselectAll(){selectedNode=null;selectedConn=null;document.querySelectorAll('.node.selected').forEach(n=>n.classList.remove('selected'));document.querySelectorAll('.conn-svg path.selected').forEach(p=>p.classList.remove('selected'));}
+
+function deleteNode(id){
+  connections=connections.filter(c=>c.from!==id&&c.to!==id);
+  chains.forEach(c=>c.nodeIds=c.nodeIds.filter(nid=>nid!==id));
+  chains=chains.filter(c=>c.nodeIds.length>0);
+  const el=document.getElementById(id);if(el)el.remove();
+  nodes=nodes.filter(n=>n.id!==id);updateConnections();renderChains();saveHistory();
+}
+
+function startResize(e,node){
+  e.stopPropagation();const sx=e.clientX,sy=e.clientY,sw=node.width;
+  function mv(ev){node.width=Math.max(100,sw+(ev.clientX-sx)/zoom);const el=document.getElementById(node.id);if(el)el.style.width=node.width+'px';}
+  function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);saveHistory();}
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+}
+
+// Connections
+function startConnection(node,e){
+  isConnecting=true;connectStart=node;
+  const p=s2c(e.clientX,e.clientY);
+  tempLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+  tempLine.classList.add('temp-line');
+  tempLine.setAttribute('x1',node.x+node.width/2);tempLine.setAttribute('y1',node.y+40);
+  tempLine.setAttribute('x2',p.x);tempLine.setAttribute('y2',p.y);
+  connSvg.appendChild(tempLine);
+}
+
+function findNodeAt(cx,cy){
+  const p=s2c(cx,cy);
+  for(const n of nodes){if(p.x>=n.x&&p.x<=n.x+n.width&&p.y>=n.y&&p.y<=n.y+80)return n;}
+  return null;
+}
+
+function createConnection(from,to,data){
+  const id='c'+(connIdCounter++);
+  const conn={id,from:from.id,to:to.id,label:data?.label||'',chainId:data?.chainId||null};
+  connections.push(conn);renderConnection(conn);saveHistory();return conn;
+}
+
+function renderConnection(conn){
+  const from=nodes.find(n=>n.id===conn.from),to=nodes.find(n=>n.id===conn.to);
+  if(!from||!to)return;
+  const x1=from.x+from.width/2,y1=from.y+40,x2=to.x+to.width/2,y2=to.y+40;
+  const dx=(x2-x1)*0.4;
+
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`);
+  path.setAttribute('marker-end','url(#ah)');
+  path.dataset.connId=conn.id;path.style.cursor='pointer';
+
+  if(conn.chainId){const ch=chains.find(c=>c.id===conn.chainId);if(ch)path.style.stroke=chainColors[ch.colorIdx%chainColors.length];}
+
+  path.addEventListener('click',e=>{e.stopPropagation();deselectAll();selectedConn=conn;path.classList.add('selected');});
+  path.addEventListener('dblclick',e=>{e.stopPropagation();showConnLabel(conn,e.clientX,e.clientY);});
+  path.addEventListener('contextmenu',e=>{e.preventDefault();if(confirm('Удалить связь?')){connections=connections.filter(c=>c.id!==conn.id);updateConnections();saveHistory();}});
+
+  connSvg.appendChild(path);
+
+  if(conn.label){
+    const lbl=document.createElement('div');lbl.className='conn-label';lbl.textContent=conn.label;
+    lbl.style.left=((x1+x2)/2-20)+'px';lbl.style.top=((y1+y2)/2-10)+'px';
+    lbl.addEventListener('dblclick',e=>{e.stopPropagation();showConnLabel(conn,e.clientX,e.clientY);});
+    canvas.appendChild(lbl);
+  }
+}
+
+function showConnLabel(conn,x,y){
+  const inp=document.getElementById('connLabelInput');
+  inp.style.display='block';inp.style.left=x+'px';inp.style.top=y+'px';inp.value=conn.label;inp.focus();
+  inp.onblur=()=>{conn.label=inp.value;inp.style.display='none';updateConnections();saveHistory();};
+  inp.onkeydown=e=>{if(e.key==='Enter')inp.blur();};
+}
+
+function updateConnections(){
+  connSvg.innerHTML='<defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>';
+  canvas.querySelectorAll('.conn-label').forEach(l=>l.remove());
+  connections.forEach(c=>renderConnection(c));
+}
+
+// Chains
+const chainColors=['#ef4444','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#ec4899'];
+
+function addChain(){
+  const name=prompt('Имя цепочки:','Цепочка '+(chains.length+1));
+  if(!name)return;
+  const chain={id:'ch'+(chainIdCounter++),name,nodeIds:[],colorIdx:chains.length};
+  chains.push(chain);activeChainId=chain.id;renderChains();
+  toast('Цепочка "'+name+'" создана');saveHistory();
+}
+
+function addToActiveChain(){
+  if(!selectedNode)return;
+  if(chains.length===0){addChain();}
+  const chain=chains.find(c=>c.id===activeChainId)||chains[0];
+  if(!chain){toast('Создайте цепочку');return;}
+  if(!chain.nodeIds.includes(selectedNode.id)){
+    chain.nodeIds.push(selectedNode.id);
+    if(chain.nodeIds.length>=2){
+      const prev=nodes.find(n=>n.id===chain.nodeIds[chain.nodeIds.length-2]);
+      const curr=selectedNode;
+      if(prev&&!connections.some(c=>c.from===prev.id&&c.to===curr.id)){
+        createConnection(prev,curr,{label:chain.name,chainId:chain.id});
+      }
+    }
+  }
+  renderChains();updateNodeHighlights();hideMenus();saveHistory();
+  toast('Добавлено в "'+chain.name+'"');
+}
+
+function removeFromChain(chainId,nodeId){
+  const ch=chains.find(c=>c.id===chainId);if(!ch)return;
+  ch.nodeIds=ch.nodeIds.filter(id=>id!==nodeId);
+  connections=connections.filter(c=>!(c.chainId===chainId&&c.from===nodeId||c.to===nodeId));
+  if(ch.nodeIds.length===0)chains=chains.filter(c=>c.id!==chainId);
+  renderChains();updateConnections();updateNodeHighlights();saveHistory();
+}
+
+function deleteChain(chainId){
+  connections=connections.filter(c=>c.chainId!==chainId);
+  chains=chains.filter(c=>c.id!==chainId);
+  if(activeChainId===chainId)activeChainId=chains[0]?.id||null;
+  renderChains();updateConnections();updateNodeHighlights();saveHistory();
+}
+
+function renderChains(){
+  const list=document.getElementById('chainList');list.innerHTML='';
+  chains.forEach(ch=>{
+    const div=document.createElement('div');
+    div.className='chain-item'+(ch.id===activeChainId?' active':'');
+    const color=chainColors[ch.colorIdx%chainColors.length];
+
+    let nodesHtml='';
+    ch.nodeIds.forEach((nid,i)=>{
+      const n=nodes.find(x=>x.id===nid);
+      if(n)nodesHtml+=`<div class="chain-node-item"><span style="display:flex;align-items:center"><span class="chain-node-num" style="background:${color}">${i+1}</span>${n.text?.substring(0,20)||'Заметка'}</span><span class="chain-node-remove" onclick="event.stopPropagation();removeFromChain('${ch.id}','${nid}')">✕</span></div>`;
+    });
+
+    div.innerHTML=`<div onclick="activeChainId='${ch.id}';renderChains();updateNodeHighlights()"><b>${ch.name}</b><span class="chain-item-count">${ch.nodeIds.length}</span><span class="chain-item-del" onclick="event.stopPropagation();deleteChain('${ch.id}')">✕</span></div><div class="chain-nodes">${nodesHtml}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function updateNodeHighlights(){
+  nodes.forEach(n=>{
+    const el=document.getElementById(n.id);if(!el)return;
+    const inChain=chains.some(c=>c.nodeIds.includes(n.id));
+    el.classList.toggle('chain-highlight',inChain&&chains.find(c=>c.nodeIds.includes(n.id))?.id===activeChainId);
+  });
+}
+
+function toggleChains(){document.getElementById('chainPanel').classList.toggle('show');renderChains();}
+
+// Context menu
+function showCtx(x,y){const m=document.getElementById('ctxMenu');m.style.left=x+'px';m.style.top=y+'px';m.classList.add('show');}
+function hideMenus(){document.getElementById('ctxMenu').classList.remove('show');document.getElementById('colorPicker').classList.remove('show');}
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu')&&!e.target.closest('.colorpicker'))hideMenus();});
+
+function deleteSelected(){if(selectedNode)deleteNode(selectedNode.id);else if(selectedConn){connections=connections.filter(c=>c.id!==selectedConn.id);selectedConn=null;updateConnections();saveHistory();}hideMenus();}
+function duplicateNode(){if(!selectedNode)return;const n=createNode(selectedNode.type,selectedNode.x+30,selectedNode.y+30,{...selectedNode});selectNode(n);hideMenus();}
+function changeNodeColor(){if(!selectedNode)return;const pk=document.getElementById('colorPicker');pk.style.left='56px';pk.style.top='200px';pk.classList.add('show');hideMenus();}
+
+document.querySelectorAll('.cswatch').forEach(s=>{
+  s.addEventListener('click',()=>{
+    if(selectedNode){selectedNode.color=s.dataset.color;const el=document.getElementById(selectedNode.id);el.className=`node ${selectedNode.color}`+(selectedNode===selectedNode?' selected':'');if(chains.some(c=>c.nodeIds.includes(selectedNode.id)))el.classList.add('chain-highlight');}
+    hideMenus();
+  });
+});
+
+function addImageToNode(){
+  if(!selectedNode)return;hideMenus();
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=ev=>{selectedNode.imageUrl=ev.target.result;const el=document.getElementById(selectedNode.id);const old=el.querySelector('.node-img');if(old)old.remove();const img=document.createElement('img');img.className='node-img';img.src=ev.target.result;img.draggable=false;el.appendChild(img);saveHistory();};
+    r.readAsDataURL(f);};
+  inp.click();
+}
+
+// Transform
+function updateTransform(){canvas.style.transform=`translate(${panOffset.x}px,${panOffset.y}px) scale(${zoom})`;}
+function s2c(cx,cy){const r=canvasWrap.getBoundingClientRect();return{x:(cx-r.left-panOffset.x)/zoom,y:(cy-r.top-panOffset.y)/zoom};}
+function zoomIn(){setZoom(zoom+0.2);}function zoomOut(){setZoom(zoom-0.2);}
+function zoomReset(){zoom=1;panOffset={x:0,y:0};updateTransform();document.getElementById('zoomLabel').textContent='100%';}
+function setZoom(z){zoom=Math.max(0.15,Math.min(4,z));updateTransform();document.getElementById('zoomLabel').textContent=Math.round(zoom*100)+'%';}
+
+// History
+function saveHistory(){history=history.slice(0,historyIndex+1);history.push(JSON.stringify({nodes,connections,chains,nodeIdCounter,connIdCounter,chainIdCounter}));historyIndex=history.length-1;if(history.length>50){history.shift();historyIndex--;}}
+function undo(){if(historyIndex<=0)return;historyIndex--;restoreHistory();}
+function redo(){if(historyIndex>=history.length-1)return;historyIndex++;restoreHistory();}
+function restoreHistory(){
+  const s=JSON.parse(history[historyIndex]);
+  canvas.querySelectorAll('.node').forEach(n=>n.remove());
+  connSvg.innerHTML='<defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>';
+  canvas.querySelectorAll('.conn-label').forEach(l=>l.remove());
+  nodes=s.nodes;connections=s.connections;chains=s.chains||[];
+  nodeIdCounter=s.nodeIdCounter;connIdCounter=s.connIdCounter;chainIdCounter=s.chainIdCounter||0;
+  nodes.forEach(n=>renderNode(n));connections.forEach(c=>renderConnection(c));renderChains();updateNodeHighlights();
+}
+
+// Save/Load
+function saveMap(){localStorage.setItem('sosint-map',JSON.stringify({nodes,connections,chains,nodeIdCounter,connIdCounter,chainIdCounter,panOffset,zoom}));toast('Сохранено');}
+function loadMap(){const raw=localStorage.getItem('sosint-map');if(!raw){toast('Нет сохранений');return;}const d=JSON.parse(raw);
+  canvas.querySelectorAll('.node').forEach(n=>n.remove());connSvg.innerHTML='<defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>';
+  canvas.querySelectorAll('.conn-label').forEach(l=>l.remove());
+  nodes=d.nodes||[];connections=d.connections||[];chains=d.chains||[];
+  nodeIdCounter=d.nodeIdCounter||0;connIdCounter=d.connIdCounter||0;chainIdCounter=d.chainIdCounter||0;
+  panOffset=d.panOffset||{x:0,y:0};zoom=d.zoom||1;
+  nodes.forEach(n=>renderNode(n));connections.forEach(c=>renderConnection(c));updateTransform();
+  document.getElementById('zoomLabel').textContent=Math.round(zoom*100)+'%';renderChains();updateNodeHighlights();saveHistory();toast('Загружено');
+}
+
+function newMap(){if(!confirm('Новая карта?'))return;canvas.querySelectorAll('.node').forEach(n=>n.remove());connSvg.innerHTML='<defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>';
+  canvas.querySelectorAll('.conn-label').forEach(l=>l.remove());nodes=[];connections=[];chains=[];
+  nodeIdCounter=0;connIdCounter=0;chainIdCounter=0;panOffset={x:0,y:0};zoom=1;updateTransform();
+  document.getElementById('zoomLabel').textContent='100%';renderChains();saveHistory();toast('Новая карта');
+}
+
+// Export
+function exportJSON(){const d={nodes,connections,chains};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='sosint-map.json';a.click();URL.revokeObjectURL(u);toast('JSON экспортирован');}
+
+function importJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);
+  canvas.querySelectorAll('.node').forEach(n=>n.remove());connSvg.innerHTML='<defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>';
+  nodes=d.nodes||[];connections=d.connections||[];chains=d.chains||[];nodes.forEach(n=>renderNode(n));connections.forEach(c=>renderConnection(c));renderChains();updateNodeHighlights();saveHistory();toast('Импортировано');}catch(err){toast('Ошибка');}};r.readAsText(f);}
+
+function exportHTML(){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  nodes.forEach(n=>{minX=Math.min(minX,n.x);minY=Math.min(minY,n.y);maxX=Math.max(maxX,n.x+(n.width||160));maxY=Math.max(maxY,n.y+100);});
+  const pad=80,w=maxX-minX+pad*2,h=maxY-minY+pad*2;
+  const cm={'node-color-amber':'#f59e0b','node-color-blue':'#3b82f6','node-color-green':'#22c55e','node-color-red':'#ef4444','node-color-purple':'#8b5cf6','node-color-pink':'#ec4899','node-color-cyan':'#06b6d4','node-color-gray':'#6b7280'};
+
+  let nh='';nodes.forEach(n=>{const bg=cm[n.color]||'#f59e0b';
+    nh+=`<div style="position:absolute;left:${n.x-minX+pad}px;top:${n.y-minY+pad}px;width:${n.width||160}px;background:#1c1c24;border:1px solid #2a2a35;border-radius:8px;border-left:3px solid ${bg};box-shadow:0 8px 32px rgba(0,0,0,0.4)"><div style="padding:6px 10px;font-size:10px;font-weight:600;color:#8888a0;border-bottom:1px solid #2a2a35;font-family:Inter,sans-serif">${n.type==='image'?'Фото':n.type==='text'?'Текст':'Заметка'}</div><div style="padding:10px;font-size:12px;line-height:1.5;color:#e8e8f0;min-height:50px;font-family:Inter,sans-serif;word-wrap:break-word">${n.text||''}</div>${n.imageUrl?`<img src="${n.imageUrl}" style="width:100%;max-height:180px;object-fit:cover;display:block;border-radius:0 0 8px 8px">`:''}</div>`;
+  });
+
+  let sp='';connections.forEach(c=>{const from=nodes.find(n=>n.id===c.from),to=nodes.find(n=>n.id===c.to);if(!from||!to)return;
+    const x1=from.x-minX+pad+(from.width||160)/2,y1=from.y-minY+pad+40,x2=to.x-minX+pad+(to.width||160)/2,y2=to.y-minY+pad+40,dx=(x2-x1)*0.4;
+    sp+=`<path d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" fill="none" stroke="#35354a" stroke-width="2" marker-end="url(#ah)"/>`;
+    if(c.label)sp+=`<text x="${(x1+x2)/2}" y="${(y1+y2)/2-8}" text-anchor="middle" font-size="10" fill="#8888a0" font-family="Inter,sans-serif" style="font-weight:600">${c.label}</text>`;
+  });
+
+  let ch='';if(chains.length>0){ch='<div style="margin-top:30px;padding:20px;background:#141419;border:1px solid #2a2a35;border-radius:10px;font-family:Inter,sans-serif"><h3 style="color:#e8e8f0;font-size:14px;margin-bottom:10px">Цепочки расследования</h3>';
+    chains.forEach(c=>{ch+=`<div style="margin-bottom:8px;padding:8px;background:#1c1c24;border:1px solid #2a2a35;border-radius:6px;color:#e8e8f0;font-size:12px"><b>${c.name}</b> — ${c.nodeIds.length} узлов</div>`;});ch+='</div>';}
+
+  const html=`<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>SOSINT Map — ${new Date().toLocaleDateString('ru-RU')}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;font-family:Inter,sans-serif;padding:20px;color:#e8e8f0}</style></head><body><div style="max-width:${w}px;margin:0 auto;background:#141419;border:1px solid #2a2a35;border-radius:12px;overflow:hidden"><div style="background:#1c1c24;padding:10px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #2a2a35">SOSINT Map — Investigation Chain</div><div style="position:relative;width:${w}px;height:${h}px;background:#0a0a0f;overflow:hidden"><svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1"><defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0 L10 3.5 L0 7 Z"/></marker></defs>${sp}</svg>${nh}</div>${ch}<div style="padding:8px 16px;font-size:11px;color:#555568;background:#1c1c24;border-top:1px solid #2a2a35">SOSINT Map — ${nodes.length} элементов, ${connections.length} связей — ${new Date().toLocaleString('ru-RU')}</div></div></body></html>`;
+
+  const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sosint-map.html';a.click();URL.revokeObjectURL(url);
+
+  try{if(parent&&parent.saveReport){parent.saveReport('map',{name:'SOSINT Map '+new Date().toLocaleDateString('ru-RU'),html,filename:'sosint-map.html'});}}catch(e){}
+
+  toast('HTML экспортирован');
+}
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
+
+saveHistory();toast('SOSINT Map — N: заметка, C: связь, X: цепочка');
+</script>
+</body>
+</html>
