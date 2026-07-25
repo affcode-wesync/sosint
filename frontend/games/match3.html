@@ -134,7 +134,7 @@ const GEM_TYPES=[
   {id:5,name:'Цитрин',color:'#e67e22',glow:'#d35400',symbol:'♣'}
 ];
 const GADGET_COSTS={hammer:30,lightning:50,tornado:40};
-let GEM_SIZE=GEM_BASE,TOTAL_LEVELS=117,levels=[],canvas,ctx;
+let GEM_SIZE=GEM_BASE,TOTAL_LEVELS=50,levels=[],canvas,ctx;
 
 // ======== UNIQUE BOARD SHAPES ========
 // blocked[r][c]=true means that cell is removed
@@ -607,8 +607,17 @@ function animateFall(){
 // ======== AUTO SHUFFLE ========
 function hasValidMoves(){
   let board=state.currentLevel.board;
+  // Quick check: try random sample of swaps instead of all
+  let cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     if(isBlocked(board,r,c)||!state.grid[r][c]||state.grid[r][c].blocked)continue;
+    cells.push([r,c]);
+  }
+  // Check a limited set for speed
+  let max=Math.min(cells.length*2,80);
+  for(let i=0;i<max;i++){
+    let idx=Math.floor(Math.random()*cells.length);
+    let[r,c]=cells[idx];
     if(c<COLS-1&&!isBlocked(board,r,c+1)&&state.grid[r][c+1]&&!state.grid[r][c+1].blocked){
       swapTemp(r,c,r,c+1);let m=findMatches().length>0;swapTemp(r,c,r,c+1);if(m)return true;
     }
