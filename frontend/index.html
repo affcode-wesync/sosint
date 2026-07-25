@@ -623,6 +623,7 @@
             <div class="login-buttons">
                 <button class="login-btn" onclick="doLogin()">OK</button>
                 <button class="login-btn" onclick="document.getElementById('loginKey').value=''">Cancel</button>
+                <button class="login-btn" onclick="enterDemo()" style="opacity:0.7;font-size:11px">⚡ Demo</button>
             </div>
             <div class="login-footer">
                 <span class="login-footer-text">Copyright © 1985-2001 Microsoft Corporation</span>
@@ -1101,6 +1102,22 @@
             verifyKey(key);
         }
 
+        let isDemoMode = false;
+
+        function enterDemo() {
+            isDemoMode = true;
+            currentUser = { role: 'demo' };
+            isAdmin = false;
+            loginOverlay.classList.add('hidden');
+            showToast('Демо-режим: поиск и настройки недоступны');
+        }
+
+        function demoBlocked(action) {
+            if (!isDemoMode) return false;
+            showToast('🔒 ' + action + ' — Купите ключ доступа!');
+            return true;
+        }
+
         async function verifyKey(key) {
             try {
                 const resp = await fetch('/api/auth/login', {
@@ -1147,6 +1164,7 @@
 
         // === Admin Panel ===
         function openAdmin() {
+            if (demoBlocked('Админ-панель')) return;
             if (!isAdmin) { showToast('Admin access required'); return; }
             document.getElementById('adminWindow').style.display = '';
             document.getElementById('adminWindow').style.left = '50%';
@@ -1251,6 +1269,7 @@
         // === Start Menu ===
         // === Settings Window ===
         function openSettings() {
+            if (demoBlocked('Настройки и персонализация')) return;
             var win = document.getElementById('settingsWindow');
             win.style.display = '';
             win.style.left = '50%';
@@ -1701,6 +1720,7 @@
         }
 
         async function searchFace() {
+            if (demoBlocked('Поиск по лицу')) return;
             var statusEl = document.getElementById('faceSearchStatus');
             var resultsEl = document.getElementById('faceSearchResults');
             var statusBar = document.getElementById('faceSearchStatusBar');
@@ -2026,6 +2046,7 @@
         usernameInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchSherlock(); });
 
         async function searchSherlock() {
+            if (demoBlocked('Nick Search')) return;
             const username = usernameInput.value.trim();
             if (!username) {
                 alert('Enter a username');
@@ -2183,6 +2204,7 @@
         phoneInput.addEventListener('keypress', e => { if (e.key === 'Enter') lookupHLR(); });
 
         async function lookupHLR() {
+            if (demoBlocked('HLR Query')) return;
             const phone = phoneInput.value.trim();
             const apiKey = document.getElementById('apiKeyInput').value.trim();
             if (!phone) {
@@ -2292,6 +2314,7 @@
 
         // === Analyze ===
         async function analyzeEmail() {
+            if (demoBlocked('Email Analysis')) return;
             const email = emailInput.value.trim();
             if (!email || !email.includes('@')) {
                 alert('Please enter a valid email address');
