@@ -10,7 +10,9 @@ body{background:#0a0e1a;color:#e8e0d4;font-family:'Segoe UI',Tahoma,sans-serif;o
 #menu-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0a0e1a 0%,#1a1040 50%,#0d1f3a 100%);position:relative;overflow:hidden}
 #menu-screen::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 80%,rgba(255,215,0,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(139,69,19,0.1) 0%,transparent 50%);pointer-events:none}
 .menu-title{font-size:42px;font-weight:800;background:linear-gradient(135deg,#ffd700,#ff8c00,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 40px rgba(255,215,0,0.3);margin-bottom:8px;letter-spacing:2px}
-.menu-subtitle{font-size:14px;color:#8b7355;margin-bottom:40px;letter-spacing:4px;text-transform:uppercase}
+.menu-subtitle{font-size:14px;color:#8b7355;margin-bottom:20px;letter-spacing:4px;text-transform:uppercase}
+.menu-coins{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:700;color:#ffd700;margin-bottom:24px;padding:8px 20px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:20px}
+.menu-coins-icon{font-size:20px}
 .level-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;max-width:520px;padding:20px;max-height:50vh;overflow-y:auto}
 .level-grid::-webkit-scrollbar{width:6px}
 .level-grid::-webkit-scrollbar-thumb{background:#ffd700;border-radius:3px}
@@ -33,8 +35,19 @@ body{background:#0a0e1a;color:#e8e0d4;font-family:'Segoe UI',Tahoma,sans-serif;o
 .stat-label{font-size:9px;color:#8b7355;text-transform:uppercase;letter-spacing:1px}
 .stat-value{font-size:18px;font-weight:700;color:#ffd700}
 .stat-value.moves{color:#ff6b6b}
+.coins-display{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:#ffd700;background:rgba(255,215,0,0.08);padding:4px 12px;border-radius:12px;border:1px solid rgba(255,215,0,0.2)}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
 #game-canvas{border-radius:12px;touch-action:none}
+.gadget-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,215,0,0.1)}
+.gadget{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 12px;border-radius:10px;border:1px solid rgba(255,215,0,0.15);background:rgba(255,215,0,0.05);transition:all 0.2s;position:relative}
+.gadget:hover{background:rgba(255,215,0,0.12);border-color:rgba(255,215,0,0.4);transform:scale(1.05)}
+.gadget.active{background:rgba(255,215,0,0.2);border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.3)}
+.gadget.disabled{opacity:0.3;cursor:not-allowed}
+.gadget.disabled:hover{transform:none;background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.15)}
+.gadget-icon{font-size:22px;line-height:1}
+.gadget-name{font-size:9px;color:#8b7355;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.gadget-cost{font-size:9px;color:#ffd700;font-weight:700;display:flex;align-items:center;gap:2px}
+.gadget-count{position:absolute;top:-4px;right:-4px;background:#ff4757;color:white;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .game-footer{padding:8px 16px;background:rgba(0,0,0,0.3);border-top:1px solid rgba(255,215,0,0.15);display:flex;align-items:center;justify-content:center;gap:20px}
 .objective{display:flex;align-items:center;gap:6px;font-size:12px;color:#e8e0d4}
 .objective-gem{width:20px;height:20px;border-radius:4px}
@@ -46,16 +59,18 @@ body{background:#0a0e1a;color:#e8e0d4;font-family:'Segoe UI',Tahoma,sans-serif;o
 .modal-title.win{background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .modal-title.lose{color:#ff6b6b}
 .modal-stars{font-size:32px;margin:12px 0}
-.modal-score{font-size:14px;color:#8b7355;margin-bottom:20px}
+.modal-score{font-size:14px;color:#8b7355;margin-bottom:6px}
+.modal-coins{font-size:15px;color:#ffd700;font-weight:700;margin-bottom:20px}
 .modal-btn{padding:10px 28px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin:0 6px;transition:all 0.2s}
 .modal-btn:hover{transform:translateY(-2px)}
 .modal-btn.primary{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1535}
 .modal-btn.secondary{background:rgba(255,255,255,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
-.particles{position:fixed;pointer-events:none;z-index:50}
-.particle{position:absolute;border-radius:50%;animation:particleFly 0.8s ease-out forwards}
+.particle{position:absolute;border-radius:50%;animation:particleFly 0.8s ease-out forwards;pointer-events:none}
 @keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
 .combo-text{position:absolute;font-size:24px;font-weight:800;color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,0.5);pointer-events:none;animation:comboFly 1s ease-out forwards;z-index:60}
 @keyframes comboFly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.3)}}
+.gadget-select-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.4);color:#ffd700;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:55;display:none;animation:fadeIn 0.2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -63,6 +78,7 @@ body{background:#0a0e1a;color:#e8e0d4;font-family:'Segoe UI',Tahoma,sans-serif;o
 <div id="menu-screen">
   <div class="menu-title">Сокровища Пиратов</div>
   <div class="menu-subtitle">Match-3 Adventure</div>
+  <div class="menu-coins"><span class="menu-coins-icon">🪙</span><span id="menuCoins">0</span></div>
   <div class="level-grid" id="levelGrid"></div>
 </div>
 
@@ -76,12 +92,31 @@ body{background:#0a0e1a;color:#e8e0d4;font-family:'Segoe UI',Tahoma,sans-serif;o
       </div>
     </div>
     <div class="game-stats">
+      <div class="coins-display">🪙 <span id="coinsValue">0</span></div>
       <div class="stat"><span class="stat-label">Очки</span><span class="stat-value" id="scoreValue">0</span></div>
       <div class="stat"><span class="stat-label">Ходы</span><span class="stat-value moves" id="movesValue">30</span></div>
     </div>
   </div>
   <div class="game-area">
+    <div class="gadget-select-hint" id="gadgetHint"></div>
     <canvas id="game-canvas"></canvas>
+  </div>
+  <div class="gadget-bar" id="gadgetBar">
+    <div class="gadget" id="gadgetHammer" onclick="activateGadget('hammer')">
+      <span class="gadget-icon">🔨</span>
+      <span class="gadget-name">Молот</span>
+      <span class="gadget-cost">🪙 30</span>
+    </div>
+    <div class="gadget" id="gadgetLightning" onclick="activateGadget('lightning')">
+      <span class="gadget-icon">⚡</span>
+      <span class="gadget-name">Молния</span>
+      <span class="gadget-cost">🪙 50</span>
+    </div>
+    <div class="gadget" id="gadgetTornado" onclick="activateGadget('tornado')">
+      <span class="gadget-icon">🌪️</span>
+      <span class="gadget-name">Торнадо</span>
+      <span class="gadget-cost">🪙 40</span>
+    </div>
   </div>
   <div class="game-footer" id="gameFooter"></div>
 </div>
@@ -101,51 +136,62 @@ const GEM_TYPES=[
   {id:5,name:'Цитрин',color:'#e67e22',glow:'#d35400',symbol:'♣'}
 ];
 
-const OBSTACLE_ICE={type:'ice',color:'rgba(200,230,255,0.35)',border:'rgba(180,220,255,0.6)'};
-const OBSTACLE_CHAIN={type:'chain',color:'rgba(150,150,150,0.4)',border:'#888'};
+const GADGET_COSTS={hammer:30,lightning:50,tornado:40};
 
 let levels=[];
-for(let i=1;i<=50;i++){
+for(let i=1;i<=67;i++){
   let obj,moves,type;
   if(i<=5){type='collect';obj={type:'collect',gems:{},score:500+i*200};moves=35+Math.floor(i*1.5);let g=Math.floor(Math.random()*6);obj.gems[g]=8+i*2;}
-  else if(i<=10){type='collect';obj={type:'collect',gems:{},score:800+i*150};moves=30+i;letgc=Math.floor(i/3)+2;letgs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=6+i;});}
+  else if(i<=10){type='collect';obj={type:'collect',gems:{},score:800+i*150};moves=30+i;let gc=Math.floor(i/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=6+i;});}
   else if(i<=15){type='ice';obj={type:'ice',iceCount:4+Math.floor((i-10)*1.5),score:1200+i*100};moves=28+i;}
   else if(i<=20){type='collect_score';obj={type:'collect_score',gems:{},score:2000+i*200};moves=25+Math.floor(i*0.8);let gc=Math.floor((i-15)/2)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=10+i;});}
   else if(i<=30){type='timed';obj={type:'timed',time:60+i,score:2500+i*150};moves=999;}
   else if(i<=40){type='collect_ice';obj={type:'collect_ice',gems:{},iceCount:6+Math.floor((i-30)*1.2),score:3000+i*100};moves=30+Math.floor(i*0.5);let gc=Math.floor((i-30)/3)+2;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=8+i;});}
-  else{type='hard';obj={type:'hard',gems:{},iceCount:8+Math.floor((i-40)*1.5),score:4000+i*100};moves=25+Math.floor(i*0.3);let gc=Math.floor((i-40)/3)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=12+i;});}
+  else if(i<=50){type='hard';obj={type:'hard',gems:{},iceCount:8+Math.floor((i-40)*1.5),score:4000+i*100};moves=25+Math.floor(i*0.3);let gc=Math.floor((i-40)/3)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=12+i;});}
+  else if(i<=55){type='chain';obj={type:'chain',chainCount:5+Math.floor((i-50)*1.5),score:4500+i*80};moves=28+Math.floor(i*0.4);let gc=Math.floor((i-50)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=10+i;});}
+  else if(i<=60){type='timed_hard';obj={type:'timed_hard',time:55+i,score:5000+i*80,gems:{},iceCount:4+Math.floor((i-55)*2)};moves=999;let gc=Math.floor((i-55)/2)+3;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=8+i;});}
+  else{type='boss';obj={type:'boss',gems:{},iceCount:10+Math.floor((i-60)*1.5),chainCount:4+Math.floor((i-60)*1),score:6000+i*100};moves=22+Math.floor(i*0.3);let gc=4;let gs=new Set();while(gs.size<gc)gs.add(Math.floor(Math.random()*6));gs.forEach(g=>{obj.gems[g]=15+i;});}
   let stars=[];
-  if(type==='timed'){stars=[obj.score,obj.score*1.5,obj.score*2.2];}
+  if(type==='timed'||type==='timed_hard'){stars=[obj.score,obj.score*1.5,obj.score*2.2];}
   else{stars=[obj.score,obj.score*1.4,obj.score*2];}
   levels.push({id:i,name:`Уровень ${i}`,type,moves,obj,stars,obstacles:i>10?generateObstacles(i):[]});
 }
 
 function generateObstacles(lvl){
   let obs=[];
-  let count=Math.min(Math.floor((lvl-10)/3)+1,12);
+  let count=Math.min(Math.floor((lvl-10)/3)+1,14);
+  let isChain=lvl>25;
   for(let i=0;i<count;i++){
     let r,c;
     do{r=1+Math.floor(Math.random()*(ROWS-2));c=1+Math.floor(Math.random()*(COLS-2));}
     while(obs.some(o=>o.r===r&&o.c===c));
-    obs.push({r,c,type:lvl<=25?'ice':'chain',hp:lvl<=25?1:2});
+    obs.push({r,c,type:isChain&&Math.random()>0.4?'chain':'ice',hp:isChain&&Math.random()>0.5?2:1});
   }
   return obs;
 }
 
+let coins=parseInt(localStorage.getItem('sosint_match3_coins')||'200');
+let gadgetInventory=JSON.parse(localStorage.getItem('sosint_match3_gadgets')||'{"hammer":3,"lightning":1,"tornado":2}');
+let completedLevels=JSON.parse(localStorage.getItem('sosint_match3_completed')||'[]');
+let highScores=JSON.parse(localStorage.getItem('sosint_match3_scores')||'{}');
+
 let state={
   grid:[],selected:null,animating:false,score:0,movesLeft:30,
   currentLevel:null,levelIndex:0,timeLeft:0,timerInterval:null,
-  combo:0,objectives:{},particles:[],shake:0
+  combo:0,objectives:{},shake:0,activeGadget:null
 };
 let canvas,ctx;
-let completedLevels=JSON.parse(localStorage.getItem('sosint_match3_completed')||'[]');
-let highScores=JSON.parse(localStorage.getItem('sosint_match3_scores')||'{}');
+
+function saveProgress(){
+  localStorage.setItem('sosint_match3_coins',coins);
+  localStorage.setItem('sosint_match3_gadgets',JSON.stringify(gadgetInventory));
+  localStorage.setItem('sosint_match3_completed',JSON.stringify(completedLevels));
+  localStorage.setItem('sosint_match3_scores',JSON.stringify(highScores));
+}
 
 function init(){
   canvas=document.getElementById('game-canvas');
   ctx=canvas.getContext('2d');
-  let s=Math.min((window.innerWidth-32),(window.innerHeight-160));
-  s=Math.min(s,COLS*GEM_TOTAL+GEM_PAD);
   canvas.width=COLS*GEM_TOTAL+GEM_PAD;
   canvas.height=ROWS*GEM_TOTAL+GEM_PAD;
   canvas.style.width=canvas.width+'px';
@@ -157,9 +203,10 @@ function init(){
 function renderMenu(){
   document.getElementById('menu-screen').style.display='flex';
   document.getElementById('game-screen').style.display='none';
+  document.getElementById('menuCoins').textContent=coins;
   let grid=document.getElementById('levelGrid');
   grid.innerHTML='';
-  for(let i=0;i<50;i++){
+  for(let i=0;i<67;i++){
     let btn=document.createElement('div');
     btn.className='level-btn';
     let completed=completedLevels.includes(i);
@@ -182,14 +229,18 @@ function startLevel(idx){
   state.selected=null;
   state.animating=false;
   state.timeLeft=state.currentLevel.obj.time||0;
+  state.activeGadget=null;
   state.objectives={};
   if(state.currentLevel.obj.gems){
     for(let g in state.currentLevel.obj.gems)state.objectives[g]={need:state.currentLevel.obj.gems[g],got:0};
   }
-  if(state.currentLevel.obj.type==='ice'||state.currentLevel.obj.type==='collect_ice'||state.currentLevel.obj.type==='hard'){
+  if(state.currentLevel.obj.type==='ice'||state.currentLevel.obj.type==='collect_ice'||state.currentLevel.obj.type==='hard'||state.currentLevel.obj.type==='chain'||state.currentLevel.obj.type==='timed_hard'||state.currentLevel.obj.type==='boss'){
     state.objectives._ice={need:state.currentLevel.obj.iceCount||0,got:0};
   }
-  if(state.currentLevel.obj.type==='collect_score'||state.currentLevel.obj.type==='timed'){
+  if(state.currentLevel.obj.type==='chain'||state.currentLevel.obj.type==='boss'){
+    state.objectives._chain={need:state.currentLevel.obj.chainCount||0,got:0};
+  }
+  if(state.currentLevel.obj.type==='collect_score'||state.currentLevel.obj.type==='timed'||state.currentLevel.obj.type==='timed_hard'){
     state.objectives._score={need:state.currentLevel.obj.score,got:0};
   }
   document.getElementById('menu-screen').style.display='none';
@@ -198,10 +249,13 @@ function startLevel(idx){
   document.getElementById('missionText').textContent=getMissionText();
   document.getElementById('scoreValue').textContent='0';
   document.getElementById('movesValue').textContent=state.movesLeft;
+  document.getElementById('coinsValue').textContent=coins;
+  document.getElementById('gadgetHint').style.display='none';
+  updateGadgetUI();
   renderObjectives();
   initGrid();
   if(state.timerInterval)clearInterval(state.timerInterval);
-  if(state.currentLevel.obj.type==='timed'){
+  if(state.currentLevel.obj.type==='timed'||state.currentLevel.obj.type==='timed_hard'){
     state.timeLeft=state.currentLevel.obj.time;
     document.getElementById('movesValue').textContent=formatTime(state.timeLeft);
     document.getElementById('movesValue').className='stat-value';
@@ -220,15 +274,18 @@ function formatTime(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);}
 
 function getMissionText(){
   let l=state.currentLevel;
-  switch(l.obj.type){
-    case'collect':return'Соберите нужные камни';
-    case'ice':return'Разбейте все ледяные блоки';
-    case'collect_score':return'Наберите очки и соберите камни';
-    case'timed':return`Наберите ${l.obj.score} очков за ${l.obj.time} секунд`;
-    case'collect_ice':return'Соберите камни и разбейте лёд';
-    case'hard':return'Выполните все задания';
-    default:return'';
-  }
+  let texts={
+    collect:'Соберите нужные камни',
+    ice:'Разбейте все ледяные блоки',
+    collect_score:'Наберите очки и соберите камни',
+    timed:`Наберите ${l.obj.score} очков за ${l.obj.time} секунд`,
+    collect_ice:'Соберите камни и разбейте лёд',
+    hard:'Выполните все задания',
+    chain:'Разбейте цепи и лёд',
+    timed_hard:`Наберите ${l.obj.score} очков и разбейте лёд`,
+    boss:'БОСС — выполните все задания!'
+  };
+  return texts[l.obj.type]||'';
 }
 
 function renderObjectives(){
@@ -240,6 +297,8 @@ function renderObjectives(){
     div.className='objective';
     if(key==='_ice'){
       div.innerHTML=`<div class="objective-gem" style="background:rgba(200,230,255,0.4);border:2px solid rgba(180,220,255,0.7)"></div><span class="objective-count" id="obj_${key}">0/${o.need}</span><span style="font-size:11px;color:#8b7355">Льда</span>`;
+    }else if(key==='_chain'){
+      div.innerHTML=`<div class="objective-gem" style="background:rgba(150,150,150,0.4);border:2px solid #888"></div><span class="objective-count" id="obj_${key}">0/${o.need}</span><span style="font-size:11px;color:#8b7355">Цепи</span>`;
     }else if(key==='_score'){
       div.innerHTML=`<div class="objective-gem" style="background:linear-gradient(135deg,#ffd700,#ff8c00)"></div><span class="objective-count" id="obj_${key}">0/${o.need}</span><span style="font-size:11px;color:#8b7355">Очков</span>`;
     }else{
@@ -255,6 +314,191 @@ function updateObjectivesUI(){
     let el=document.getElementById('obj_'+key);
     if(el)el.textContent=`${state.objectives[key].got}/${state.objectives[key].need}`;
   }
+}
+
+function updateGadgetUI(){
+  ['hammer','lightning','tornado'].forEach(g=>{
+    let el=document.getElementById('gadget'+g.charAt(0).toUpperCase()+g.slice(1));
+    let count=gadgetInventory[g]||0;
+    let cost=GADGET_COSTS[g];
+    let canAfford=coins>=cost;
+    el.classList.remove('active','disabled');
+    if(state.activeGadget===g)el.classList.add('active');
+    else if(count<=0&&!canAfford)el.classList.add('disabled');
+    let countEl=el.querySelector('.gadget-count');
+    if(!countEl){countEl=document.createElement('span');countEl.className='gadget-count';el.appendChild(countEl);}
+    if(count>0){countEl.textContent=count;countEl.style.display='flex';el.querySelector('.gadget-cost').style.display='none';}
+    else{countEl.style.display='none';el.querySelector('.gadget-cost').style.display='';el.querySelector('.gadget-cost').innerHTML=`🪙 ${cost}`;}
+  });
+}
+
+function activateGadget(type){
+  if(state.animating)return;
+  let count=gadgetInventory[type]||0;
+  let cost=GADGET_COSTS[type];
+  if(count<=0&&coins<cost){
+    showHint('Недостаточно монет!');
+    return;
+  }
+  if(type==='tornado'){
+    useTornado();
+    return;
+  }
+  if(state.activeGadget===type){
+    state.activeGadget=null;
+    document.getElementById('gadgetHint').style.display='none';
+    updateGadgetUI();
+    draw();
+    return;
+  }
+  state.activeGadget=type;
+  let hints={hammer:'Нажмите на камень или препятствие',lightning:'Нажмите на камень нужного цвета'};
+  showHint(hints[type]);
+  updateGadgetUI();
+  draw();
+}
+
+function showHint(text){
+  let el=document.getElementById('gadgetHint');
+  el.textContent=text;
+  el.style.display='block';
+  setTimeout(()=>{if(el.textContent===text)el.style.display='none';},3000);
+}
+
+function spendGadget(type){
+  let count=gadgetInventory[type]||0;
+  if(count>0){gadgetInventory[type]--;}
+  else{coins-=GADGET_COSTS[type];}
+  saveProgress();
+  document.getElementById('coinsValue').textContent=coins;
+  state.activeGadget=null;
+  document.getElementById('gadgetHint').style.display='none';
+  updateGadgetUI();
+}
+
+async function useGadgetAt(r,c){
+  if(state.animating)return;
+  state.animating=true;
+  let gadget=state.activeGadget;
+  spendGadget(gadget);
+  if(gadget==='hammer'){
+    let cell=state.grid[r][c];
+    if(cell){
+      if(cell.obstacle){
+        cell.obstacle.hp--;
+        if(cell.obstacle.hp<=0){
+          if(state.objectives._ice){state.objectives._ice.got++;updateObjectivesUI();}
+          if(state.objectives._chain){state.objectives._chain.got++;updateObjectivesUI();}
+          cell.obstacle=null;
+        }
+      }else{
+        if(cell.type>=0&&state.objectives[cell.type]){state.objectives[cell.type].got++;updateObjectivesUI();}
+        spawnParticles(c*GEM_TOTAL+GEM_PAD+GEM_SIZE/2,r*GEM_TOTAL+GEM_PAD+GEM_SIZE/2,GEM_TYPES[cell.type].color);
+        state.grid[r][c]=null;
+      }
+    }
+  }else if(gadget==='lightning'){
+    let cell=state.grid[r][c];
+    if(cell&&cell.type>=0){
+      let targetType=cell.type;
+      let destroyed=0;
+      for(let rr=0;rr<ROWS;rr++){
+        for(let cc=0;cc<COLS;cc++){
+          let cl=state.grid[rr][cc];
+          if(cl&&cl.type===targetType){
+            if(cl.obstacle){
+              cl.obstacle.hp--;
+              if(cl.obstacle.hp<=0){
+                if(state.objectives._ice){state.objectives._ice.got++;updateObjectivesUI();}
+                if(state.objectives._chain){state.objectives._chain.got++;updateObjectivesUI();}
+                cl.obstacle=null;
+              }
+            }
+            if(state.objectives[targetType]){state.objectives[targetType].got++;updateObjectivesUI();}
+            spawnParticles(cc*GEM_TOTAL+GEM_PAD+GEM_SIZE/2,rr*GEM_TOTAL+GEM_PAD+GEM_SIZE/2,GEM_TYPES[targetType].color);
+            state.grid[rr][cc]=null;
+            destroyed++;
+          }
+        }
+      }
+      state.score+=destroyed*15;
+      document.getElementById('scoreValue').textContent=state.score;
+    }
+  }
+  draw();
+  await sleep(200);
+  await dropGems();
+  await fillBoard();
+  let matches=findMatches();
+  if(matches.length>0)await processMatches(matches);
+  state.animating=false;
+  checkWinLose();
+}
+
+async function useTornado(){
+  if(state.animating)return;
+  state.animating=true;
+  spendGadget('tornado');
+  let allGems=[];
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      let cell=state.grid[r][c];
+      if(cell&&!cell.obstacle){allGems.push(cell.type);}
+    }
+  }
+  for(let i=allGems.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [allGems[i],allGems[j]]=[allGems[j],allGems[i]];
+  }
+  let idx=0;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      let cell=state.grid[r][c];
+      if(cell&&!cell.obstacle){
+        cell.type=allGems[idx++];
+        cell.targetX=c*GEM_TOTAL+GEM_PAD;
+        cell.targetY=r*GEM_TOTAL+GEM_PAD;
+      }
+    }
+  }
+  await animateShuffle();
+  let matches=findMatches();
+  if(matches.length>0){
+    await processMatches(matches);
+  }
+  state.animating=false;
+  checkWinLose();
+}
+
+function animateShuffle(){
+  return new Promise(resolve=>{
+    let dur=400,start=performance.now();
+    function step(now){
+      let t=Math.min((now-start)/dur,1);
+      t=t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);
+      for(let r=0;r<ROWS;r++){
+        for(let c=0;c<COLS;c++){
+          let cell=state.grid[r][c];
+          if(cell&&!cell.obstacle){
+            let angle=t*Math.PI*2;
+            let offset=Math.sin(angle)*(1-t)*20;
+            cell.x=cell.targetX+offset*(Math.random()-0.5);
+            cell.y=cell.targetY+offset*(Math.random()-0.5);
+          }
+        }
+      }
+      draw();
+      if(t<1)requestAnimationFrame(step);
+      else{
+        for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+          let cell=state.grid[r][c];
+          if(cell&&!cell.obstacle){cell.x=cell.targetX;cell.y=cell.targetY;}
+        }
+        draw();resolve();
+      }
+    }
+    requestAnimationFrame(step);
+  });
 }
 
 function initGrid(){
@@ -341,6 +585,9 @@ function setupInput(){
     let x=e.clientX-rect.left,y=e.clientY-rect.top;
     let c=Math.floor(x/GEM_TOTAL),r=Math.floor(y/GEM_TOTAL);
     if(r<0||r>=ROWS||c<0||c>=COLS)return;
+    if(state.activeGadget){
+      useGadgetAt(r,c);return;
+    }
     startX=x;startY=y;dragging=true;
     if(state.selected){
       let sr=state.selected.r,sc=state.selected.c;
@@ -351,7 +598,7 @@ function setupInput(){
     state.selected={r,c};draw();
   });
   canvas.addEventListener('pointermove',e=>{
-    if(!dragging||state.animating)return;
+    if(!dragging||state.animating||state.activeGadget)return;
     let rect=canvas.getBoundingClientRect();
     let x=e.clientX-rect.left,y=e.clientY-rect.top;
     let dx=x-startX,dy=y-startY;
@@ -375,7 +622,7 @@ async function trySwap(r1,c1,r2,c2){
     await animateSwap(r1,c1,r2,c2);
     state.animating=false;return;
   }
-  if(state.currentLevel.obj.type!=='timed'){
+  if(state.currentLevel.obj.type!=='timed'&&state.currentLevel.obj.type!=='timed_hard'){
     state.movesLeft--;
     document.getElementById('movesValue').textContent=state.movesLeft;
   }
@@ -439,21 +686,13 @@ function detectSpecials(matches){
   });
   for(let r in byRow){
     let cols=byRow[r].sort((a,b)=>a-b);
-    if(cols.length>=5){
-      let mid=cols[Math.floor(cols.length/2)];
-      specials.push({r:r|0,c:mid,special:'color'});
-    }else if(cols.length===4){
-      specials.push({r:r|0,c:cols[1],special:'line_h'});
-    }
+    if(cols.length>=5){specials.push({r:r|0,c:cols[2],special:'color'});}
+    else if(cols.length===4){specials.push({r:r|0,c:cols[1],special:'line_h'});}
   }
   for(let c in byCol){
     let rows=byCol[c].sort((a,b)=>a-b);
-    if(rows.length>=5){
-      let mid=rows[Math.floor(rows.length/2)];
-      specials.push({r:mid,c:c|0,special:'color'});
-    }else if(rows.length===4){
-      specials.push({r:rows[1],c:c|0,special:'line_v'});
-    }
+    if(rows.length>=5){specials.push({r:rows[2],c:c|0,special:'color'});}
+    else if(rows.length===4){specials.push({r:rows[1],c:c|0,special:'line_v'});}
   }
   return specials;
 }
@@ -506,7 +745,8 @@ async function processMatches(matches){
     if(cell.obstacle){
       cell.obstacle.hp--;
       if(cell.obstacle.hp<=0){
-        if(state.objectives._ice){state.objectives._ice.got++;updateObjectivesUI();}
+        if(cell.obstacle.type==='ice'&&state.objectives._ice){state.objectives._ice.got++;updateObjectivesUI();}
+        if(cell.obstacle.type==='chain'&&state.objectives._chain){state.objectives._chain.got++;updateObjectivesUI();}
         cell.obstacle=null;
       }
     }
@@ -582,8 +822,9 @@ function animateFall(){
 }
 
 function checkWinLose(){
-  if(state.timerInterval&&state.currentLevel.obj.type==='timed'&&state.timeLeft<=0){
-    if(state.score>=state.currentLevel.obj.score){showWin();}else{showLose();}
+  if((state.timerInterval&&(state.currentLevel.obj.type==='timed'||state.currentLevel.obj.type==='timed_hard'))&&state.timeLeft<=0){
+    let scoreOk=!state.objectives._score||state.score>=state.objectives._score.need;
+    if(scoreOk){showWin();}else{showLose();}
     return;
   }
   let allDone=true;
@@ -591,7 +832,7 @@ function checkWinLose(){
     if(state.objectives[key].got<state.objectives[key].need){allDone=false;break;}
   }
   if(allDone){showWin();return;}
-  if(state.movesLeft<=0&&state.currentLevel.obj.type!=='timed'){showLose();}
+  if(state.movesLeft<=0&&state.currentLevel.obj.type!=='timed'&&state.currentLevel.obj.type!=='timed_hard'){showLose();}
 }
 
 function showWin(){
@@ -602,16 +843,17 @@ function showWin(){
   else if(state.score>=lvl.stars[1])stars=2;
   else if(state.score>=lvl.stars[0])stars=1;
   else stars=1;
+  let coinsEarned=10+stars*10+Math.floor(state.score/200);
+  coins+=coinsEarned;
   if(!completedLevels.includes(state.levelIndex)){
     completedLevels.push(state.levelIndex);
-    localStorage.setItem('sosint_match3_completed',JSON.stringify(completedLevels));
   }
   if(!highScores[state.levelIndex]||state.score>highScores[state.levelIndex]){
     highScores[state.levelIndex]=state.score;
-    localStorage.setItem('sosint_match3_scores',JSON.stringify(highScores));
   }
+  saveProgress();
   let starStr='⭐'.repeat(stars)+'☆'.repeat(3-stars);
-  showModal(`<div class="modal-title win">Победа!</div><div class="modal-stars">${starStr}</div><div class="modal-score">Очки: ${state.score}</div><div><button class="modal-btn primary" onclick="nextLevel()">Далее →</button><button class="modal-btn secondary" onclick="backToMenu()">Меню</button></div>`);
+  showModal(`<div class="modal-title win">Победа!</div><div class="modal-stars">${starStr}</div><div class="modal-score">Очки: ${state.score}</div><div class="modal-coins">+${coinsEarned} 🪙</div><div><button class="modal-btn primary" onclick="nextLevel()">Далее →</button><button class="modal-btn secondary" onclick="backToMenu()">Меню</button></div>`);
 }
 
 function showLose(){
@@ -621,12 +863,13 @@ function showLose(){
 
 function nextLevel(){
   hideModal();
-  if(state.levelIndex<49)startLevel(state.levelIndex+1);
+  if(state.levelIndex<66)startLevel(state.levelIndex+1);
   else backToMenu();
 }
 
 function backToMenu(){
   if(state.timerInterval)clearInterval(state.timerInterval);
+  state.activeGadget=null;
   hideModal();
   renderMenu();
 }
@@ -638,12 +881,13 @@ function showModal(html){
 function hideModal(){document.getElementById('modal-overlay').style.display='none';}
 
 function spawnParticles(x,y,color){
+  let area=document.querySelector('.game-area');
   for(let i=0;i<6;i++){
     let p=document.createElement('div');
     p.className='particle';
     let dx=(Math.random()-0.5)*80,dy=(Math.random()-0.5)*80-20;
     p.style.cssText=`left:${x}px;top:${y}px;width:${4+Math.random()*4}px;height:${4+Math.random()*4}px;background:${color};--dx:${dx}px;--dy:${dy}px;`;
-    document.querySelector('.game-area').appendChild(p);
+    area.appendChild(p);
     setTimeout(()=>p.remove(),800);
   }
 }
@@ -661,7 +905,7 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
 window.addEventListener('resize',()=>{
   if(document.getElementById('game-screen').style.display!=='none'){
-    let s=Math.min(window.innerWidth-32,window.innerHeight-160);
+    let s=Math.min(window.innerWidth-32,window.innerHeight-200);
     s=Math.min(s,COLS*GEM_TOTAL+GEM_PAD);
     canvas.style.width=Math.min(canvas.width,s)+'px';
     canvas.style.height=Math.min(canvas.height,s)+'px';
