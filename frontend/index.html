@@ -118,22 +118,23 @@
 
         /* === Results === */
         .section { margin-bottom: 16px; animation: fadeIn 0.3s ease-out; }
-        .section-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; padding-bottom: 6px; }
-        .xp-code { padding: 14px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.7; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
-        .xp-profile { display: flex; gap: 16px; padding: 14px; border-radius: 8px; }
-        .xp-avatar { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+        .section-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+        .xp-code { padding: 14px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.7; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+        .xp-profile { display: flex; gap: 16px; padding: 14px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); }
+        .xp-avatar { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; flex-shrink: 0; overflow: hidden; background: var(--surface3); border: 1px solid var(--border); }
         .xp-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .xp-profile-info { flex: 1; }
         .xp-info-row { display: flex; gap: 8px; margin-bottom: 4px; font-size: 12px; }
-        .xp-info-label { font-weight: 600; min-width: 100px; }
-        .xp-links { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; }
-        .xp-link { padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
-        .xp-link:hover { transform: translateY(-1px); }
+        .xp-info-label { font-weight: 600; min-width: 100px; color: var(--accent); }
+        .xp-links { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .xp-link { padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); }
+        .xp-link:hover { transform: translateY(-1px); background: var(--surface3); }
         .xp-link:active { transform: translateY(0); }
-        .xp-table { width: 100%; border-collapse: collapse; font-size: 12px; border-radius: 8px; overflow: hidden; }
-        .xp-table th { padding: 8px 12px; text-align: left; font-weight: 600; }
-        .xp-table td { padding: 8px 12px; }
+        .xp-table { width: 100%; border-collapse: collapse; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .xp-table th { padding: 8px 12px; text-align: left; font-weight: 600; background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--text); }
+        .xp-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
         .xp-table tr { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-table tr:hover { background: var(--accent-glow); }
         .xp-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: none; }
         .xp-badge.found { background: rgba(34,197,94,0.15); color: #22c55e; }
         .xp-badge.not_found { opacity: 0.5; }
@@ -141,12 +142,21 @@
         .xp-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
         .xp-badge.rate_limited { background: rgba(245,158,11,0.15); color: #f59e0b; }
         .xp-badge.unknown { opacity: 0.3; }
-        .xp-loading { display: none; text-align: center; padding: 40px; font-size: 12px; }
-        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; opacity: 0.5; }
+        .xp-loading { display: none; text-align: center; padding: 40px; font-size: 12px; color: var(--text-muted); }
+        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--text-dim); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
         .xp-loading.show { display: block; }
         #results { display: none; }
         #results.show { display: block; }
-        .xp-footer { text-align: center; font-size: 11px; margin-top: 16px; }
+        .xp-footer { text-align: center; font-size: 11px; margin-top: 16px; color: var(--text-muted); }
+        .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .result-header { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+        .result-stat { background: var(--surface2); border: 1px solid var(--border); padding: 10px; text-align: center; border-radius: 8px; }
+        .result-stat-label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .result-stat-value { font-size: 16px; font-weight: 700; color: var(--text); }
+        .result-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px; margin: 10px 0; color: var(--danger); }
+        .result-info { color: var(--text-muted); font-size: 11px; }
+        .result-link { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .result-link:hover { text-decoration: underline; }
 
         /* === Reports === */
         .xp-reports-folder { padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); border-radius: 12px; }
@@ -500,7 +510,7 @@
         </div>
 
         <div class="xp-toolbar">
-            <span style="font-size:11px;color:#666">Address:</span>
+            <span style="font-size:11px;color:var(--text-muted)">Address:</span>
             <input type="email" id="emailInput" class="xp-toolbar-input" placeholder="Enter email address..." autocomplete="off">
             <button class="xp-toolbar-btn" onclick="analyzeEmail()">Analyze</button>
         </div>
@@ -508,7 +518,7 @@
         <div class="xp-content" id="xpContent">
             <div class="xp-loading" id="loading">
                 <p>Analyzing email...</p>
-                <p style="margin-top:8px;color:#999">Please wait</p>
+                <p style="margin-top:8px;color:var(--text-muted)">Please wait</p>
             </div>
             <div id="results"></div>
         </div>
@@ -533,9 +543,9 @@
         </div>
 
         <div class="xp-toolbar" style="flex-wrap:wrap;gap:4px">
-            <span style="font-size:11px;color:#666">API Key:</span>
+            <span style="font-size:11px;color:var(--text-muted)">API Key:</span>
             <input type="text" id="apiKeyInput" class="xp-toolbar-input" placeholder="Your Numverify API key" autocomplete="off" style="max-width:280px" value="b9f3dd40b9e704fe0d9f053ce29e7e55">
-            <span style="font-size:11px;color:#666;margin-left:8px">Phone:</span>
+            <span style="font-size:11px;color:var(--text-muted);margin-left:8px">Phone:</span>
             <input type="text" id="phoneInput" class="xp-toolbar-input" placeholder="79001234567" autocomplete="off" style="max-width:180px">
             <button class="xp-toolbar-btn" onclick="lookupHLR()">Lookup</button>
         </div>
@@ -543,7 +553,7 @@
         <div class="xp-content" id="hlrContent">
             <div class="xp-loading" id="hlrLoading">
                 <p>Querying Numverify API...</p>
-                <p style="margin-top:8px;color:#999">Please wait</p>
+                <p style="margin-top:8px;color:var(--text-muted)">Please wait</p>
             </div>
             <div id="hlrResults"></div>
         </div>
@@ -568,7 +578,7 @@
         </div>
 
         <div class="xp-toolbar">
-            <span style="font-size:11px;color:#666">Username:</span>
+            <span style="font-size:11px;color:var(--text-muted)">Username:</span>
             <input type="text" id="usernameInput" class="xp-toolbar-input" placeholder="Enter username..." autocomplete="off">
             <button class="xp-toolbar-btn" onclick="searchSherlock()">Search</button>
         </div>
@@ -576,7 +586,7 @@
         <div class="xp-content" id="sherlockContent">
             <div class="xp-loading" id="sherlockLoading">
                 <p>Searching across 300+ sites...</p>
-                <p style="margin-top:8px;color:#999">Please wait</p>
+                <p style="margin-top:8px;color:var(--text-muted)">Please wait</p>
             </div>
             <div id="sherlockResults"></div>
         </div>
@@ -602,7 +612,7 @@
 
         <div class="xp-content" style="min-height:300px;max-height:450px;padding:10px">
             <div style="display:flex;gap:10px;align-items:flex-start">
-                <div id="faceDropZone" style="width:120px;height:120px;border:2px dashed #aaa;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;text-align:center;overflow:hidden;cursor:pointer;flex-shrink:0" onclick="document.getElementById('faceFileInput').click()">
+                <div id="faceDropZone" style="width:120px;height:120px;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:10px;text-align:center;overflow:hidden;cursor:pointer;flex-shrink:0" onclick="document.getElementById('faceFileInput').click()">
                     <div id="facePreviewContent">
                         <div style="font-size:24px;margin-bottom:2px">📷</div>
                         <div>Перетащите фото</div>
@@ -622,7 +632,7 @@
                     <div style="display:flex;gap:4px;margin-bottom:6px">
                         <input type="text" id="faceUrlInput" class="xp-toolbar-input" placeholder="URL изображения (необязательно)" style="flex:1;font-size:10px;padding:3px 6px">
                     </div>
-                    <div id="faceSearchStatus" style="font-size:10px;color:#666"></div>
+                    <div id="faceSearchStatus" style="font-size:10px;color:var(--text-muted)"></div>
                 </div>
             </div>
             <div id="faceSearchResults" style="margin-top:8px"></div>
@@ -647,7 +657,7 @@
                 <div class="xp-btn xp-btn-close" onclick="closeMap()">✕</div>
             </div>
         </div>
-        <div style="flex:1;overflow:hidden;background:#e8ecf0">
+        <div style="flex:1;overflow:hidden;background:var(--surface2)">
             <iframe src="/map/index.html" style="width:100%;height:100%;border:none" id="mapFrame"></iframe>
         </div>
         <div class="xp-statusbar">
@@ -950,7 +960,7 @@
 
         function showToast(msg) {
             const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#003399;color:white;padding:12px 24px;font-size:12px;z-index:99999;border-radius:4px;font-family:Tahoma,sans-serif';
+            toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);color:var(--text);padding:12px 24px;font-size:12px;z-index:99999;border-radius:8px;font-family:inherit;border:1px solid var(--border)';
             toast.textContent = msg;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
@@ -973,7 +983,7 @@
                 const data = await resp.json();
                 const list = document.getElementById('adminKeysList');
                 if (!data.keys || data.keys.length === 0) {
-                    list.innerHTML = '<div style="text-align:center;padding:20px;color:#999;font-size:11px">No keys created yet</div>';
+                    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:11px">No keys created yet</div>';
                     return;
                 }
                 let html = '<table class="xp-table"><tr><th>KEY</th><th>USERNAME</th><th>STATUS</th><th>CREATED</th><th>LOGINS</th><th>ACTIONS</th></tr>';
@@ -987,7 +997,7 @@
                         <td>${k.login_count || 0}</td>
                         <td>
                             <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px" onclick="adminToggleKey('${k.key}','${k.status}')">${k.status==='active'?'Block':'Unblock'}</button>
-                            <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px;color:#c53a20" onclick="adminDeleteKey('${k.key}')">Delete</button>
+                            <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px;color:var(--danger)" onclick="adminDeleteKey('${k.key}')">Delete</button>
                             <button class="xp-toolbar-btn" style="padding:2px 6px;font-size:10px" onclick="navigator.clipboard.writeText('${k.key}');showToast('Key copied')">Copy</button>
                         </td>
                     </tr>`;
@@ -996,7 +1006,7 @@
                 list.innerHTML = html;
                 document.getElementById('adminStatus').textContent = data.keys.length + ' keys';
             } catch (e) {
-                document.getElementById('adminKeysList').innerHTML = '<div style="color:#c53a20;padding:10px">Error loading keys</div>';
+                document.getElementById('adminKeysList').innerHTML = '<div style="color:var(--danger);padding:10px">Error loading keys</div>';
             }
         }
 
@@ -1574,7 +1584,7 @@
             statusEl.textContent = 'Поиск...';
             statusEl.style.color = '#666';
             statusBar.textContent = 'Searching...';
-            resultsEl.innerHTML = '<div style="text-align:center;padding:30px;color:#999"><p>🔍 Выполняется поиск через Яндекс...</p><p style="margin-top:8px;font-size:10px">Это может занять 10-20 секунд</p></div>';
+            resultsEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)"><p>🔍 Выполняется поиск через Яндекс...</p><p style="margin-top:8px;font-size:10px">Это может занять 10-20 секунд</p></div>';
 
             try {
                 var resp;
@@ -1598,8 +1608,8 @@
                     statusEl.style.color = '#c53a20';
                     statusBar.textContent = 'Error';
                     resultsEl.innerHTML = '<div style="padding:16px;font-size:11px">' +
-                        '<div style="color:#c53a20;margin-bottom:8px">⚠ ' + data.error + '</div>' +
-                        '<div style="color:#666;margin-bottom:8px">Попробуйте открыть поиск в Яндексе напрямую:</div>' +
+                        '<div style="color:var(--danger);margin-bottom:8px">⚠ ' + data.error + '</div>' +
+                        '<div style="color:var(--text-muted);margin-bottom:8px">Попробуйте открыть поиск в Яндексе напрямую:</div>' +
                         '<a href="https://yandex.ru/images/search?rpt=imageview" target="_blank" class="xp-toolbar-btn" style="display:inline-block;text-decoration:none;padding:4px 12px">Открыть Яндекс Картинки</a>' +
                         '</div>';
                     return;
@@ -1610,7 +1620,7 @@
                 // VK profiles
                 if (data.vk_profiles && data.vk_profiles.length > 0) {
                     html += '<div style="margin-bottom:16px">';
-                    html += '<div style="font-size:11px;font-weight:bold;color:#003399;margin-bottom:8px;border-bottom:1px solid #7f9db9;padding-bottom:4px">VK — Найдено: ' + data.vk_profiles.length + '</div>';
+                    html += '<div style="font-size:11px;font-weight:bold;color:var(--text);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px">VK — Найдено: ' + data.vk_profiles.length + '</div>';
                     data.vk_profiles.forEach(function(p) {
                         html += renderProfileCard(p);
                     });
@@ -1620,7 +1630,7 @@
                 // OK profiles
                 if (data.ok_profiles && data.ok_profiles.length > 0) {
                     html += '<div style="margin-bottom:16px">';
-                    html += '<div style="font-size:11px;font-weight:bold;color:#d35400;margin-bottom:8px;border-bottom:1px solid #7f9db9;padding-bottom:4px">Одноклассники — Найдено: ' + data.ok_profiles.length + '</div>';
+                    html += '<div style="font-size:11px;font-weight:bold;color:var(--warning);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px">Одноклассники — Найдено: ' + data.ok_profiles.length + '</div>';
                     data.ok_profiles.forEach(function(p) {
                         html += renderProfileCard(p);
                     });
@@ -1630,10 +1640,10 @@
                 // No results
                 if (data.total_found === 0) {
                     var yandexUrl = data.search_url || 'https://yandex.ru/images/search?rpt=imageview';
-                    html = '<div style="text-align:center;padding:20px;color:#666">' +
+                    html = '<div style="text-align:center;padding:20px;color:var(--text-muted)">' +
                         '<p style="font-size:24px;margin-bottom:8px">🔍</p>' +
                         '<p style="font-size:11px;font-weight:bold;margin-bottom:8px">Профили VK/OK не найдены автоматически</p>' +
-                        '<p style="font-size:10px;color:#999;margin-bottom:12px">Результаты загружаются динамически в Яндексе.<br>Откройте поиск для просмотра всех результатов:</p>' +
+                        '<p style="font-size:10px;color:var(--text-muted);margin-bottom:12px">Результаты загружаются динамически в Яндексе.<br>Откройте поиск для просмотра всех результатов:</p>' +
                         '<a href="https://yandex.ru/images/search?rpt=imageview" target="_blank" class="xp-toolbar-btn" style="display:inline-block;text-decoration:none;padding:6px 16px">Открыть в Яндекс Картинках</a>' +
                         '</div>';
                 }
@@ -1647,17 +1657,17 @@
                 statusEl.textContent = 'Ошибка: ' + e.message;
                 statusEl.style.color = '#c53a20';
                 statusBar.textContent = 'Error';
-                resultsEl.innerHTML = '<div style="padding:16px;color:#c53a20;font-size:11px">Ошибка: ' + e.message + '</div>';
+                resultsEl.innerHTML = '<div style="padding:16px;color:var(--danger);font-size:11px">Ошибка: ' + e.message + '</div>';
             }
         }
 
         function renderProfileCard(profile) {
             var sourceColor = profile.source === 'VK' ? '#003399' : '#d35400';
             var sourceBg = profile.source === 'VK' ? '#e8f0fe' : '#fef3e8';
-            return '<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #d4d0c8;border-radius:3px;margin-bottom:6px;background:' + sourceBg + '">' +
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--border);border-radius:3px;margin-bottom:6px;background:' + sourceBg + '">' +
                 '<div style="width:16px;height:16px;border-radius:2px;background:' + sourceColor + ';color:white;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">' + profile.source + '</div>' +
                 '<div style="flex:1;min-width:0">' +
-                    '<a href="' + profile.url + '" target="_blank" style="font-size:11px;color:#003399;text-decoration:none;word-break:break-all">' + profile.url + '</a>' +
+                    '<a href="' + profile.url + '" target="_blank" style="font-size:11px;color:var(--text);text-decoration:none;word-break:break-all">' + profile.url + '</a>' +
                 '</div>' +
                 '<a href="' + profile.url + '" target="_blank" class="xp-toolbar-btn" style="padding:2px 8px;font-size:10px;text-decoration:none">Открыть</a>' +
                 '</div>';
@@ -1669,7 +1679,7 @@
                 '<div style="font-size:28px;margin-bottom:4px">📷</div>' +
                 '<div>Перетащите фото</div>' +
                 '<div>или Ctrl+V</div>' +
-                '<div style="margin-top:4px;font-size:10px;color:#bbb">или нажмите здесь</div>';
+                '<div style="margin-top:4px;font-size:10px;color:var(--text-muted)">или нажмите здесь</div>';
             document.getElementById('faceDropZone').style.border = '2px dashed #aaa';
             document.getElementById('faceDropZone').style.background = '#f8f8f8';
             document.getElementById('faceFileInput').value = '';
@@ -1839,11 +1849,11 @@
             document.getElementById('reportsStatus').textContent = names[type] + ' — ' + reports.length + ' отчётов';
 
             if (reports.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;font-size:11px">Нет сохранённых отчётов.<br>Отчёты автоматически сохраняются при скачивании.</div>';
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:11px">Нет сохранённых отчётов.<br>Отчёты автоматически сохраняются при скачивании.</div>';
                 return;
             }
 
-            let html = `<div style="margin-bottom:8px;font-size:11px;font-weight:bold;color:#003399">${names[type]} (${reports.length})</div>`;
+            let html = `<div style="margin-bottom:8px;font-size:11px;font-weight:bold;color:var(--text)">${names[type]} (${reports.length})</div>`;
             reports.forEach(r => {
                 html += `
                 <div class="xp-report-item">
@@ -1916,7 +1926,7 @@
             let h = '';
 
             if (data.error) {
-                h += `<div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;padding:12px;margin:10px 0;color:#721c24"><b>Error:</b> ${data.error}</div>`;
+                h += `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px;margin:10px 0;color:var(--danger)"><b>Error:</b> ${data.error}</div>`;
             }
 
             h += `<div style="margin:10px 0"><button class="xp-toolbar-btn" onclick="downloadReport()">Download HTML Report</button></div>`;
@@ -1925,32 +1935,32 @@
             const total = data.found.length + data.not_found.length;
             h += `
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Ник</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.username}</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Ник</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.username}</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Площадок</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${total}</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Площадок</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${total}</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Найдено</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Найдено</div>
                     <div style="font-size:16px;font-weight:bold;color:#228b22">${data.found.length}</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Время</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.search_time}s</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Время</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.search_time}s</div>
                 </div>
             </div>`;
 
             // Found accounts
             if (data.found.length > 0) {
                 h += `
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">НАЙДЕННЫЕ АККАУНТЫ (${data.found.length})</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">НАЙДЕННЫЕ АККАУНТЫ (${data.found.length})</div>
                     <table class="xp-table">
                         <tr><th>САЙТ</th><th>ССЫЛКА</th></tr>
-                        ${data.found.map(item => `<tr><td><b>${item.site}</b></td><td style="font-size:11px"><a href="${item.url}" target="_blank" style="color:#2584af">${item.url}</a></td></tr>`).join('')}
+                        ${data.found.map(item => `<tr><td><b>${item.site}</b></td><td style="font-size:11px"><a href="${item.url}" target="_blank" style="color:var(--accent)">${item.url}</a></td></tr>`).join('')}
                     </table>
                 </div>`;
             }
@@ -1958,9 +1968,9 @@
             // Not found (collapsible)
             if (data.not_found.length > 0) {
                 h += `
-                <details style="margin:12px 0;border:1px solid #819aaa;background:#f8fbfc;border-radius:3px">
-                    <summary style="padding:10px 14px;font-size:12px;font-weight:bold;color:#164965;cursor:pointer;list-style:none">Не найдено (${data.not_found.length})</summary>
-                    <div style="border-top:1px solid #c2d0d6">
+                <details style="margin:12px 0;border:1px solid var(--border);background:var(--surface);border-radius:8px">
+                    <summary style="padding:10px 14px;font-size:12px;font-weight:bold;color:var(--text);cursor:pointer;list-style:none">Не найдено (${data.not_found.length})</summary>
+                    <div style="border-top:1px solid var(--border)">
                         <table class="xp-table">
                             <tr><th>САЙТ</th></tr>
                             ${data.not_found.map(site => `<tr><td>${site}</td></tr>`).join('')}
@@ -2080,32 +2090,32 @@
 
             if (data.error) {
                 h += `
-                <div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;padding:12px;margin:10px 0;color:#721c24">
+                <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px;margin:10px 0;color:var(--danger)">
                     <b>Error:</b> ${data.error}
                 </div>`;
             } else {
                 h += `
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
-                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Телефон</div>
-                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.phone}</div>
+                    <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Телефон</div>
+                        <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.phone}</div>
                     </div>
-                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Страна</div>
-                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.country || '—'}</div>
+                    <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Страна</div>
+                        <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.country || '—'}</div>
                     </div>
-                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Оператор</div>
-                        <div style="font-size:16px;font-weight:bold;color:#164965">${data.operator || '—'}</div>
+                    <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Оператор</div>
+                        <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.operator || '—'}</div>
                     </div>
-                    <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                        <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Статус</div>
+                    <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Статус</div>
                         <div style="font-size:16px;font-weight:bold;color:${data.status === 'valid' ? '#228b22' : '#8b0000'}">${data.status || '—'}</div>
                     </div>
                 </div>
 
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PHONE DETAILS</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">PHONE DETAILS</div>
                     <table class="xp-table">
                         <tr><th>ПАРАМЕТР</th><th>ЗНАЧЕНИЕ</th></tr>
                         <tr><td><b>Phone</b></td><td>${data.phone}</td></tr>
@@ -2124,8 +2134,8 @@
 
             if (data.raw_response) {
                 h += `
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">RAW RESPONSE</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">RAW RESPONSE</div>
                     <div class="xp-code">${data.raw_response.substring(0, 500)}</div>
                 </div>`;
             }
@@ -2185,28 +2195,28 @@
             // Summary cards
             h += `
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Домен</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.domain}</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Домен</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.domain}</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">SMTP статус</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">SMTP статус</div>
                     <div style="font-size:16px;font-weight:bold;color:${data.smtp.final_status === 'valid' ? '#228b22' : '#8b0000'}">${data.smtp.final_status}</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Риск</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.risk_level} (${data.risk_score}/100)</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Риск</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.risk_level} (${data.risk_score}/100)</div>
                 </div>
-                <div style="background:#f0f4f7;border:1px solid #819aaa;padding:10px;text-align:center;border-radius:3px">
-                    <div style="font-size:10px;text-transform:uppercase;color:#617684;margin-bottom:4px">Сервисы</div>
-                    <div style="font-size:16px;font-weight:bold;color:#164965">${data.connections ? data.connections.length : 0}</div>
+                <div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center;border-radius:8px">
+                    <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Сервисы</div>
+                    <div style="font-size:16px;font-weight:bold;color:var(--text)">${data.connections ? data.connections.length : 0}</div>
                 </div>
             </div>`;
 
             // SMTP
             h += `
-            <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">SMTP VERIFICATION</div>
+            <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">SMTP VERIFICATION</div>
                 <div style="padding:12px">
                     <table class="xp-table">
                         <tr><th>ШАГ</th><th>КОД</th></tr>
@@ -2227,8 +2237,8 @@
 
             if (data.is_gmail && data.google) {
                 h += `
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PROFILE</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">PROFILE</div>
                     <div style="padding:12px;display:flex;gap:16px;align-items:center">
                         <div style="width:60px;height:60px;border-radius:4px;background:linear-gradient(135deg,#4169e1,#00bfff);display:flex;align-items:center;justify-content:center;font-size:24px;color:white;flex-shrink:0;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
                             ${mainAvatar ? `<img src="${mainAvatar}" style="width:100%;height:100%;border-radius:4px;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
@@ -2236,14 +2246,14 @@
                         <div style="flex:1">
                             <div style="margin-bottom:4px"><b>Google ID:</b> ${data.google.google_id}</div>
                             <div style="margin-bottom:4px"><b>Last Update:</b> ${data.google.last_update}</div>
-                            <div>${(data.google.services || []).map(s => `<a href="${s.url}" target="_blank" style="color:#2584af;margin-right:12px;font-size:12px">${s.name}</a>`).join('')}</div>
+                            <div>${(data.google.services || []).map(s => `<a href="${s.url}" target="_blank" style="color:var(--accent);margin-right:12px;font-size:12px">${s.name}</a>`).join('')}</div>
                         </div>
                     </div>
                 </div>`;
             } else {
                 h += `
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">PROFILE</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">PROFILE</div>
                     <div style="padding:12px;display:flex;gap:16px;align-items:center">
                         <div style="width:60px;height:60px;border-radius:4px;background:linear-gradient(135deg,#4169e1,#00bfff);display:flex;align-items:center;justify-content:center;font-size:24px;color:white;flex-shrink:0;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
                             ${mainAvatar ? `<img src="${mainAvatar}" style="width:100%;height:100%;border-radius:4px;object-fit:cover" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">` : initial}
@@ -2260,13 +2270,13 @@
             // Connections
             if (data.connections && data.connections.length) {
                 h += `
-                <div style="background:#f8fbfc;border:1px solid #819aaa;margin:12px 0;border-radius:3px">
-                    <div style="background:linear-gradient(#fff,#bfd2dc 47%,#88a4b4 50%,#dce8ee);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid #738d9d">SERVICE CONNECTIONS</div>
+                <div style="background:#f8fbfc;border:1px solid var(--border);margin:12px 0;border-radius:8px">
+                    <div style="background:var(--surface2);padding:8px 11px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--border)">SERVICE CONNECTIONS</div>
                     <table class="xp-table">
                         <tr><th>СЕРВИС</th><th>URL</th><th>СТАТУС</th></tr>
                         ${data.connections.map(c => {
                             const cls = c.status === 'found' ? 'found' : (c.status === 'not_found' ? 'not_found' : 'redirect');
-                            return `<tr><td><b>${c.service}</b></td><td style="font-size:10px;color:#666">${c.url}</td><td><span class="xp-badge ${cls}">${c.status}</span></td></tr>`;
+                            return `<tr><td><b>${c.service}</b></td><td style="font-size:10px;color:var(--text-muted)">${c.url}</td><td><span class="xp-badge ${cls}">${c.status}</span></td></tr>`;
                         }).join('')}
                     </table>
                 </div>`;
