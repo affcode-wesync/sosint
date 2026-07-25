@@ -93,7 +93,7 @@ canvas{touch-action:none;display:block;border-radius:6px}
 const R=8,C=8,G=50,P=3,T=G+P;
 const GEMS=[{c:'#ffd700',s:'★'},{c:'#ff4757',s:'♦'},{c:'#3498db',s:'●'},{c:'#2ecc71',s:'◆'},{c:'#9b59b6',s:'♠'},{c:'#e67e22',s:'♣'}];
 const COST={hammer:30,lightning:50,tornado:40};
-let gs=50,tot=30,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30,co=parseInt(localStorage.getItem('m3c')||'100');
+let gs=50,tot=50,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30,co=parseInt(localStorage.getItem('m3c')||'100');
 let inv=JSON.parse(localStorage.getItem('m3g')||'{"hammer":3,"lightning":1,"tornado":2}');
 let done=JSON.parse(localStorage.getItem('m3d')||'[]');
 let st={grid:null,lvl:null,idx:0,tmr:null,time:0,combo:0,obj:{},gadget:null};
@@ -124,19 +124,23 @@ function mkLevels(){
   lvls=[];
   for(let i=1;i<=tot;i++){
     let o={},mv,tp;
-    if(i<=5){tp='c';o={t:'c',g:{},s:500+i*200};mv=35+~~(i*1.5);let g=~~(Math.random()*6);o.g[g]=8+i*2;}
-    else if(i<=10){tp='c';o={t:'c',g:{},s:800+i*150};mv=32+i;let gc=~~(i/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=6+i;});}
-    else if(i<=15){tp='i';o={t:'i',ic:3+~~((i-10)*1.2),s:1200+i*100};mv=30+i;}
-    else if(i<=20){tp='cs';o={t:'cs',g:{},s:1800+i*180};mv=28+~~(i*.8);let gc=~~((i-15)/2)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=10+i;});}
-    else if(i<=28){tp='t';o={t:'t',tm:65+i,s:2200+i*140};mv=999;}
-    else if(i<=35){tp='ci';o={t:'ci',g:{},ic:5+~~((i-28)),s:2800+i*100};mv=28+~~(i*.5);let gc=~~((i-28)/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=8+i;});}
-    else if(i<=42){tp='h';o={t:'h',g:{},ic:6+~~((i-35)*1.2),s:3500+i*100};mv=26+~~(i*.4);let gc=~~((i-35)/3)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=12+i;});}
-    else if(i<=50){tp='ch';o={t:'ch',g:{},cc:4+~~((i-42)),ic:3+~~((i-42)/2),s:4000+i*80};mv=25+~~(i*.35);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=12+i;});}
-    else if(i<=58){tp='th';o={t:'th',tm:50+i,s:4500+i*80,g:{},ic:4+~~((i-50)*1.5)};mv=999;let gc=~~((i-50)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=10+i;});}
-    else if(i<=65){tp='ch';o={t:'ch',g:{},cc:5+~~((i-58)*1.5),ic:4+~~((i-58)/2),s:5500+i*80};mv=24+~~(i*.3);let gc=~~((i-58)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
-    else if(i<=70){tp='cs';o={t:'cs',g:{},s:6000+i*100};mv=22+~~(i*.2);let gc=~~((i-65)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=18+i;});}
-    else{tp='b';o={t:'b',g:{},ic:10+~~((i-70)*2),cc:6+~~((i-70)),s:8000+i*100};mv=20+~~(i*.15);let gc=4+~~((i-70)/2),gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=20+i;});}
-    let stars=o.t==='t'||o.t==='th'?[o.s,o.s*1.5,o.s*2.2]:[o.s,o.s*1.4,o.s*2];
+    // 1-5: Easy - collect 1 color (fewer moves)
+    if(i<=5){tp='c';o={t:'c',g:{},s:600+i*250};mv=30+~~(i*1.2);let g=~~(Math.random()*6);o.g[g]=10+i*2;}
+    // 6-10: Collect 2-3 colors (tighter)
+    else if(i<=10){tp='c';o={t:'c',g:{},s:1000+i*180};mv=28+i;let gc=~~(i/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=8+i*2;});}
+    // 11-15: Break ice (more ice, fewer moves)
+    else if(i<=15){tp='i';o={t:'i',ic:4+~~((i-10)*1.5),s:1500+i*120};mv=28+i;}
+    // 16-20: Collect + score
+    else if(i<=20){tp='cs';o={t:'cs',g:{},s:2200+i*200};mv=26+~~(i*.7);let gc=~~((i-15)/2)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=12+i;});}
+    // 21-28: Timed (less time)
+    else if(i<=28){tp='t';o={t:'t',tm:55+i,s:2500+i*160};mv=999;}
+    // 29-35: Collect + ice combo
+    else if(i<=35){tp='ci';o={t:'ci',g:{},ic:6+~~((i-28)*1.2),s:3000+i*120};mv=25+~~(i*.5);let gc=~~((i-28)/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=10+i;});}
+    // 36-42: Hard (collect + ice + fewer moves)
+    else if(i<=42){tp='h';o={t:'h',g:{},ic:7+~~((i-35)*1.3),s:3800+i*120};mv=24+~~(i*.35);let gc=~~((i-35)/3)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=14+i;});}
+    // 43-50: Chains + ice + tough
+    else if(i<=50){tp='ch';o={t:'ch',g:{},cc:5+~~((i-42)*1.2),ic:4+~~((i-42)/2),s:4500+i*100};mv=22+~~(i*.3);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
+    let stars=o.t==='t'?[o.s,o.s*1.5,o.s*2.2]:[o.s,o.s*1.4,o.s*2];
     lvls.push({id:i,tp,mv,o,stars,board:getBoard(i)});
   }
 }
@@ -430,11 +434,12 @@ function useG(type){
   if(type==='tornado'){doTornado();return;}
   st.gadget=st.gadget===type?null:type;
 }
-function doTornado(){
+async function doTornado(){
   let cnt=inv.tornado||0;if(cnt<=0&&co<COST.tornado)return;
   if(cnt>0)inv.tornado--;else co-=COST.tornado;save();
-  st.gadget=null;
-  shuffle();
+  st.gadget=null;anim=true;
+  await shuffle();
+  anim=false;chkEnd();
 }
 async function doGadget(r,c){
   if(anim)return;anim=true;
