@@ -33,15 +33,15 @@
         .desktop-icon-img { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 6px; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
         .desktop-icon:hover .desktop-icon-img { transform: translateY(-2px); }
         .desktop-icon-label { font-size: 11px; text-align: center; line-height: 1.3; font-weight: 500; }
-        .desktop-icon-email { background-image: url('/static/icons/email-sosint.png'); }
-        .desktop-icon-phone { background-image: url('/static/icons/hlr.png'); }
-        .desktop-icon-search { background-image: url('/static/icons/nickname.png'); }
-        .desktop-icon-map { background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; }
-        .desktop-icon-map::before { content: ''; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .desktop-icon-map::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; }
-        .desktop-icon-reports { background: linear-gradient(135deg, #f59e0b, #d97706); border: none; }
-        .desktop-icon-reports::before { content: ''; width: 24px; height: 4px; background: rgba(255,255,255,0.5); position: absolute; top: 6px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
-        .desktop-icon-reports::after { content: '📧📁📋🗺️'; font-size: 8px; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+        .desktop-icon-email { background-image: url('/static/icons/email-sosint.png'); background-color: var(--surface3); }
+        .desktop-icon-phone { background-image: url('/static/icons/hlr.png'); background-color: var(--surface3); }
+        .desktop-icon-search { background-image: url('/static/icons/nickname.png'); background-color: var(--surface3); }
+        .desktop-icon-map { background: linear-gradient(135deg, var(--surface3), var(--surface2)); border: 1px solid var(--border); }
+        .desktop-icon-map::before { content: '🗺️'; font-size: 24px; position: static; width: auto; height: auto; border: none; border-radius: 0; background: none; }
+        .desktop-icon-map::after { content: none; }
+        .desktop-icon-reports { background: linear-gradient(135deg, var(--surface3), var(--surface2)); border: 1px solid var(--border); }
+        .desktop-icon-reports::before { content: '📊'; font-size: 24px; position: static; width: auto; height: auto; border: none; border-radius: 0; background: none; }
+        .desktop-icon-reports::after { content: none; }
 
         /* === Window Layout === */
         .xp-window { position: absolute; width: 820px; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: slideIn 0.25s ease-out; }
@@ -339,8 +339,12 @@
             color: #333;
             background: url('/static/wall.png') center/cover no-repeat fixed;
         }
-        [data-theme="xp"] .desktop-icon-img { border: 2px solid rgba(255,255,255,0.5); box-shadow: 1px 1px 3px rgba(0,0,0,0.3); background: linear-gradient(135deg, #4169e1, #00bfff); }
+        [data-theme="xp"] .desktop-icon-img { border: 2px solid rgba(255,255,255,0.5); box-shadow: 1px 1px 3px rgba(0,0,0,0.3); background-color: #4169e1; }
         [data-theme="xp"] .desktop-icon:hover .desktop-icon-img { box-shadow: 2px 2px 6px rgba(0,0,0,0.4); }
+        [data-theme="xp"] .desktop-icon-map { background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important; border: none !important; }
+        [data-theme="xp"] .desktop-icon-map::before { content: '🗺️' !important; }
+        [data-theme="xp"] .desktop-icon-reports { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: none !important; }
+        [data-theme="xp"] .desktop-icon-reports::before { content: '📊' !important; }
         [data-theme="xp"] .desktop-icon-label { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
         [data-theme="xp"] .xp-window { background: #ece9d8; border: 3px outset #dfdfdf; border-radius: 8px 8px 0 0; }
         [data-theme="xp"] .xp-titlebar { background: linear-gradient(180deg, #0a246a 0%, #0f3795 3%, #2f6fce 6%, #2f6fce 90%, #0f3795 97%, #0a246a 100%); border-radius: 5px 5px 0 0; border-bottom: none; }
@@ -1079,7 +1083,7 @@
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('sosint-theme', theme);
-            document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Тёмная тема' : 'Windows XP';
+            document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Windows XP' : 'Тёмная тема';
             updateSettingsHighlight();
         }
 
@@ -1192,7 +1196,7 @@
                 overlay.style.background = 'linear-gradient(180deg,#3a6ea5,#1a3f7a)';
                 logo.style.background = 'linear-gradient(135deg,#3a6ea5,#1a3f7a)';
             }
-            text.textContent = next === 'dark' ? 'Тёмная тема' : 'Windows XP';
+            text.textContent = next === 'dark' ? 'Windows XP' : 'Тёмная тема';
             text.style.color = next === 'dark' ? '#e8e8f0' : 'white';
 
             // Phase 1: Fade in overlay
@@ -1203,7 +1207,7 @@
             setTimeout(function() {
                 document.documentElement.setAttribute('data-theme', next);
                 localStorage.setItem('sosint-theme', next);
-                document.getElementById('themeLabel').textContent = next === 'dark' ? 'Тёмная тема' : 'Windows XP';
+                document.getElementById('themeLabel').textContent = next === 'dark' ? 'Windows XP' : 'Тёмная тема';
 
                 // Update overlay to match NEW theme
                 if (next === 'dark') {
@@ -1229,7 +1233,7 @@
             var saved = localStorage.getItem('sosint-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', saved);
             var label = document.getElementById('themeLabel');
-            if (label) label.textContent = saved === 'dark' ? 'Тёмная тема' : 'Windows XP';
+            if (label) label.textContent = saved === 'dark' ? 'Windows XP' : 'Тёмная тема';
             loadSettings();
         })();
 
