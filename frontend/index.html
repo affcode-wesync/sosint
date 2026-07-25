@@ -105,8 +105,8 @@
         .start-menu-item-desc { font-size: 10px; opacity: 0.5; }
         .start-menu-separator { height: 1px; margin: 6px 14px; }
         .start-menu-right .start-menu-item { font-weight: 600; }
-        .start-menu-footer { border-top: 1px solid; padding: 8px 14px; display: flex; justify-content: flex-end; gap: 8px; }
-        .start-menu-footer-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; }
+        .start-menu-footer { border-top: 1px solid; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+        .start-menu-footer-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px solid; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; white-space: nowrap; }
         .start-menu-footer-btn:hover { }
 
         /* === Icons === */
@@ -203,11 +203,11 @@
             .desktop-icon { width: 60px !important; padding: 4px !important; flex-shrink: 0 !important; }
             .desktop-icon-img { width: 36px !important; height: 36px !important; font-size: 18px !important; }
             .desktop-icon-label { font-size: 9px !important; }
-            .start-menu { width: calc(100vw - 16px) !important; left: 8px !important; bottom: 52px !important; max-height: 70vh !important; border-radius: 10px !important; }
-            .start-menu-body { flex-direction: column !important; min-height: auto !important; }
+            .start-menu { width: calc(100vw - 16px) !important; left: 8px !important; bottom: 52px !important; max-height: 80vh !important; border-radius: 10px !important; display: flex !important; flex-direction: column !important; }
+            .start-menu-body { flex-direction: column !important; min-height: auto !important; flex: 1 !important; overflow-y: auto !important; }
             .start-menu-right { width: 100% !important; border-left: none !important; border-top: 1px solid; }
-            .start-menu-footer { flex-wrap: wrap !important; gap: 4px !important; justify-content: center !important; }
-            .start-menu-footer-btn { font-size: 10px !important; padding: 5px 8px !important; white-space: nowrap !important; }
+            .start-menu-footer { flex-shrink: 0 !important; }
+            .start-menu-footer-btn { font-size: 10px !important; padding: 4px 6px !important; gap: 3px !important; }
             .xp-taskbar { height: 44px !important; padding: 0 4px !important; overflow-x: auto !important; }
             .xp-start-btn { padding: 5px 10px !important; font-size: 11px !important; flex-shrink: 0 !important; }
             .xp-taskbar-items { gap: 2px !important; }
@@ -228,7 +228,8 @@
             .xp-toolbar { padding: 6px 8px !important; flex-wrap: wrap !important; gap: 4px !important; }
             .xp-toolbar-btn { padding: 6px 10px !important; font-size: 10px !important; }
             .xp-content { padding: 8px !important; }
-            .start-menu-footer-btn { font-size: 9px !important; padding: 4px 6px !important; }
+            .start-menu-footer { padding: 4px 6px !important; gap: 3px !important; }
+            .start-menu-footer-btn { font-size: 9px !important; padding: 3px 5px !important; gap: 2px !important; }
         }
 
         /* =========================================
