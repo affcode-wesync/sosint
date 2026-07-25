@@ -77,7 +77,7 @@
         .xp-statusbar-section { padding: 2px 8px; }
 
         /* === Taskbar === */
-        .xp-taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; padding: 0 8px; z-index: 1000; backdrop-filter: blur(20px); }
+        .xp-taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; padding: 0 8px; z-index: 1000; }
         .xp-start-btn { padding: 6px 16px 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
         .xp-start-btn:hover { transform: translateY(-1px); }
         .xp-start-btn:active { transform: translateY(0); }
@@ -177,7 +177,7 @@
         .xp-report-item-btn.danger { }
 
         /* === Login === */
-        .login-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .login-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
         .login-overlay.hidden { display: none; }
         .login-window { width: 380px; border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); animation: slideIn 0.3s ease-out; }
         .login-titlebar { padding: 16px 20px 0; display: flex; align-items: center; justify-content: space-between; }
@@ -859,7 +859,7 @@
             </div>
         </div>
         <div style="flex:1;overflow:hidden;background:var(--surface2)">
-            <iframe src="/static/games/match3.html" style="width:100%;height:100%;border:none" id="gamesFrame"></iframe>
+            <iframe data-src="/static/games/match3.html" style="width:100%;height:100%;border:none" id="gamesFrame"></iframe>
         </div>
         <div class="xp-statusbar">
             <div class="xp-statusbar-section">SOSINT Games</div>
@@ -1967,6 +1967,10 @@
         });
 
         function openGames() {
+            var frame = document.getElementById('gamesFrame');
+            if (!frame.src && frame.dataset.src) {
+                frame.src = frame.dataset.src;
+            }
             gamesWin.style.display = 'flex';
             gamesWin.style.left = '50%';
             gamesWin.style.top = window.innerWidth < 600 ? '0' : '60px';
