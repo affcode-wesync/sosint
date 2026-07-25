@@ -234,7 +234,8 @@ function makeLevels(){
       gs.forEach(g=>{obj.gems[g]=20+i;});
     }
     let stars=type==='timed'||type==='timed_hard'?[obj.score,obj.score*1.5,obj.score*2.2]:[obj.score,obj.score*1.4,obj.score*2];
-    levels.push({id:i,name:`Уровень ${i}`,type,moves,obj,stars,board:genBoardShape(i),obstacles:i>10?generateObstacles(i,genBoardShape(i)):[]});
+    let board=genBoardShape(i);
+    levels.push({id:i,name:`Уровень ${i}`,type,moves,obj,stars,board,obstacles:i>10?generateObstacles(i,board):[]});
   }
 }
 
@@ -302,7 +303,8 @@ function renderMenu(){
   document.getElementById('menu-screen').style.display='flex';
   document.getElementById('game-screen').style.display='none';
   document.getElementById('menuCoins').textContent=coins;
-  let grid=document.getElementById('levelGrid');grid.innerHTML='';
+  let grid=document.getElementById('levelGrid');
+  let frag=document.createDocumentFragment();
   for(let i=0;i<TOTAL_LEVELS;i++){
     let btn=document.createElement('div');btn.className='level-btn';
     let done=completedLevels.includes(i),unlocked=i===0||completedLevels.includes(i-1);
@@ -311,8 +313,10 @@ function renderMenu(){
     if(!unlocked)btn.classList.add('locked');
     btn.textContent=i+1;
     btn.onclick=()=>{if(unlocked)startLevel(i);};
-    grid.appendChild(btn);
+    frag.appendChild(btn);
   }
+  grid.innerHTML='';
+  grid.appendChild(frag);
 }
 
 // ======== START LEVEL ========
