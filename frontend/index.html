@@ -10,7 +10,226 @@
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         input, textarea, button { user-select: auto; }
 
-        :root {
+        /* === Shared Animations === */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.2); } 50% { box-shadow: 0 0 40px rgba(99,102,241,0.4); } }
+
+        /* === Shared Layout === */
+        body { min-height: 100vh; overflow: hidden; position: relative; }
+        .desktop-icons { position: fixed; top: 24px; left: 24px; z-index: 5; display: flex; flex-direction: column; gap: 16px; }
+        .desktop-icon { display: flex; flex-direction: column; align-items: center; width: 72px; padding: 8px; cursor: pointer; border-radius: 8px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); animation: fadeIn 0.4s ease-out both; }
+        .desktop-icon:nth-child(1) { animation-delay: 0.05s; }
+        .desktop-icon:nth-child(2) { animation-delay: 0.1s; }
+        .desktop-icon:nth-child(3) { animation-delay: 0.15s; }
+        .desktop-icon:nth-child(4) { animation-delay: 0.2s; }
+        .desktop-icon:nth-child(5) { animation-delay: 0.25s; }
+        .desktop-icon:nth-child(6) { animation-delay: 0.3s; }
+        .desktop-icon:active { transform: scale(0.95); }
+        .desktop-icon.drag-over { border-top: 2px solid #666; opacity: 0.7; }
+        .desktop-icon-img { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 6px; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .desktop-icon:hover .desktop-icon-img { transform: translateY(-2px); }
+        .desktop-icon-label { font-size: 11px; text-align: center; line-height: 1.3; font-weight: 500; }
+        .desktop-icon-email { background-image: url('/static/icons/email-sosint.png'); }
+        .desktop-icon-phone { background-image: url('/static/icons/hlr.png'); }
+        .desktop-icon-search { background-image: url('/static/icons/nickname.png'); }
+        .desktop-icon-map { background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; }
+        .desktop-icon-map::before { content: ''; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; position: absolute; }
+        .desktop-icon-map::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; }
+        .desktop-icon-reports { background: linear-gradient(135deg, #f59e0b, #d97706); border: none; }
+        .desktop-icon-reports::before { content: ''; width: 24px; height: 4px; background: rgba(255,255,255,0.5); position: absolute; top: 6px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+        .desktop-icon-reports::after { content: '📧📁📋🗺️'; font-size: 8px; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+
+        /* === Window Layout === */
+        .xp-window { position: absolute; width: 820px; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: slideIn 0.25s ease-out; }
+        .xp-window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; transform: none !important; border-radius: 0; }
+        .xp-window.minimized { display: none; }
+        #mapWindow { display: none; flex-direction: column; }
+
+        /* === Common Elements === */
+        .xp-titlebar { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: move; border-radius: 12px 12px 0 0; }
+        .xp-titlebar-left { display: flex; align-items: center; gap: 10px; }
+        .xp-titlebar-icon { width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0; background-image: url('/static/icons/logo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .xp-titlebar-text { font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .xp-titlebar-buttons { display: flex; gap: 4px; }
+        .xp-btn { width: 28px; height: 28px; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-btn:hover { transform: scale(1.1); }
+        .xp-btn:active { transform: scale(0.9); }
+        .xp-btn-close:hover { background: #ef4444 !important; color: white !important; }
+        .xp-toolbar { padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+        .xp-toolbar-input { flex: 1; padding: 8px 12px; font-size: 13px; border-radius: 8px; font-family: inherit; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-toolbar-input:focus { outline: none; }
+        .xp-toolbar-input::placeholder { opacity: 0.4; }
+        .xp-toolbar-btn { padding: 8px 16px; font-size: 12px; font-family: inherit; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+        .xp-toolbar-btn:hover { transform: translateY(-1px); }
+        .xp-toolbar-btn:active { transform: translateY(0); }
+        .xp-content { margin: 0 4px; padding: 16px; min-height: 400px; max-height: 500px; overflow-y: auto; border-radius: 0 0 12px 12px; }
+        .xp-content::-webkit-scrollbar { width: 6px; }
+        .xp-content::-webkit-scrollbar-track { background: transparent; }
+        .xp-content::-webkit-scrollbar-thumb { border-radius: 3px; }
+        .xp-content::-webkit-scrollbar-thumb:hover { }
+        .xp-window.maximized .xp-content { max-height: calc(100vh - 160px); }
+        .xp-statusbar { padding: 6px 14px; font-size: 11px; display: flex; justify-content: space-between; border-radius: 0 0 12px 12px; }
+        .xp-statusbar-section { padding: 2px 8px; }
+
+        /* === Taskbar === */
+        .xp-taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; padding: 0 8px; z-index: 1000; backdrop-filter: blur(20px); }
+        .xp-start-btn { padding: 6px 16px 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-start-btn:hover { transform: translateY(-1px); }
+        .xp-start-btn:active { transform: translateY(0); }
+        .xp-start-logo { width: 20px; height: 20px; background-image: url('/static/icons/logo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .xp-taskbar-items { flex: 1; display: flex; gap: 4px; margin-left: 12px; }
+        .xp-taskbar-item { padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-taskbar-item:hover { }
+        .xp-taskbar-item:active { transform: scale(0.97); }
+        .xp-taskbar-item-icon { width: 16px; height: 16px; background-image: url('/static/icons/logo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 4px; }
+        .xp-taskbar-clock { font-size: 12px; padding: 6px 14px; border-radius: 8px; font-weight: 500; }
+
+        /* === Start Menu === */
+        .start-menu { display: none; position: fixed; bottom: 56px; left: 8px; width: 380px; border-radius: 12px; z-index: 2000; box-shadow: 0 16px 48px rgba(0,0,0,0.6); animation: slideUp 0.2s ease-out; overflow: hidden; }
+        .start-menu.show { display: block; }
+        .start-menu-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+        .start-menu-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+        .start-menu-username { font-size: 14px; font-weight: 600; }
+        .start-menu-body { display: flex; min-height: 280px; }
+        .start-menu-left { flex: 1; padding: 8px 0; }
+        .start-menu-right { width: 160px; padding: 8px 0; }
+        .start-menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .start-menu-item:hover { }
+        .start-menu-item-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .start-menu-item-text { flex: 1; }
+        .start-menu-item-title { font-weight: 500; }
+        .start-menu-item-desc { font-size: 10px; opacity: 0.5; }
+        .start-menu-separator { height: 1px; margin: 6px 14px; }
+        .start-menu-right .start-menu-item { font-weight: 600; }
+        .start-menu-footer { border-top: 1px solid; padding: 8px 14px; display: flex; justify-content: flex-end; gap: 8px; }
+        .start-menu-footer-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; }
+        .start-menu-footer-btn:hover { }
+
+        /* === Icons === */
+        .xp-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .xp-icon-16 { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .icon-email { background-image: url('/static/icons/email-sosint.png'); }
+        .icon-phone { background-image: url('/static/icons/hlr.png'); }
+        .icon-search { background-image: url('/static/icons/nickname.png'); }
+
+        /* === Results === */
+        .section { margin-bottom: 16px; animation: fadeIn 0.3s ease-out; }
+        .section-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; padding-bottom: 6px; }
+        .xp-code { padding: 14px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.7; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+        .xp-profile { display: flex; gap: 16px; padding: 14px; border-radius: 8px; }
+        .xp-avatar { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+        .xp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .xp-profile-info { flex: 1; }
+        .xp-info-row { display: flex; gap: 8px; margin-bottom: 4px; font-size: 12px; }
+        .xp-info-label { font-weight: 600; min-width: 100px; }
+        .xp-links { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; }
+        .xp-link { padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-link:hover { transform: translateY(-1px); }
+        .xp-link:active { transform: translateY(0); }
+        .xp-table { width: 100%; border-collapse: collapse; font-size: 12px; border-radius: 8px; overflow: hidden; }
+        .xp-table th { padding: 8px 12px; text-align: left; font-weight: 600; }
+        .xp-table td { padding: 8px 12px; }
+        .xp-table tr { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: none; }
+        .xp-badge.found { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .xp-badge.not_found { opacity: 0.5; }
+        .xp-badge.redirect { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .xp-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .xp-badge.rate_limited { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .xp-badge.unknown { opacity: 0.3; }
+        .xp-loading { display: none; text-align: center; padding: 40px; font-size: 12px; }
+        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; opacity: 0.5; }
+        .xp-loading.show { display: block; }
+        #results { display: none; }
+        #results.show { display: block; }
+        .xp-footer { text-align: center; font-size: 11px; margin-top: 16px; }
+
+        /* === Reports === */
+        .xp-reports-folder { padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); border-radius: 12px; }
+        .xp-reports-folder:hover { transform: translateY(-2px); }
+        .xp-reports-folder:active { transform: translateY(0); }
+        .xp-reports-folder-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .xp-reports-folder-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .xp-reports-folder-count { font-size: 10px; opacity: 0.5; }
+        .xp-report-item { display: flex; align-items: center; padding: 8px 10px; border-bottom: 1px solid; cursor: pointer; font-size: 12px; gap: 8px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .xp-report-item:hover { }
+        .xp-report-item-name { flex: 1; }
+        .xp-report-item-date { font-size: 10px; opacity: 0.5; }
+        .xp-report-item-actions { display: flex; gap: 4px; }
+        .xp-report-item-btn { padding: 3px 8px; font-size: 10px; border: 1px solid; cursor: pointer; border-radius: 4px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; }
+        .xp-report-item-btn:hover { }
+        .xp-report-item-btn:active { transform: scale(0.95); }
+        .xp-report-item-btn.danger { }
+
+        /* === Login === */
+        .login-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .login-overlay.hidden { display: none; }
+        .login-window { width: 380px; border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.6); animation: slideIn 0.3s ease-out; }
+        .login-titlebar { padding: 16px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+        .login-titlebar-text { font-size: 16px; font-weight: 600; }
+        .login-body { padding: 24px 20px; display: flex; gap: 20px; align-items: flex-start; }
+        .login-logo { width: 64px; height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; animation: glow 3s ease-in-out infinite; }
+        .login-logo-text { color: white; font-size: 18px; font-weight: 700; }
+        .login-form { flex: 1; }
+        .login-label { font-size: 12px; margin-bottom: 6px; display: block; font-weight: 500; }
+        .login-input { width: 100%; padding: 10px 14px; font-size: 13px; border-radius: 8px; font-family: inherit; margin-bottom: 12px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .login-input:focus { outline: none; }
+        .login-input::placeholder { opacity: 0.4; }
+        .login-error { font-size: 12px; margin-bottom: 8px; display: none; }
+        .login-error.show { display: block; }
+        .login-buttons { padding: 12px 20px 16px; display: flex; gap: 8px; justify-content: flex-end; }
+        .login-btn { padding: 8px 24px; font-size: 13px; font-family: inherit; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        .login-btn:hover { transform: translateY(-1px); }
+        .login-btn:active { transform: translateY(0); }
+        .login-footer { padding: 0 20px 16px; }
+        .login-footer-text { font-size: 11px; opacity: 0.5; }
+        .login-copyright { text-align: center; padding: 0 20px 16px; font-size: 11px; opacity: 0.3; }
+
+        /* === Face Search === */
+        #faceDropZone { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+        #faceDropZone:hover { border-color: #555; }
+        #faceDropZone img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+        /* === Mobile === */
+        @media (max-width: 860px) {
+            .xp-window { width: calc(100vw - 16px) !important; left: 8px !important; transform: none !important; top: 50px !important; max-height: calc(100vh - 100px) !important; border-radius: 8px !important; }
+            .xp-window.maximized { width: 100vw !important; left: 0 !important; top: 0 !important; border-radius: 0 !important; }
+            .xp-content { min-height: 200px !important; max-height: calc(100vh - 200px) !important; padding: 12px !important; }
+            .desktop-icons { flex-direction: row !important; top: 8px !important; left: 8px !important; gap: 8px !important; overflow-x: auto !important; padding-bottom: 4px !important; width: calc(100vw - 16px) !important; flex-wrap: nowrap !important; }
+            .desktop-icon { width: 60px !important; padding: 4px !important; flex-shrink: 0 !important; }
+            .desktop-icon-img { width: 36px !important; height: 36px !important; font-size: 18px !important; }
+            .desktop-icon-label { font-size: 9px !important; }
+            .start-menu { width: calc(100vw - 16px) !important; left: 8px !important; bottom: 56px !important; max-height: 60vh !important; border-radius: 10px !important; }
+            .start-menu-body { flex-direction: column !important; min-height: auto !important; }
+            .start-menu-right { width: 100% !important; border-left: none !important; border-top: 1px solid; }
+            .xp-taskbar { height: 44px !important; padding: 0 4px !important; }
+            .xp-start-btn { padding: 5px 10px !important; font-size: 11px !important; }
+            .xp-taskbar-item { padding: 4px 8px !important; font-size: 10px !important; }
+            .login-window { width: calc(100vw - 32px) !important; max-width: 360px !important; }
+            .login-body { flex-direction: column !important; align-items: center !important; text-align: center !important; }
+            .login-logo { width: 56px !important; height: 56px !important; }
+        }
+        @media (max-width: 480px) {
+            .desktop-icons { top: 6px !important; left: 6px !important; gap: 4px !important; }
+            .desktop-icon { width: 52px !important; padding: 3px !important; }
+            .desktop-icon-img { width: 32px !important; height: 32px !important; border-radius: 8px !important; }
+            .desktop-icon-label { font-size: 8px !important; }
+            .xp-window { width: calc(100vw - 8px) !important; left: 4px !important; top: 40px !important; border-radius: 6px !important; }
+            .xp-titlebar { padding: 6px 8px !important; }
+            .xp-titlebar-text { font-size: 11px !important; }
+            .xp-toolbar { padding: 6px 8px !important; flex-wrap: wrap !important; gap: 4px !important; }
+            .xp-toolbar-btn { padding: 6px 10px !important; font-size: 10px !important; }
+            .xp-content { padding: 8px !important; }
+        }
+
+        /* =========================================
+           DARK THEME (Default)
+           ========================================= */
+        [data-theme="dark"], :root {
             --bg: #0a0a0f;
             --surface: #141419;
             --surface2: #1c1c24;
@@ -26,623 +245,179 @@
             --danger: #ef4444;
             --success: #22c55e;
             --warning: #f59e0b;
-            --radius: 10px;
-            --radius-sm: 6px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
-            --shadow-lg: 0 16px 48px rgba(0,0,0,0.6);
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        [data-theme="dark"] body, :root { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); background: var(--bg); }
+        [data-theme="dark"] .desktop-icon-img, :root .desktop-icon-img { border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .desktop-icon:hover .desktop-icon-img, :root .desktop-icon:hover .desktop-icon-img { box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .desktop-icon-label, :root .desktop-icon-label { color: var(--text-dim); }
+        [data-theme="dark"] .xp-window, :root .xp-window { background: var(--surface); border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-titlebar, :root .xp-titlebar { background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--text); }
+        [data-theme="dark"] .xp-titlebar-icon, :root .xp-titlebar-icon { background: linear-gradient(135deg, #3a3a42, #1a1a1f); }
+        [data-theme="dark"] .xp-titlebar-text, :root .xp-titlebar-text { color: var(--text); }
+        [data-theme="dark"] .xp-btn, :root .xp-btn { background: var(--surface3); color: var(--text-dim); }
+        [data-theme="dark"] .xp-btn:hover, :root .xp-btn:hover { background: var(--border-light); color: var(--text); }
+        [data-theme="dark"] .xp-toolbar, :root .xp-toolbar { background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--text-dim); }
+        [data-theme="dark"] .xp-toolbar-input, :root .xp-toolbar-input { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+        [data-theme="dark"] .xp-toolbar-input:focus, :root .xp-toolbar-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        [data-theme="dark"] .xp-toolbar-btn, :root .xp-toolbar-btn { background: var(--accent); color: var(--text); }
+        [data-theme="dark"] .xp-toolbar-btn:hover, :root .xp-toolbar-btn:hover { background: var(--accent-hover); }
+        [data-theme="dark"] .xp-content, :root .xp-content { background: var(--surface); color: var(--text); }
+        [data-theme="dark"] .xp-content::-webkit-scrollbar-thumb, :root .xp-content::-webkit-scrollbar-thumb { background: var(--border); }
+        [data-theme="dark"] .xp-content::-webkit-scrollbar-thumb:hover, :root .xp-content::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+        [data-theme="dark"] .xp-statusbar, :root .xp-statusbar { background: var(--surface2); border-top: 1px solid var(--border); color: var(--text-muted); }
+        [data-theme="dark"] .xp-taskbar, :root .xp-taskbar { background: var(--surface); border-top: 1px solid var(--border); }
+        [data-theme="dark"] .xp-start-btn, :root .xp-start-btn { background: linear-gradient(135deg, #2a2a30, #1a1a1f); color: var(--text); }
+        [data-theme="dark"] .xp-start-btn:hover, :root .xp-start-btn:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+        [data-theme="dark"] .xp-taskbar-item, :root .xp-taskbar-item { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-taskbar-item:hover, :root .xp-taskbar-item:hover { background: var(--surface3); color: var(--text); border-color: var(--border-light); }
+        [data-theme="dark"] .xp-taskbar-clock, :root .xp-taskbar-clock { color: var(--text-dim); background: var(--surface2); border: 1px solid var(--border); }
+        [data-theme="dark"] .start-menu, :root .start-menu { background: var(--surface); border: 1px solid var(--border); }
+        [data-theme="dark"] .start-menu-header, :root .start-menu-header { background: linear-gradient(135deg, #2a2a30, #1a1a1f); }
+        [data-theme="dark"] .start-menu-avatar, :root .start-menu-avatar { border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: white; }
+        [data-theme="dark"] .start-menu-username, :root .start-menu-username { color: white; }
+        [data-theme="dark"] .start-menu-left, :root .start-menu-left { background: var(--surface); }
+        [data-theme="dark"] .start-menu-right, :root .start-menu-right { background: var(--surface2); border-left: 1px solid var(--border); }
+        [data-theme="dark"] .start-menu-item, :root .start-menu-item { color: var(--text); }
+        [data-theme="dark"] .start-menu-item:hover, :root .start-menu-item:hover { background: var(--accent-glow); }
+        [data-theme="dark"] .start-menu-item-desc, :root .start-menu-item-desc { color: var(--text-muted); }
+        [data-theme="dark"] .start-menu-separator, :root .start-menu-separator { background: var(--border); }
+        [data-theme="dark"] .start-menu-footer, :root .start-menu-footer { background: var(--surface2); border-top: 1px solid var(--border); }
+        [data-theme="dark"] .start-menu-footer-btn, :root .start-menu-footer-btn { background: var(--surface3); border-color: var(--border); color: var(--text-dim); }
+        [data-theme="dark"] .start-menu-footer-btn:hover, :root .start-menu-footer-btn:hover { background: var(--border); color: var(--text); }
+        [data-theme="dark"] .login-overlay, :root .login-overlay { background: var(--bg); }
+        [data-theme="dark"] .login-window, :root .login-window { background: var(--surface); border: 1px solid var(--border); }
+        [data-theme="dark"] .login-titlebar-text, :root .login-titlebar-text { color: var(--text); }
+        [data-theme="dark"] .login-body, :root .login-body { }
+        [data-theme="dark"] .login-logo, :root .login-logo { background: linear-gradient(135deg, #2a2a30, #1a1a1f); }
+        [data-theme="dark"] .login-label, :root .login-label { color: var(--text-dim); }
+        [data-theme="dark"] .login-input, :root .login-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+        [data-theme="dark"] .login-input:focus, :root .login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        [data-theme="dark"] .login-error, :root .login-error { color: var(--danger); }
+        [data-theme="dark"] .login-buttons, :root .login-buttons { }
+        [data-theme="dark"] .login-btn, :root .login-btn { background: var(--accent); color: var(--text); }
+        [data-theme="dark"] .login-btn:hover, :root .login-btn:hover { background: var(--accent-hover); }
+        [data-theme="dark"] .login-footer-text, :root .login-footer-text { color: var(--text-muted); }
+        [data-theme="dark"] .login-copyright, :root .login-copyright { color: var(--text-muted); }
+        [data-theme="dark"] .section, :root .section { }
+        [data-theme="dark"] .section-title, :root .section-title { color: var(--text); border-bottom-color: var(--border); }
+        [data-theme="dark"] .xp-code, :root .xp-code { background: var(--bg); color: #e2e8f0; border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-profile, :root .xp-profile { background: var(--surface2); border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-avatar, :root .xp-avatar { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: 1px solid var(--border); color: white; }
+        [data-theme="dark"] .xp-info-label, :root .xp-info-label { color: var(--text); }
+        [data-theme="dark"] .xp-links, :root .xp-links { border-top-color: var(--border); }
+        [data-theme="dark"] .xp-link, :root .xp-link { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+        [data-theme="dark"] .xp-link:hover, :root .xp-link:hover { background: var(--surface3); border-color: var(--border-light); }
+        [data-theme="dark"] .xp-table, :root .xp-table { border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-table th, :root .xp-table th { background: var(--surface2); border-bottom-color: var(--border); color: var(--text); }
+        [data-theme="dark"] .xp-table td, :root .xp-table td { border-bottom-color: var(--border); }
+        [data-theme="dark"] .xp-table tr:hover, :root .xp-table tr:hover { background: var(--accent-glow); }
+        [data-theme="dark"] .xp-loading, :root .xp-loading { color: var(--text-muted); }
+        [data-theme="dark"] .xp-loading::before, :root .xp-loading::before { border-color: var(--border); border-top-color: var(--text-muted); }
+        [data-theme="dark"] .xp-reports-folder, :root .xp-reports-folder { background: var(--surface2); border: 1px solid var(--border); }
+        [data-theme="dark"] .xp-reports-folder:hover, :root .xp-reports-folder:hover { background: var(--surface3); border-color: var(--border-light); }
+        [data-theme="dark"] .xp-reports-folder-name, :root .xp-reports-folder-name { color: var(--text); }
+        [data-theme="dark"] .xp-reports-folder-count, :root .xp-reports-folder-count { color: var(--text-muted); }
+        [data-theme="dark"] .xp-report-item, :root .xp-report-item { border-bottom-color: var(--border); }
+        [data-theme="dark"] .xp-report-item:hover, :root .xp-report-item:hover { background: var(--accent-glow); }
+        [data-theme="dark"] .xp-report-item-date, :root .xp-report-item-date { color: var(--text-muted); }
+        [data-theme="dark"] .xp-report-item-btn, :root .xp-report-item-btn { background: var(--surface3); border-color: var(--border); color: var(--text-dim); }
+        [data-theme="dark"] .xp-report-item-btn:hover, :root .xp-report-item-btn:hover { background: var(--border); color: var(--text); }
+        [data-theme="dark"] .xp-report-item-btn.danger, :root .xp-report-item-btn.danger { color: var(--danger); }
+        [data-theme="dark"] #faceDropZone, :root #faceDropZone { border-color: var(--border); background: var(--surface2); color: var(--text-muted); }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-            background: var(--bg);
-            color: var(--text);
+        /* =========================================
+           XP THEME
+           ========================================= */
+        [data-theme="xp"] body {
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+            color: #333;
+            background: url('/static/wall.png') center/cover no-repeat fixed;
         }
-
-        /* === Animations === */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.03); } 50% { box-shadow: 0 0 40px rgba(255,255,255,0.05); } }
-
-        /* === Login Screen === */
-        .login-overlay {
-            position: fixed; inset: 0;
-            background: var(--bg);
-            z-index: 10000;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px);
-        }
-        .login-overlay.hidden { display: none; }
-        .login-window {
-            width: 380px; background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            animation: slideIn 0.3s ease-out;
-        }
-        .login-titlebar {
-            padding: 16px 20px 0;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .login-titlebar-text { color: var(--text); font-size: 16px; font-weight: 600; }
-        .login-body { padding: 24px 20px; display: flex; gap: 20px; align-items: flex-start; }
-        .login-logo {
-            width: 64px; height: 64px;
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            animation: glow 3s ease-in-out infinite;
-        }
-        .login-logo-text { color: white; font-size: 18px; font-weight: 700; }
-        .login-form { flex: 1; }
-        .login-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: block; font-weight: 500; }
-        .login-input {
-            width: 100%; padding: 10px 14px; font-size: 13px;
-            border: 1px solid var(--border); border-radius: var(--radius-sm);
-            font-family: inherit; background: var(--surface2); color: var(--text);
-            margin-bottom: 12px; transition: var(--transition);
-        }
-        .login-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-glow); }
-        .login-input::placeholder { color: var(--text-muted); }
-        .login-error { color: var(--danger); font-size: 12px; margin-bottom: 8px; display: none; }
-        .login-error.show { display: block; }
-        .login-buttons {
-            padding: 12px 20px 16px;
-            display: flex; gap: 8px; justify-content: flex-end;
-        }
-        .login-btn {
-            padding: 8px 24px; font-size: 13px; font-family: inherit;
-            background: #2a2a30; border: none; border-radius: var(--radius-sm);
-            cursor: pointer; font-weight: 600; color: white; transition: var(--transition);
-        }
-        .login-btn:hover { background: #3a3a42; transform: translateY(-1px); }
-        .login-btn:active { transform: translateY(0); }
-        .login-footer { padding: 0 20px 16px; }
-        .login-footer-text { color: var(--text-muted); font-size: 11px; }
-        .login-copyright { text-align: center; padding: 0 20px 16px; font-size: 11px; color: var(--text-muted); }
-
-        /* === Desktop Icons === */
-        .desktop-icons {
-            position: fixed; top: 24px; left: 24px; z-index: 5;
-            display: flex; flex-direction: column; gap: 16px;
-        }
-        .desktop-icon {
-            display: flex; flex-direction: column; align-items: center;
-            width: 72px; padding: 8px; cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
-            animation: fadeIn 0.4s ease-out both;
-        }
-        .desktop-icon:nth-child(1) { animation-delay: 0.05s; }
-        .desktop-icon:nth-child(2) { animation-delay: 0.1s; }
-        .desktop-icon:nth-child(3) { animation-delay: 0.15s; }
-        .desktop-icon:nth-child(4) { animation-delay: 0.2s; }
-        .desktop-icon:nth-child(5) { animation-delay: 0.25s; }
-        .desktop-icon:nth-child(6) { animation-delay: 0.3s; }
-        .desktop-icon:hover { background: rgba(255,255,255,0.06); }
-        .desktop-icon:active { transform: scale(0.95); }
-        .desktop-icon.drag-over { border-top: 2px solid #666; opacity: 0.7; }
-        .desktop-icon-img {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; margin-bottom: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: var(--transition);
-        }
-        .desktop-icon:hover .desktop-icon-img { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
-        .desktop-icon-label {
-            font-size: 11px; color: var(--text-dim); text-align: center;
-            line-height: 1.3; font-weight: 500;
-        }
-
-        /* === XP Window (Modern) === */
-        .xp-window {
-            position: absolute; width: 820px; top: 80px; left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            z-index: 100;
-            animation: slideIn 0.25s ease-out;
-        }
-        .xp-window.maximized {
-            top: 0 !important; left: 0 !important;
-            width: 100vw !important; height: calc(100vh - 48px) !important;
-            transform: none !important; border-radius: 0;
-        }
-        .xp-window.minimized { display: none; }
-        #mapWindow { display: none; flex-direction: column; }
-
-        /* === Title Bar === */
-        .xp-titlebar {
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 14px;
-            display: flex; align-items: center; justify-content: space-between;
-            border-radius: var(--radius) var(--radius) 0 0;
-            cursor: move;
-        }
-        .xp-titlebar-left { display: flex; align-items: center; gap: 10px; }
-        .xp-titlebar-icon {
-            width: 20px; height: 20px;
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            border-radius: 5px; flex-shrink: 0;
-        }
-        .xp-titlebar-text { color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap; }
-        .xp-titlebar-buttons { display: flex; gap: 4px; }
-        .xp-btn {
-            width: 28px; height: 28px;
-            border: none; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; cursor: pointer; color: var(--text-dim);
-            background: var(--surface3); transition: var(--transition);
-        }
-        .xp-btn:hover { background: var(--border-light); color: var(--text); }
-        .xp-btn:active { transform: scale(0.9); }
-        .xp-btn-close:hover { background: var(--danger); color: white; }
-
-        /* === Toolbar === */
-        .xp-toolbar {
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 14px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .xp-toolbar-input {
-            flex: 1; padding: 8px 12px; font-size: 13px;
-            border: 1px solid var(--border); border-radius: var(--radius-sm);
-            font-family: inherit; background: var(--surface); color: var(--text);
-            transition: var(--transition);
-        }
-        .xp-toolbar-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-glow); }
-        .xp-toolbar-input::placeholder { color: var(--text-muted); }
-        .xp-toolbar-btn {
-            padding: 8px 16px; font-size: 12px; font-family: inherit;
-            background: #2a2a30; border: none; border-radius: var(--radius-sm);
-            cursor: pointer; font-weight: 600; color: white; transition: var(--transition);
-            white-space: nowrap;
-        }
-        .xp-toolbar-btn:hover { background: #3a3a42; transform: translateY(-1px); }
-        .xp-toolbar-btn:active { transform: translateY(0); }
-
-        /* === Content === */
-        .xp-content {
-            background: var(--surface);
-            margin: 0 4px; padding: 16px;
-            min-height: 400px; max-height: 500px;
-            overflow-y: auto; border-radius: 0 0 var(--radius) var(--radius);
-        }
-        .xp-content::-webkit-scrollbar { width: 6px; }
-        .xp-content::-webkit-scrollbar-track { background: transparent; }
-        .xp-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        .xp-content::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
-        .xp-window.maximized .xp-content { max-height: calc(100vh - 160px); }
-
-        /* === Status Bar === */
-        .xp-statusbar {
-            background: var(--surface2); border-top: 1px solid var(--border);
-            padding: 6px 14px; font-size: 11px; color: var(--text-muted);
-            display: flex; justify-content: space-between;
-            border-radius: 0 0 var(--radius) var(--radius);
-        }
-        .xp-statusbar-section { padding: 2px 8px; }
-
-        /* === Taskbar === */
-        .xp-taskbar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
-            background: var(--surface); border-top: 1px solid var(--border);
-            display: flex; align-items: center; padding: 0 8px;
-            z-index: 1000;
-            backdrop-filter: blur(20px);
-        }
-        .xp-start-btn {
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            color: white; padding: 6px 16px 6px 10px;
-            border: none; border-radius: var(--radius-sm);
-            font-size: 13px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 6px;
-            font-family: inherit; transition: var(--transition);
-        }
-        .xp-start-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
-        .xp-start-btn:active { transform: translateY(0); }
-
-        /* === Start Menu === */
-        .start-menu {
-            display: none; position: fixed; bottom: 56px; left: 8px;
-            width: 380px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: var(--radius);
-            z-index: 2000; box-shadow: var(--shadow-lg);
-            animation: slideUp 0.2s ease-out;
-            overflow: hidden;
-        }
-        .start-menu.show { display: block; }
-        .start-menu-header {
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            padding: 14px 16px; display: flex; align-items: center; gap: 12px;
-        }
-        .start-menu-avatar {
-            width: 40px; height: 40px; border-radius: 10px;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; color: white; font-weight: 700;
-        }
-        .start-menu-username { color: white; font-size: 14px; font-weight: 600; }
-        .start-menu-body { display: flex; min-height: 280px; }
-        .start-menu-left { flex: 1; background: var(--surface); padding: 8px 0; }
-        .start-menu-right { width: 160px; background: var(--surface2); padding: 8px 0; border-left: 1px solid var(--border); }
-        .start-menu-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 14px; font-size: 12px; cursor: pointer;
-            transition: var(--transition); color: var(--text);
-        }
-        .start-menu-item:hover { background: rgba(255,255,255,0.03); color: #ccc; }
-        .start-menu-item-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .start-menu-item-text { flex: 1; }
-        .start-menu-item-title { font-weight: 500; }
-        .start-menu-item-desc { font-size: 10px; color: var(--text-muted); }
-        .start-menu-item:hover .start-menu-item-desc { color: var(--text-dim); }
-        .start-menu-separator { height: 1px; background: var(--border); margin: 6px 14px; }
-        .start-menu-right .start-menu-item { font-weight: 600; }
-        .start-menu-footer {
-            background: var(--surface2); border-top: 1px solid var(--border);
-            padding: 8px 14px; display: flex; justify-content: flex-end; gap: 8px;
-        }
-        .start-menu-footer-btn {
-            display: flex; align-items: center; gap: 4px;
-            padding: 6px 12px; background: var(--surface3);
-            border: 1px solid var(--border); color: var(--text-dim);
-            font-size: 11px; cursor: pointer; border-radius: var(--radius-sm);
-            transition: var(--transition); font-family: inherit;
-        }
-        .start-menu-footer-btn:hover { background: var(--border); color: var(--text); }
-
-        /* === XP Icons === */
-        .xp-icon {
-            width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden; background-size: contain;
-            background-repeat: no-repeat; background-position: center;
-        }
-        .xp-icon-16 {
-            width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
-            background-size: contain; background-repeat: no-repeat;
-            background-position: center;
-        }
-        .icon-email { background-image: url('/static/icons/email-sosint.png'); }
-        .icon-phone { background-image: url('/static/icons/hlr.png'); }
-        .icon-search { background-image: url('/static/icons/nickname.png'); }
-        .icon-internet { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
-        .icon-internet::after { content: ''; width: 14px; height: 14px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .icon-outlook { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
-        .icon-outlook::before { content: ''; width: 12px; height: 8px; background: white; border-radius: 2px; position: absolute; }
-        .icon-notepad { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-notepad::before { content: ''; width: 14px; height: 16px; background: repeating-linear-gradient(0deg, var(--text-muted) 0px, var(--text-muted) 1px, transparent 1px, transparent 3px); position: absolute; border-radius: 2px; }
-        .icon-calc { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-calc::before { content: ''; width: 12px; height: 8px; background: #2a2a30; border-radius: 2px; position: absolute; top: 4px; }
-        .icon-folder { background: linear-gradient(135deg, #3a3a3a, #2a2a2a); border: none; }
-        .icon-folder::before { content: ''; width: 10px; height: 3px; background: #d97706; position: absolute; top: 2px; left: 2px; border-radius: 2px 2px 0 0; }
-        .icon-pictures { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
-        .icon-pictures::before { content: ''; width: 12px; height: 10px; background: linear-gradient(135deg, #22c55e, #15803d); border-radius: 50% 50% 0 0; position: absolute; }
-        .icon-music { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-music::before { content: '♪'; font-size: 14px; color: var(--text-dim); }
-        .icon-computer { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-computer::before { content: ''; width: 16px; height: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 2px; position: absolute; top: 3px; }
-        .icon-computer::after { content: ''; width: 8px; height: 3px; background: var(--border-light); position: absolute; bottom: 4px; border-radius: 1px; }
-        .icon-control { background: var(--surface3); border: 1px solid var(--border); }
-        .icon-control::before { content: ''; width: 14px; height: 14px; border: 2px solid var(--text-muted); border-radius: 50%; position: absolute; }
-        .icon-control::after { content: ''; width: 6px; height: 6px; background: #2a2a30; border-radius: 50%; position: absolute; }
-        .icon-logout { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
-        .icon-logout::before { content: ''; width: 8px; height: 8px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .icon-shutdown { background: linear-gradient(135deg, #3a2a2a, #2a1a1a); border: none; }
-        .icon-shutdown::before { content: ''; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; position: absolute; }
-
-        /* Desktop Icon Images */
-        .desktop-icon-img { background-size: contain; background-repeat: no-repeat; background-position: center; }
-        .desktop-icon-email { background-image: url('/static/icons/email-sosint.png'); }
-        .desktop-icon-phone { background-image: url('/static/icons/hlr.png'); }
-        .desktop-icon-search { background-image: url('/static/icons/nickname.png'); }
-        .desktop-icon-map { background: linear-gradient(135deg, #2a2a30, #1a1a1f); border: none; }
-        .desktop-icon-map::before { content: ''; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; position: absolute; }
-        .desktop-icon-map::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; }
-        .icon-map { background: linear-gradient(135deg, #2a2a30, #1a1a1f) !important; border: none !important; }
-        .desktop-icon-reports { background: linear-gradient(135deg, #3a3a3a, #2a2a2a); border: none; }
-        .desktop-icon-reports::before { content: ''; width: 24px; height: 4px; background: rgba(255,255,255,0.5); position: absolute; top: 6px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
-        .desktop-icon-reports::after { content: '📧📁📋🗺️'; font-size: 8px; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
-        .icon-reports { background: linear-gradient(135deg, var(--warning), #d97706) !important; border: none !important; }
-
-        /* Taskbar/Title Icons */
-        .xp-taskbar-item-icon, .xp-titlebar-icon, .xp-start-logo {
-            background-image: url('/static/icons/logo.png');
-            background-size: contain; background-repeat: no-repeat;
-            background-position: center; border-radius: 4px;
-        }
-        .xp-taskbar-items { flex: 1; display: flex; gap: 4px; margin-left: 12px; }
-        .xp-taskbar-item {
-            background: var(--surface2); color: var(--text-dim);
-            padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-            font-size: 12px; cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; gap: 6px;
-            transition: var(--transition);
-        }
-        .xp-taskbar-item:hover { background: var(--surface3); color: var(--text); border-color: var(--border-light); }
-        .xp-taskbar-item:active { transform: scale(0.97); }
-        .xp-taskbar-clock {
-            color: var(--text-dim); font-size: 12px; padding: 6px 14px;
-            background: var(--surface2); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); font-weight: 500;
-        }
-
-        /* === Results === */
-        .section { margin-bottom: 16px; animation: fadeIn 0.3s ease-out; }
-        .section-title {
-            font-size: 12px; font-weight: 600; color: var(--text);
-            margin-bottom: 8px; padding-bottom: 6px;
-            border-bottom: 1px solid var(--border);
-        }
-        .xp-code {
-            background: var(--bg); color: #e2e8f0;
-            padding: 14px; font-family: 'SF Mono', 'Consolas', monospace;
-            font-size: 12px; line-height: 1.7; border: 1px solid var(--border);
-            border-radius: var(--radius-sm); overflow-x: auto; white-space: pre-wrap;
-        }
-        .xp-profile {
-            display: flex; gap: 16px; padding: 14px;
-            background: var(--surface2); border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-        }
-        .xp-avatar {
-            width: 80px; height: 80px; border: 1px solid var(--border);
-            background: linear-gradient(135deg, #2a2a30, #1a1a1f);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: 700; color: white;
-            flex-shrink: 0; overflow: hidden; border-radius: var(--radius);
-        }
-        .xp-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .xp-profile-info { flex: 1; }
-        .xp-info-row { display: flex; gap: 8px; margin-bottom: 4px; font-size: 12px; }
-        .xp-info-label { font-weight: 600; color: var(--text); min-width: 100px; }
-        .xp-links {
-            display: flex; gap: 8px; margin-top: 12px;
-            padding-top: 10px; border-top: 1px solid var(--border);
-        }
-        .xp-link {
-            padding: 8px 14px; background: var(--surface2);
-            border: 1px solid var(--border); border-radius: var(--radius-sm);
-            text-decoration: none; color: var(--text); font-size: 12px; font-weight: 600;
-            transition: var(--transition);
-        }
-        .xp-link:hover { background: var(--surface3); border-color: var(--text); transform: translateY(-1px); }
-        .xp-link:active { transform: translateY(0); }
-
-        /* === Table === */
-        .xp-table {
-            width: 100%; border-collapse: collapse; font-size: 12px;
-            border: 1px solid var(--border); border-radius: var(--radius-sm);
-            overflow: hidden;
-        }
-        .xp-table th {
-            background: var(--surface2); border-bottom: 1px solid var(--border);
-            padding: 8px 12px; text-align: left; font-weight: 600; color: var(--text);
-        }
-        .xp-table td { border-bottom: 1px solid var(--border); padding: 8px 12px; }
-        .xp-table tr { transition: var(--transition); }
-        .xp-table tr:hover { background: rgba(255,255,255,0.03); }
-
-        /* === Badges === */
-        .xp-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: none; }
-        .xp-badge.found { background: rgba(34,197,94,0.15); color: #22c55e; }
-        .xp-badge.not_found { background: rgba(136,136,160,0.15); color: #8888a0; }
-        .xp-badge.redirect { background: rgba(136,136,160,0.15); color: #aaa; }
-        .xp-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
-        .xp-badge.rate_limited { background: rgba(245,158,11,0.15); color: #f59e0b; }
-        .xp-badge.unknown { background: rgba(136,136,160,0.1); color: #8888a0; }
-
-        /* === Loading === */
-        .xp-loading { display: none; text-align: center; padding: 40px; font-size: 12px; color: var(--text-muted); }
-        .xp-loading::before { content: ''; display: block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: #555; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-
-        /* === Reports === */
-        .xp-reports-folder {
-            background: var(--surface2); border: 1px solid var(--border);
-            padding: 16px; text-align: center; cursor: pointer;
-            transition: var(--transition); border-radius: var(--radius);
-        }
-        .xp-reports-folder:hover { background: var(--surface3); border-color: var(--text); transform: translateY(-2px); }
-        .xp-reports-folder:active { transform: translateY(0); }
-        .xp-reports-folder-icon {
-            width: 48px; height: 48px; margin: 0 auto 8px;
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .xp-reports-folder-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-        .xp-reports-folder-count { font-size: 10px; color: var(--text-muted); }
-
-        .xp-report-item {
-            display: flex; align-items: center; padding: 8px 10px;
-            border-bottom: 1px solid var(--border); cursor: pointer;
-            font-size: 12px; gap: 8px; transition: var(--transition);
-        }
-        .xp-report-item:hover { background: rgba(255,255,255,0.03); }
-        .xp-report-item-name { flex: 1; }
-        .xp-report-item-date { font-size: 10px; color: var(--text-muted); }
-        .xp-report-item:hover .xp-report-item-date { color: var(--text-dim); }
-        .xp-report-item-actions { display: flex; gap: 4px; }
-        .xp-report-item-btn {
-            padding: 3px 8px; font-size: 10px;
-            background: var(--surface3); border: 1px solid var(--border);
-            cursor: pointer; border-radius: 4px; transition: var(--transition);
-            color: var(--text-dim); font-family: inherit;
-        }
-        .xp-report-item-btn:hover { background: var(--border); color: var(--text); }
-        .xp-report-item-btn:active { transform: scale(0.95); }
-        .xp-report-item-btn.danger { color: var(--danger); }
-        .xp-report-item-btn.danger:hover { background: rgba(239,68,68,0.15); }
-
-        .xp-loading.show { display: block; }
-        #results { display: none; }
-        #results.show { display: block; }
-        .xp-footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 16px; }
-
-        /* === Mobile Responsive === */
-        @media (max-width: 860px) {
-            .xp-window {
-                width: calc(100vw - 16px) !important;
-                left: 8px !important;
-                transform: none !important;
-                top: 50px !important;
-                max-height: calc(100vh - 100px) !important;
-                border-radius: 8px !important;
-            }
-            .xp-window.maximized {
-                width: 100vw !important;
-                left: 0 !important;
-                top: 0 !important;
-                border-radius: 0 !important;
-            }
-            .xp-content {
-                min-height: 200px !important;
-                max-height: calc(100vh - 200px) !important;
-                padding: 12px !important;
-            }
-            .xp-window.maximized .xp-content {
-                max-height: calc(100vh - 180px) !important;
-            }
-            .desktop-icons {
-                flex-direction: row !important;
-                top: 8px !important;
-                left: 8px !important;
-                gap: 8px !important;
-                overflow-x: auto !important;
-                padding-bottom: 4px !important;
-                width: calc(100vw - 16px) !important;
-                flex-wrap: nowrap !important;
-            }
-            .desktop-icon {
-                width: 60px !important;
-                padding: 4px !important;
-                flex-shrink: 0 !important;
-            }
-            .desktop-icon-img {
-                width: 36px !important;
-                height: 36px !important;
-                font-size: 18px !important;
-            }
-            .desktop-icon-label {
-                font-size: 9px !important;
-            }
-            .start-menu {
-                width: calc(100vw - 16px) !important;
-                left: 8px !important;
-                bottom: 56px !important;
-                max-height: 60vh !important;
-                border-radius: 10px !important;
-            }
-            .start-menu-body {
-                flex-direction: column !important;
-                min-height: auto !important;
-            }
-            .start-menu-right {
-                width: 100% !important;
-                border-left: none !important;
-                border-top: 1px solid var(--border) !important;
-            }
-            .xp-taskbar {
-                height: 44px !important;
-                padding: 0 4px !important;
-            }
-            .xp-start-btn {
-                padding: 5px 10px !important;
-                font-size: 11px !important;
-            }
-            .xp-taskbar-item {
-                padding: 4px 8px !important;
-                font-size: 10px !important;
-            }
-            .login-window {
-                width: calc(100vw - 32px) !important;
-                max-width: 360px !important;
-            }
-            .login-body {
-                flex-direction: column !important;
-                align-items: center !important;
-                text-align: center !important;
-            }
-            .login-logo {
-                width: 56px !important;
-                height: 56px !important;
-            }
-            .face-drop-zone {
-                width: 100px !important;
-                height: 100px !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .desktop-icons {
-                top: 6px !important;
-                left: 6px !important;
-                gap: 4px !important;
-            }
-            .desktop-icon {
-                width: 52px !important;
-                padding: 3px !important;
-            }
-            .desktop-icon-img {
-                width: 32px !important;
-                height: 32px !important;
-                border-radius: 8px !important;
-            }
-            .desktop-icon-label {
-                font-size: 8px !important;
-            }
-            .xp-window {
-                width: calc(100vw - 8px) !important;
-                left: 4px !important;
-                top: 40px !important;
-                border-radius: 6px !important;
-            }
-            .xp-titlebar {
-                padding: 6px 8px !important;
-            }
-            .xp-titlebar-text {
-                font-size: 11px !important;
-            }
-            .xp-toolbar {
-                padding: 6px 8px !important;
-                flex-wrap: wrap !important;
-                gap: 4px !important;
-            }
-            .xp-toolbar-btn {
-                padding: 6px 10px !important;
-                font-size: 10px !important;
-            }
-            .xp-content {
-                padding: 8px !important;
-            }
-            .start-menu-header {
-                padding: 10px 12px !important;
-            }
-            .start-menu-item {
-                padding: 6px 10px !important;
-                font-size: 11px !important;
-            }
-            .zoom-ctrl {
-                bottom: 52px !important;
-                right: 6px !important;
-            }
-        }
+        [data-theme="xp"] .desktop-icon-img { border: 2px solid rgba(255,255,255,0.5); box-shadow: 1px 1px 3px rgba(0,0,0,0.3); background: linear-gradient(135deg, #4169e1, #00bfff); }
+        [data-theme="xp"] .desktop-icon:hover .desktop-icon-img { box-shadow: 2px 2px 6px rgba(0,0,0,0.4); }
+        [data-theme="xp"] .desktop-icon-label { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        [data-theme="xp"] .xp-window { background: #ece9d8; border: 3px outset #dfdfdf; border-radius: 8px 8px 0 0; }
+        [data-theme="xp"] .xp-titlebar { background: linear-gradient(180deg, #0a246a 0%, #0f3795 3%, #2f6fce 6%, #2f6fce 90%, #0f3795 97%, #0a246a 100%); border-radius: 5px 5px 0 0; border-bottom: none; }
+        [data-theme="xp"] .xp-titlebar-icon { background: linear-gradient(135deg, #ff6b35, #ffd700, #00aa00, #0066ff) !important; }
+        [data-theme="xp"] .xp-titlebar-text { color: white; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
+        [data-theme="xp"] .xp-btn { background: linear-gradient(180deg, #3c7fb1, #2f6299); border: 1px outset #aaa; border-radius: 3px; color: white; width: 21px; height: 21px; }
+        [data-theme="xp"] .xp-btn-close { background: linear-gradient(180deg, #e08356, #c53a20) !important; }
+        [data-theme="xp"] .xp-toolbar { background: linear-gradient(180deg, #f2f0e8, #e6e2d6); border-bottom: 1px solid #aca899; }
+        [data-theme="xp"] .xp-toolbar-input { background: white; border: 2px inset #d4d0c8; }
+        [data-theme="xp"] .xp-toolbar-input:focus { border-color: #316ac5; }
+        [data-theme="xp"] .xp-toolbar-btn { background: linear-gradient(180deg, #fff 0%, #ece9d8 100%); border: 2px outset #d4d0c8; color: #333; }
+        [data-theme="xp"] .xp-toolbar-btn:hover { background: linear-gradient(180deg, #fff 0%, #ddd8c8 100%); }
+        [data-theme="xp"] .xp-content { background: white; border: 2px inset #d4d0c8; color: #333; }
+        [data-theme="xp"] .xp-content::-webkit-scrollbar-thumb { background: #aca899; }
+        [data-theme="xp"] .xp-statusbar { background: #ece9d8; border-top: 2px outset #fff; color: #444; }
+        [data-theme="xp"] .xp-statusbar-section { border: 1px inset #d4d0c8; }
+        [data-theme="xp"] .xp-taskbar { background: linear-gradient(180deg, #3168d5 0%, #2456bb 2%, #1941a5 50%, #18399a 50%, #1e4fbd 100%); border-top: none; }
+        [data-theme="xp"] .xp-start-btn { background: linear-gradient(180deg, #3c9b47 0%, #2d7e36 30%, #1e6b27 100%); border: 2px outset #4caf50; border-radius: 0 8px 8px 0; color: white; }
+        [data-theme="xp"] .xp-taskbar-item { background: linear-gradient(180deg, #3c7fb1 0%, #2f6299 50%, #245080 100%); color: white; border: 2px outset #5599cc; border-radius: 2px; }
+        [data-theme="xp"] .xp-taskbar-clock { color: white; border: 2px inset #3366aa; background: linear-gradient(180deg, #1a5276, #0e3d5c); }
+        [data-theme="xp"] .start-menu { background: #ece9d8; border: 2px outset #dfdfdf; border-radius: 8px 8px 0 0; }
+        [data-theme="xp"] .start-menu-header { background: linear-gradient(180deg, #1a5276 0%, #2471a3 100%); border-radius: 6px 6px 0 0; }
+        [data-theme="xp"] .start-menu-avatar { border: 2px solid white; background: linear-gradient(135deg, #4169e1, #00bfff); color: white; border-radius: 4px; }
+        [data-theme="xp"] .start-menu-username { color: white; }
+        [data-theme="xp"] .start-menu-left { background: white; border-right: 1px solid #d4d0c8; }
+        [data-theme="xp"] .start-menu-right { background: #d3e5fa; }
+        [data-theme="xp"] .start-menu-item { color: #333; border: 1px solid transparent; }
+        [data-theme="xp"] .start-menu-item:hover { background: #316ac5; color: white; border-color: #316ac5; }
+        [data-theme="xp"] .start-menu-item-desc { color: #666; }
+        [data-theme="xp"] .start-menu-item:hover .start-menu-item-desc { color: #ccc; }
+        [data-theme="xp"] .start-menu-separator { background: #d4d0c8; }
+        [data-theme="xp"] .start-menu-footer { background: linear-gradient(180deg, #3168d5, #1941a5); border-top: none; }
+        [data-theme="xp"] .start-menu-footer-btn { background: linear-gradient(180deg, #3c7fb1, #2f6299); border: 1px outset #5599cc; color: white; border-radius: 2px; }
+        [data-theme="xp"] .login-overlay { background: linear-gradient(180deg, #3a6ea5 0%, #2456a0 50%, #1a3f7a 100%); }
+        [data-theme="xp"] .login-window { background: #ece9d8; border: 3px outset #dfdfdf; border-radius: 8px 8px 0 0; }
+        [data-theme="xp"] .login-titlebar { background: linear-gradient(180deg, #0a246a 0%, #0f3795 3%, #2f6fce 6%, #2f6fce 90%, #0f3795 97%, #0a246a 100%); border-radius: 5px 5px 0 0; }
+        [data-theme="xp"] .login-titlebar-text { color: white; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
+        [data-theme="xp"] .login-logo { background: linear-gradient(135deg, #3a6ea5, #1a3f7a); }
+        [data-theme="xp"] .login-label { color: #003399; }
+        [data-theme="xp"] .login-input { background: white; border: 2px inset #d4d0c8; }
+        [data-theme="xp"] .login-input:focus { border-color: #316ac5; }
+        [data-theme="xp"] .login-error { color: #c53a20; }
+        [data-theme="xp"] .login-buttons { border-top: 1px solid #aca899; }
+        [data-theme="xp"] .login-btn { background: linear-gradient(180deg, #fff 0%, #ece9d8 100%); border: 2px outset #d4d0c8; color: #333; }
+        [data-theme="xp"] .login-btn:hover { background: linear-gradient(180deg, #fff 0%, #ddd8c8 100%); }
+        [data-theme="xp"] .login-footer-text { color: white; }
+        [data-theme="xp"] .login-copyright { color: #666; }
+        [data-theme="xp"] .section-title { color: #003399; border-bottom: 1px solid #7f9db9; }
+        [data-theme="xp"] .xp-code { background: #1e1e1e; color: #d4d4d4; border: 2px inset #d4d0c8; }
+        [data-theme="xp"] .xp-profile { background: #f0f0f0; border: 2px inset #d4d0c8; }
+        [data-theme="xp"] .xp-avatar { background: linear-gradient(135deg, #4169e1, #00bfff); border: 2px inset #d4d0c8; color: white; }
+        [data-theme="xp"] .xp-info-label { color: #003399; }
+        [data-theme="xp"] .xp-links { border-top: 1px solid #aca899; }
+        [data-theme="xp"] .xp-link { background: linear-gradient(180deg, #fff, #ece9d8); border: 2px outset #d4d0c8; color: #003399; }
+        [data-theme="xp"] .xp-link:hover { background: linear-gradient(180deg, #fff, #ddd8c8); }
+        [data-theme="xp"] .xp-table { border: 2px inset #d4d0c8; }
+        [data-theme="xp"] .xp-table th { background: linear-gradient(180deg, #f2f0e8, #e6e2d6); border-bottom: 1px solid #aca899; color: #333; }
+        [data-theme="xp"] .xp-table td { border-bottom: 1px solid #aca899; }
+        [data-theme="xp"] .xp-table tr:hover { background: #e8f4fd; }
+        [data-theme="xp"] .xp-loading { color: #666; }
+        [data-theme="xp"] .xp-loading::before { border-color: #d4d0c8; border-top-color: #666; }
+        [data-theme="xp"] .xp-reports-folder { background: linear-gradient(180deg, #fff 0%, #ece9d8 100%); border: 2px outset #d4d0c8; }
+        [data-theme="xp"] .xp-reports-folder:hover { background: linear-gradient(180deg, #fff 0%, #ddd8c8 100%); border-color: #003399; }
+        [data-theme="xp"] .xp-reports-folder-name { color: #003399; }
+        [data-theme="xp"] .xp-reports-folder-count { color: #666; }
+        [data-theme="xp"] .xp-report-item { border-bottom: 1px solid #d4d0c8; }
+        [data-theme="xp"] .xp-report-item:hover { background: #316ac5; color: white; }
+        [data-theme="xp"] .xp-report-item-date { color: #888; }
+        [data-theme="xp"] .xp-report-item:hover .xp-report-item-date { color: #ccc; }
+        [data-theme="xp"] .xp-report-item-btn { background: linear-gradient(180deg, #fff, #ece9d8); border: 1px outset #d4d0c8; color: #333; }
+        [data-theme="xp"] .xp-report-item-btn:hover { }
+        [data-theme="xp"] .xp-report-item-btn.danger { color: #c53a20; }
+        [data-theme="xp"] #faceDropZone { border-color: #aaa; background: #f8f8f8; color: #999; }
+        [data-theme="xp"] #faceDropZone:hover { border-color: #666; }
 </style>
+
+    <script>
+        // Theme System
+        (function() {
+            var saved = localStorage.getItem('sosint-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
 </head>
 <body>
     <!-- Login Screen -->
@@ -1044,6 +819,9 @@
             </div>
         </div>
         <div class="start-menu-footer">
+            <div class="start-menu-footer-btn" onclick="toggleTheme()" id="themeBtn" style="font-size:10px">
+                🎨 <span id="themeLabel">Тёмная тема</span>
+            </div>
             <div class="start-menu-footer-btn" onclick="doLogout(); toggleStartMenu();">
                 <div class="xp-icon-16 icon-logout"></div> Log Off
             </div>
@@ -1248,6 +1026,23 @@
         function toggleStartMenu() {
             document.getElementById('startMenu').classList.toggle('show');
         }
+
+        // === Theme System ===
+        function toggleTheme() {
+            var current = document.documentElement.getAttribute('data-theme');
+            var next = current === 'dark' ? 'xp' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('sosint-theme', next);
+            document.getElementById('themeLabel').textContent = next === 'dark' ? 'Тёмная тема' : 'Windows XP';
+        }
+
+        // Init theme on load
+        (function() {
+            var saved = localStorage.getItem('sosint-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            var label = document.getElementById('themeLabel');
+            if (label) label.textContent = saved === 'dark' ? 'Тёмная тема' : 'Windows XP';
+        })();
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.start-menu') && !e.target.closest('.xp-start-btn')) {
