@@ -1,15 +1,88 @@
 [build]
   publish = "frontend"
-  command = "echo 'Static site - no build needed'"
+  functions = "netlify/functions"
+  command = "echo 'Static site with Netlify Functions'"
 
-# Redirect API calls to backend
+# Auth routes
 [[redirects]]
-  from = "/api/*"
-  to = "https://sosint-api.onrender.com/api/:splat"
+  from = "/api/auth/login"
+  to = "/.netlify/functions/auth-login"
   status = 200
   force = true
 
-# Serve map page
+[[redirects]]
+  from = "/api/auth/status"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+  force = true
+
+# Admin routes - all go to auth-admin
+[[redirects]]
+  from = "/api/auth/admin/*"
+  to = "/.netlify/functions/auth-admin"
+  status = 200
+  force = true
+
+# Analysis routes
+[[redirects]]
+  from = "/api/analyze"
+  to = "/.netlify/functions/analyze"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/analyze/export"
+  to = "/.netlify/functions/analyze"
+  status = 200
+  force = true
+
+# HLR routes
+[[redirects]]
+  from = "/api/hlr"
+  to = "/.netlify/functions/hlr"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/hlr/export"
+  to = "/.netlify/functions/hlr"
+  status = 200
+  force = true
+
+# Sherlock routes
+[[redirects]]
+  from = "/api/sherlock"
+  to = "/.netlify/functions/sherlock"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/sherlock/export"
+  to = "/.netlify/functions/sherlock"
+  status = 200
+  force = true
+
+# Face search routes
+[[redirects]]
+  from = "/api/face-search"
+  to = "/.netlify/functions/face-search"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/face-search/url"
+  to = "/.netlify/functions/face-search"
+  status = 200
+  force = true
+
+# Health check
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+  force = true
+
+# Map page
 [[redirects]]
   from = "/map"
   to = "/map/index.html"
@@ -19,13 +92,6 @@
   from = "/map/*"
   to = "/map/:splat"
   status = 200
-
-# SPA fallback
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = [{Type = "application/json", Status = "404"}]
 
 # Cache static assets
 [[headers]]
