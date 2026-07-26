@@ -215,7 +215,7 @@ function startFight(){
   tension=0;catchProg=0;arcPos=0;
   arcDir=1;
   fishStrength=biteFish.type.str;
-  arcSpeed=1.5+biteFish.type.speed*0.5;
+  arcSpeed=0.5+biteFish.type.speed*0.2;
   document.getElementById('pullBtn').style.display='block';
   document.getElementById('pullBtn').textContent='Тянуть';
   document.getElementById('tensionBar').style.display='block';
@@ -273,29 +273,27 @@ function update(dt){
   // Fighting - arc meter system
   if(state==='fighting'){
     // Fish moves the arc indicator
-    arcPos+=arcDir*arcSpeed*dt*0.06;
+    arcPos+=arcDir*arcSpeed*dt*0.02;
     // Random direction changes (fish fighting)
-    if(Math.random()<0.02*fishStrength)arcDir*=-1;
+    if(Math.random()<0.015*fishStrength)arcDir*=-1;
     // Bounce off edges
     if(arcPos>1){arcPos=1;arcDir=-1;}
     if(arcPos<-1){arcPos=-1;arcDir=1;}
     // Fish periodically changes direction aggressively
-    if(Math.random()<0.008*fishStrength){arcDir*=-1;arcSpeed=1.5+fishStrength*1.5+Math.random();}
+    if(Math.random()<0.005*fishStrength){arcDir*=-1;arcSpeed=0.5+fishStrength*0.8+Math.random()*0.3;}
 
     // Pulling - check if in good zone
     if(pulling){
-      // arcPos near 0 = green zone (good)
       let inZone=Math.abs(arcPos)<0.4;
       if(inZone){
-        catchProg+=0.4; // progress when in green zone
-        tension=Math.max(0,tension-0.3); // tension decreases in good zone
+        catchProg+=0.25;
+        tension=Math.max(0,tension-0.15);
       }else{
-        tension+=0.8; // tension increases in bad zone
+        tension+=0.4;
       }
     }else{
-      // Not pulling - catch progress decreases, tension normalizes
-      catchProg=Math.max(0,catchProg-0.15);
-      tension=Math.max(0,tension-0.1);
+      catchProg=Math.max(0,catchProg-0.1);
+      tension=Math.max(0,tension-0.08);
     }
 
     // Clamp
