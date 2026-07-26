@@ -6,398 +6,394 @@
 <title>Рыбалка</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{overflow:hidden;height:100dvh;background:#0a1628;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
-canvas{display:block;width:100vw;height:100dvh;touch-action:none}
-.ui{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;z-index:10;pointer-events:none}
-.ui>*{pointer-events:auto}
-.back{background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.3);color:#ffd700;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;backdrop-filter:blur(4px)}
-.back:hover{background:rgba(255,215,0,.15)}
-.stats{display:flex;gap:16px;background:rgba(0,0,0,.5);padding:6px 16px;border-radius:10px;backdrop-filter:blur(4px)}
-.stat{text-align:center}
-.stat .l{font-size:9px;color:#8b7355;text-transform:uppercase}
-.stat .v{font-size:18px;font-weight:700;color:#ffd700}
-.stat .v.w{color:#fff}
-.coins{font-size:14px;color:#ffd700;font-weight:700;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:10px;backdrop-filter:blur(4px)}
-.bottom{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;padding:12px;z-index:10;pointer-events:none}
-.hint{background:rgba(0,0,0,.6);color:#ffd700;padding:8px 20px;border-radius:10px;font-size:13px;font-weight:600;backdrop-filter:blur(4px);pointer-events:auto;text-align:center;transition:opacity .3s}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+body{overflow:hidden;height:100dvh;background:#5a3a1a;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
+.wrap{display:flex;width:100vw;height:100dvh;position:relative}
+.side{width:80px;background:repeating-linear-gradient(0deg,#8B6914 0px,#A07828 3px,#7A5A10 6px,#9A7020 9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;flex-shrink:0;border-right:3px solid #5a3a1a}
+.side.right{border-right:none;border-left:3px solid #5a3a1a}
+.fish-wall{font-size:40px;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.5));animation:sway 3s ease-in-out infinite alternate}
+.fish-wall:nth-child(2){animation-delay:-1s}
+.fish-wall:nth-child(3){animation-delay:-2s}
+@keyframes sway{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+.hook{font-size:20px;color:#888}
+.center{flex:1;display:flex;flex-direction:column;position:relative;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:linear-gradient(180deg,#4a3010,#3a2508);border-bottom:2px solid #2a1a05;z-index:10;gap:8px;flex-shrink:0}
+.tb-item{display:flex;align-items:center;gap:4px;color:#ffd700;font-size:13px;font-weight:700}
+.tb-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+.coin-bg{background:linear-gradient(135deg,#ffd700,#b8860b);border:2px solid #8B6914}
+.bait-bg{background:linear-gradient(135deg,#87ceeb,#4682b4);border:2px solid #2a5a8a}
+.tb-plus{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#b8860b);border:2px solid #8B6914;color:#3a2508;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.progress-bar{flex:1;max-width:120px;height:16px;background:#2a1a05;border-radius:8px;border:1px solid #8B6914;overflow:hidden;margin:0 8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:8px;transition:width .3s;width:0%}
+.level-badge{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8B4513,#5a3010);border:2px solid #8B6914;color:#ffd700;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.settings-btn{font-size:18px;cursor:pointer;color:#ffd700;padding:4px}
+.payments-tab{position:absolute;left:0;top:50px;background:linear-gradient(180deg,#e8a020,#c88010);color:#3a2508;padding:8px 4px;border-radius:0 6px 6px 0;font-size:10px;font-weight:700;writing-mode:vertical-lr;z-index:10;cursor:pointer;border:1px solid #8B6914;border-left:none}
+.lake-wrap{flex:1;position:relative;overflow:hidden;border-radius:8px;margin:4px}
+canvas#cv{display:block;width:100%;height:100%}
+.cancel-btn{position:absolute;bottom:20px;right:20px;background:linear-gradient(180deg,#d4c4a0,#b8a888);border:2px solid #8B6914;color:#3a2508;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;z-index:5;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.cancel-btn:active{transform:scale(.95)}
+.bottombar{display:flex;align-items:center;padding:6px 12px;background:linear-gradient(180deg,#3a2508,#2a1a05);border-top:2px solid #4a3010;gap:8px;flex-shrink:0;z-index:10}
+.profile{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:50px}
+.profile-icon{width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,#6a5a4a,#4a3a2a);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;font-size:18px;color:#aaa}
+.profile-lvl{font-size:9px;color:#ffd700;font-weight:700}
+.profile-pts{font-size:9px;color:#8b7355}
+.hunt-btn{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#1a4a2a,#0a2a1a);border:3px solid #4CAF50;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(76,175,80,.3)}
+.hunt-btn:active{transform:scale(.95)}
+.hunt-text{color:#4CAF50;font-size:8px;font-weight:700;letter-spacing:1px}
+.hunt-icon{font-size:20px}
+.inv-slots{display:flex;gap:4px;flex:1;justify-content:center}
+.inv-slot{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#5a3a1a,#3a2508);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.inv-slot.empty::after{content:'+';color:#8B6914;font-size:20px;font-weight:700}
+.inv-slot.filled{border-color:#4CAF50}
+.inv-slot .qty{position:absolute;bottom:1px;right:3px;font-size:8px;color:#ffd700;font-weight:700}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:linear-gradient(135deg,#1a2a3a,#0d1f2a);border:2px solid rgba(255,215,0,.3);border-radius:14px;padding:24px;text-align:center;max-width:300px;width:88%;animation:mIn .3s}
-@keyframes mIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-.modal h2{font-size:24px;margin-bottom:8px;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.modal .fish-info{font-size:14px;color:#e8e0d4;margin:8px 0}
-.modal .fish-emoji{font-size:48px;margin:8px 0}
+.modal{background:linear-gradient(135deg,#3a2a1a,#2a1a0a);border:2px solid #8B6914;border-radius:12px;padding:24px;text-align:center;max-width:300px;width:88%;color:#e8d8c0}
+.modal h2{font-size:22px;color:#ffd700;margin-bottom:8px}
+.modal .emoji{font-size:48px;margin:8px 0}
+.modal .info{font-size:13px;margin:4px 0}
 .modal .reward{font-size:16px;color:#ffd700;font-weight:700;margin:8px 0}
-.modal button{padding:10px 24px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin:4px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1535}
-.modal button:hover{transform:scale(1.05)}
+.modal button{padding:8px 20px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;margin:4px;background:linear-gradient(135deg,#ffd700,#b8860b);color:#3a2508}
 </style>
 </head>
 <body>
-<canvas id="cv"></canvas>
-<div class="ui">
-  <a href="index.html" class="back">← Игры</a>
-  <div class="stats">
-    <div class="stat"><div class="l">Поймано</div><div class="v w" id="caught">0</div></div>
-    <div class="stat"><div class="l">Рекорд</div><div class="v w" id="best">0</div></div>
+<div class="wrap">
+  <div class="side">
+    <div class="hook">🪝</div>
+    <div class="fish-wall">🐟</div>
+    <div class="fish-wall">🐠</div>
+    <div class="fish-wall">🐡</div>
+    <div class="hook">🪝</div>
   </div>
-  <div class="coins" id="coins">🪙 0</div>
+  <div class="center">
+    <div class="topbar">
+      <div class="tb-item"><div class="tb-icon coin-bg">🪙</div><span id="coins">292</span></div>
+      <div class="tb-item"><div class="tb-icon bait-bg">🪱</div><span id="bait">100</span></div>
+      <div class="tb-plus" onclick="buyBait()">+</div>
+      <div class="progress-bar"><div class="progress-fill" id="pf"></div></div>
+      <div class="level-badge" id="lvl">1</div>
+      <div class="settings-btn">⚙️</div>
+    </div>
+    <div class="payments-tab">Платежи</div>
+    <div class="lake-wrap">
+      <canvas id="cv"></canvas>
+      <button class="cancel-btn" id="cancelBtn" onclick="cancelCast()" style="display:none">Отменить</button>
+    </div>
+    <div class="bottombar">
+      <div class="profile">
+        <div class="profile-icon">👤</div>
+        <div class="profile-lvl">Ур. <span id="plvl">1</span></div>
+        <div class="profile-pts"><span id="ppts">0</span> оч.</div>
+      </div>
+      <div class="hunt-btn" onclick="castLine()">
+        <div class="hunt-icon">🎣</div>
+        <div class="hunt-text">HUNT</div>
+      </div>
+      <div class="inv-slots" id="invSlots"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div class="hook">🪝</div>
+    <div class="fish-wall" style="animation-delay:-.5s">🐟</div>
+    <div class="fish-wall" style="animation-delay:-1.5s">🐠</div>
+    <div class="fish-wall" style="animation-delay:-2.5s">🐡</div>
+    <div class="hook">🪝</div>
+  </div>
 </div>
-<div class="bottom"><div class="hint" id="hint">Нажмите на воду чтобы забросить удочку</div></div>
+
 <div class="modal-bg" id="modal"><div class="modal" id="modalInner"></div></div>
+
 <script>
 const cv=document.getElementById('cv'),cx=cv.getContext('2d');
 let W,H,dpr;
 function resize(){
   dpr=window.devicePixelRatio||1;
-  W=window.innerWidth;H=window.innerHeight;
+  let r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=r.height;
   cv.width=W*dpr;cv.height=H*dpr;
   cv.style.width=W+'px';cv.style.height=H+'px';
   cx.setTransform(dpr,0,0,dpr,0,0);
 }
 resize();window.addEventListener('resize',resize);
 
-// State
-let coins=parseInt(localStorage.getItem('fish_coins')||'0');
-let best=parseInt(localStorage.getItem('fish_best')||'0');
-let state='idle'; // idle, casting, waiting, bite, reeling, caught
-let lineX=0,lineY=0,hookX=0,hookY=0;
-let targetX=0,targetY=0;
-let biteTimer=0,biteFish=null;
-let reelProgress=0;
-let caughtCount=0;
-let time=0;
-let bubbles=[];
-let fishes=[];
-let ripples=[];
-let clouds=[];
-let waves=[];
+let coins=parseInt(localStorage.getItem('fc')||'292');
+let bait=parseInt(localStorage.getItem('fb')||'100');
+let lvl=parseInt(localStorage.getItem('fl')||'1');
+let xp=parseInt(localStorage.getItem('fxp')||'0');
+let caught=JSON.parse(localStorage.getItem('fca')||'[]');
+let inv=JSON.parse(localStorage.getItem('finv')||'[null,null,null,null,null,null,null]');
+let state='idle',lineX=0,lineY=0,hookX=0,hookY=0,targetX=0,targetY=0;
+let biteTimer=0,biteFish=null,reelProg=0,time=0;
+let bubbles=[],ripples=[],clouds=[];
+let waterH=0;
 
-// Fish types
 const FISH=[
-  {name:'Карась',emoji:'🐟',weight:[0.2,1.5],speed:1,color:'#c0a040',value:10,bite:0.3},
-  {name:'Окунь',emoji:'🐠',weight:[0.3,2],speed:1.5,color:'#4a8a3a',value:15,bite:0.25},
-  {name:'Щука',emoji:'🐟',weight:[0.5,4],speed:2,color:'#5a6a3a',value:25,bite:0.2},
-  {name:'Лещ',emoji:'🐡',weight:[0.4,2.5],speed:0.8,color:'#8a7a50',value:20,bite:0.35},
-  {name:'Сом',emoji:'🐟',weight:[1,6],speed:1.2,color:'#3a3a3a',value:40,bite:0.15},
-  {name:'Судак',emoji:'🐠',weight:[0.8,3.5],speed:1.8,color:'#7a8a6a',value:35,bite:0.18},
-  {name:'Золотая рыбка',emoji:'✨',weight:[0.1,0.5],speed:3,color:'#ffd700',value:100,bite:0.05},
+  {name:'Карась',emoji:'🐟',wt:[0.2,1.5],spd:1,col:'#c0a040',val:10,bite:0.3,xp:5},
+  {name:'Окунь',emoji:'🐠',wt:[0.3,2],spd:1.5,col:'#4a8a3a',val:15,bite:0.25,xp:8},
+  {name:'Щука',emoji:'🐟',wt:[0.5,4],spd:2,col:'#5a6a3a',val:25,bite:0.2,xp:12},
+  {name:'Лещ',emoji:'🐡',wt:[0.4,2.5],spd:0.8,col:'#8a7a50',val:20,bite:0.35,xp:7},
+  {name:'Сом',emoji:'🐟',wt:[1,6],spd:1.2,col:'#3a3a3a',val:40,bite:0.15,xp:20},
+  {name:'Судак',emoji:'🐠',wt:[0.8,3.5],spd:1.8,col:'#7a8a6a',val:35,bite:0.18,xp:15},
+  {name:'Золотая',emoji:'✨',wt:[0.1,0.5],spd:3,col:'#ffd700',val:100,bite:0.05,xp:50},
 ];
 
-// Init
+let fishes=[];
 function init(){
-  for(let i=0;i<4;i++){
-    clouds.push({x:Math.random()*W,y:20+Math.random()*60,w:60+Math.random()*120,h:20+Math.random()*20,speed:0.2+Math.random()*0.3});
-  }
-  for(let i=0;i<5;i++){
-    spawnFish();
-  }
-  for(let i=0;i<8;i++){
-    waves.push({x:Math.random()*W,y:H*0.45+Math.random()*20,amp:2+Math.random()*4,freq:0.02+Math.random()*0.02,phase:Math.random()*Math.PI*2,speed:0.5+Math.random()*0.5});
-  }
-  updateUI();
+  for(let i=0;i<4;i++)clouds.push({x:Math.random()*W,y:10+Math.random()*30,w:40+Math.random()*80,h:10+Math.random()*15,s:0.15+Math.random()*0.2});
+  for(let i=0;i<5;i++)spawnFish();
+  updateUI();buildInv();
 }
 
 function spawnFish(){
   let f=FISH[Math.floor(Math.random()*FISH.length)];
   let side=Math.random()>0.5?1:-1;
-  fishes.push({
-    type:f,x:side>0?W+50:-50,y:H*0.5+Math.random()*H*0.35,
-    vx:side*-(0.3+f.speed*0.5),size:20+f.weight[0]*8,
-    color:f.color,wobble:Math.random()*Math.PI*2,
-    dir:side,alive:true
-  });
+  fishes.push({type:f,x:side>0?W+40:-40,y:H*0.3+Math.random()*H*0.5,vx:side*-(0.2+f.spd*0.4),sz:16+f.wt[0]*6,col:f.col,w:Math.random()*Math.PI*2,dir:side,alive:true});
 }
 
 function updateUI(){
-  document.getElementById('caught').textContent=caughtCount;
-  document.getElementById('best').textContent=best;
-  document.getElementById('coins').textContent='🪙 '+coins;
+  document.getElementById('coins').textContent=coins;
+  document.getElementById('bait').textContent=bait;
+  document.getElementById('lvl').textContent=lvl;
+  document.getElementById('ppts').textContent=xp;
+  document.getElementById('plvl').textContent=lvl;
+  let needed=lvl*100;
+  document.getElementById('pf').style.width=Math.min(100,xp/needed*100)+'%';
 }
 
-// Input
-cv.addEventListener('pointerdown',e=>{
-  if(state!=='idle')return;
-  let x=e.clientX,y=e.clientY;
-  if(y<H*0.4)return;
-  state='casting';
-  lineX=W/2;lineY=H*0.38;
-  targetX=x;targetY=Math.min(y,H*0.85);
-  hookX=lineX;hookY=lineY;
-  document.getElementById('hint').textContent='Заброс...';
-});
+function buildInv(){
+  let el=document.getElementById('invSlots');el.innerHTML='';
+  for(let i=0;i<7;i++){
+    let s=document.createElement('div');s.className='inv-slot'+(inv[i]?' filled':' empty');
+    if(inv[i]){
+      let f=FISH.find(x=>x.name===inv[i].name);
+      s.innerHTML=(f?f.emoji:'🐟')+(inv[i].qty>1?`<span class="qty">x${inv[i].qty}</span>`:'');
+    }
+    el.appendChild(s);
+  }
+}
 
-// Game loop
+function addToInv(fish,weight){
+  for(let i=0;i<inv.length;i++){
+    if(inv[i]&&inv[i].name===fish.name){inv[i].qty++;save();buildInv();return;}
+  }
+  for(let i=0;i<inv.length;i++){
+    if(!inv[i]){inv[i]={name:fish.name,weight,qty:1};save();buildInv();return;}
+  }
+}
+
+function save(){localStorage.setItem('fc',coins);localStorage.setItem('fb',bait);localStorage.setItem('fl',lvl);localStorage.setItem('fxp',xp);localStorage.setItem('fca',JSON.stringify(caught));localStorage.setItem('finv',JSON.stringify(inv));}
+
+function buyBait(){if(coins>=10){coins-=10;bait+=10;save();updateUI();}}
+
+// ======== GAME ========
+function castLine(){
+  if(state!=='idle')return;
+  if(bait<=0){showMsg('Нет наживки!','Купить 10 за 10🪙?',()=>{if(coins>=10){coins-=10;bait+=10;save();updateUI();}});return;}
+  bait--;save();updateUI();
+  state='casting';
+  lineX=W*0.6;lineY=H*0.15;
+  targetX=W*0.3+Math.random()*W*0.4;
+  targetY=H*0.3+Math.random()*H*0.4;
+  hookX=lineX;hookY=lineY;
+  document.getElementById('cancelBtn').style.display='block';
+}
+
+function cancelCast(){
+  state='idle';
+  document.getElementById('cancelBtn').style.display='none';
+}
+
+function doTornado(){
+  if(state!=='idle')return;
+  state='shuffling';
+  let all=[];
+  fishes.forEach(f=>{if(f.alive)all.push(f.type);});
+  fishes=[];
+  for(let i=0;i<5;i++)spawnFish();
+  state='idle';
+}
+
+// ======== UPDATE ========
 function update(dt){
   time+=dt;
-  // Clouds
-  clouds.forEach(c=>{c.x+=c.speed;if(c.x>W+150)c.x=-150;});
-  // Waves
-  waves.forEach(w=>{w.phase+=w.speed*dt;});
-  // Fish
-  fishes.forEach(f=>{
-    if(!f.alive)return;
-    f.x+=f.vx;
-    f.wobble+=dt*2;
-    f.y+=Math.sin(f.wobble)*0.3;
-    if(f.dir>0&&f.x<-100)f.alive=false;
-    if(f.dir<0&&f.x>W+100)f.alive=false;
-  });
-  fishes=fishes.filter(f=>f.alive);
+  clouds.forEach(c=>{c.x+=c.s;if(c.x>W+100)c.x=-100;});
+  fishes.forEach(f=>{if(!f.alive)return;f.x+=f.vx;f.w+=dt*2;f.y+=Math.sin(f.w)*0.3;});
+  fishes=fishes.filter(f=>f.alive&&(f.x>-80&&f.x<W+80));
   while(fishes.length<5)spawnFish();
-  // Bubbles
-  if(Math.random()<0.02){
-    bubbles.push({x:Math.random()*W,y:H*0.5+Math.random()*H*0.35,r:1+Math.random()*3,vy:-0.3-Math.random()*0.5,life:1});
-  }
-  bubbles.forEach(b=>{b.y+=b.vy;b.life-=0.005;});
-  bubbles=bubbles.filter(b=>b.life>0);
-  // Ripples
-  ripples.forEach(r=>{r.r+=0.5;r.life-=0.01;});
-  ripples=ripples.filter(r=>r.life>0);
+  if(Math.random()<0.03)bubbles.push({x:Math.random()*W,y:H*0.3+Math.random()*H*0.5,r:1+Math.random()*2,vy:-0.2-Math.random()*0.3,life:1});
+  bubbles.forEach(b=>{b.y+=b.vy;b.life-=0.008;});bubbles=bubbles.filter(b=>b.life>0);
+  ripples.forEach(r=>{r.r+=0.4;r.life-=0.015;});ripples=ripples.filter(r=>r.life>0);
 
-  // State machine
   if(state==='casting'){
-    let dx=targetX-hookX,dy=targetY-hookY;
-    let dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<5){
-      hookX=targetX;hookY=targetY;
-      state='waiting';
-      ripples.push({x:hookX,y:hookY,r:5,life:1});
-      document.getElementById('hint').textContent='Ждём клёва...';
-      biteTimer=60+Math.random()*120;
-    }else{
-      hookX+=dx*0.08;hookY+=dy*0.08;
-    }
+    let dx=targetX-hookX,dy=targetY-hookY,d=Math.hypot(dx,dy);
+    if(d<5){hookX=targetX;hookY=targetY;state='waiting';ripples.push({x:hookX,y:hookY,r:5,life:1});biteTimer=80+Math.random()*150;}
+    else{hookX+=dx*0.1;hookY+=dy*0.1;}
   }
   if(state==='waiting'){
+    hookY+=Math.sin(time*1.5)*0.15;
     biteTimer--;
-    hookY+=Math.sin(time*2)*0.2;
     if(biteTimer<=0){
-      // Find nearby fish
       let near=null,minD=Infinity;
-      fishes.forEach(f=>{
-        if(!f.alive)return;
-        let d=Math.hypot(f.x-hookX,f.y-hookY);
-        if(d<100&&d<minD&&Math.random()<f.type.bite){minD=d;near=f;}
-      });
-      if(near){
-        state='bite';biteFish=near;
-        document.getElementById('hint').textContent='🐟 КЛЮЁТ! Нажмите!';
-        document.getElementById('hint').style.color='#ff4757';
-        biteTimer=90;
-      }else{
-        biteTimer=60+Math.random()*120;
-      }
+      fishes.forEach(f=>{if(!f.alive)return;let d=Math.hypot(f.x-hookX,f.y-hookY);if(d<80&&d<minD&&Math.random()<f.type.bite){minD=d;near=f;}});
+      if(near){state='bite';biteFish=near;biteTimer=100;}
+      else biteTimer=60+Math.random()*120;
     }
   }
   if(state==='bite'){
-    hookY+=Math.sin(time*10)*3;
+    hookY+=Math.sin(time*12)*2.5;
     biteTimer--;
-    if(biteTimer<=0){
-      state='idle';biteFish=null;
-      document.getElementById('hint').textContent='Рыба ушла... Попробуйте снова';
-      document.getElementById('hint').style.color='#ffd700';
-    }
+    if(biteTimer<=0){state='idle';biteFish=null;document.getElementById('cancelBtn').style.display='none';}
   }
   if(state==='reeling'){
-    reelProgress+=0.02;
-    hookY+=(lineY-hookY)*0.03;
-    hookX+=(lineX-hookX)*0.03;
-    if(biteFish){
-      biteFish.x+=(lineX-biteFish.x)*0.03;
-      biteFish.y+=(lineY-biteFish.y)*0.03;
-    }
-    if(reelProgress>=1){
-      state='caught';
+    reelProg+=0.025;
+    hookY+=(lineY-hookY)*0.04;hookX+=(lineX-hookX)*0.04;
+    if(biteFish){biteFish.x+=(lineX-biteFish.x)*0.04;biteFish.y+=(lineY-biteFish.y)*0.04;}
+    if(reelProg>=1){
+      state='idle';
+      document.getElementById('cancelBtn').style.display='none';
       showCatch();
     }
   }
 }
 
 cv.addEventListener('pointerdown',e=>{
-  if(state==='bite'){
-    state='reeling';reelProgress=0;
-    document.getElementById('hint').textContent='Тянете рыбу!';
-    document.getElementById('hint').style.color='#2ecc71';
-  }
+  if(state==='bite'){state='reeling';reelProg=0;}
 });
 
 function showCatch(){
   let f=biteFish.type;
-  let w=(f.weight[0]+Math.random()*(f.weight[1]-f.weight[0])).toFixed(1);
-  let earned=f.value+Math.floor(w*10);
-  coins+=earned;caughtCount++;
-  if(caughtCount>best){best=caughtCount;localStorage.setItem('fish_best',best);}
-  localStorage.setItem('fish_coins',coins);
-  updateUI();
+  let w=(f.wt[0]+Math.random()*(f.wt[1]-f.wt[0])).toFixed(1);
+  let earned=f.val+Math.floor(w*10);
+  coins+=earned;xp+=f.xp;
+  if(xp>=lvl*100){xp-=lvl*100;lvl++;}
+  caught.push({name:f.name,weight:w});
+  addToInv(f,w);save();updateUI();
   document.getElementById('modal').classList.add('show');
-  document.getElementById('modalInner').innerHTML=`
-    <div class="fish-emoji">${f.emoji}</div>
-    <h2>${f.name}</h2>
-    <div class="fish-info">Вес: ${w} кг</div>
-    <div class="reward">+${earned} 🪙</div>
-    <button onclick="closeCatch()">Отпустить</button>
-  `;
+  document.getElementById('modalInner').innerHTML=`<div class="emoji">${f.emoji}</div><h2>${f.name}</h2><div class="info">Вес: ${w} кг</div><div class="reward">+${earned} 🪙  +${f.xp} XP</div><button onclick="closeModal()">ОК</button>`;
   biteFish.alive=false;biteFish=null;
 }
 
-function closeCatch(){
-  document.getElementById('modal').classList.remove('show');
-  state='idle';
-  document.getElementById('hint').textContent='Нажмите на воду чтобы забросить удочку';
-  document.getElementById('hint').style.color='#ffd700';
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+function showMsg(title,text,onOk){
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('modalInner').innerHTML=`<h2>${title}</h2><div class="info">${text}</div><button onclick="closeModal()">Нет</button><button onclick="(${onOk})();closeModal()">Да</button>`;
 }
 
+// ======== DRAW ========
 function draw(){
   cx.clearRect(0,0,W,H);
-  // Sky gradient
-  let sky=cx.createLinearGradient(0,0,0,H*0.5);
-  sky.addColorStop(0,'#0a1628');sky.addColorStop(0.4,'#1a3050');sky.addColorStop(0.7,'#2a4a6a');sky.addColorStop(1,'#3a6080');
-  cx.fillStyle=sky;cx.fillRect(0,0,W,H*0.5);
-  // Moon
-  cx.fillStyle='rgba(255,250,230,0.9)';cx.beginPath();cx.arc(W*0.8,H*0.12,25,0,Math.PI*2);cx.fill();
-  cx.fillStyle='rgba(255,250,230,0.15)';cx.beginPath();cx.arc(W*0.8,H*0.12,40,0,Math.PI*2);cx.fill();
-  // Stars
-  cx.fillStyle='rgba(255,255,255,0.6)';
-  for(let i=0;i<30;i++){
-    let sx=(i*137.5+i*i*3)%W,sy=(i*97.3+i*i*7)%(H*0.35);
-    let blink=Math.sin(time*2+i)*0.3+0.7;
-    cx.globalAlpha=blink*0.8;cx.fillRect(sx,sy,1.5,1.5);
-  }
-  cx.globalAlpha=1;
+  // Lake background - sky
+  let sky=cx.createLinearGradient(0,0,0,H*0.55);
+  sky.addColorStop(0,'#87CEEB');sky.addColorStop(0.4,'#B0E0E6');sky.addColorStop(0.7,'#90C8A0');sky.addColorStop(1,'#5A8A50');
+  cx.fillStyle=sky;cx.fillRect(0,0,W,H*0.55);
   // Clouds
-  cx.fillStyle='rgba(100,130,160,0.15)';
+  cx.fillStyle='rgba(255,255,255,0.7)';
   clouds.forEach(c=>{
-    cx.beginPath();
-    cx.ellipse(c.x,c.y,c.w/2,c.h/2,0,0,Math.PI*2);
-    cx.fill();
-    cx.beginPath();cx.ellipse(c.x-c.w*0.3,c.y+5,c.w*0.3,c.h*0.4,0,0,Math.PI*2);cx.fill();
-    cx.beginPath();cx.ellipse(c.x+c.w*0.3,c.y+3,c.w*0.25,c.h*0.35,0,0,Math.PI*2);cx.fill();
+    cx.beginPath();cx.ellipse(c.x,c.y,c.w/2,c.h/2,0,0,Math.PI*2);cx.fill();
+    cx.beginPath();cx.ellipse(c.x-c.w*0.3,c.y+3,c.w*0.25,c.h*0.4,0,0,Math.PI*2);cx.fill();
   });
-  // Mountains
-  cx.fillStyle='#0d1a2a';
-  cx.beginPath();cx.moveTo(0,H*0.45);
-  cx.lineTo(W*0.1,H*0.32);cx.lineTo(W*0.25,H*0.4);cx.lineTo(W*0.4,H*0.28);
-  cx.lineTo(W*0.55,H*0.38);cx.lineTo(W*0.7,H*0.3);cx.lineTo(W*0.85,H*0.36);
-  cx.lineTo(W,H*0.42);cx.lineTo(W,H*0.5);cx.lineTo(0,H*0.5);
-  cx.fill();
-  // Trees silhouette
-  cx.fillStyle='#0a1520';
-  for(let i=0;i<15;i++){
-    let tx=i*(W/14)-10,ty=H*0.42+Math.sin(i*2)*10;
-    let th=20+Math.sin(i*3)*15;
-    cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+8,ty-th);cx.lineTo(tx+16,ty);cx.fill();
+  // Trees background
+  cx.fillStyle='#3a6a2a';
+  for(let i=0;i<25;i++){
+    let tx=i*(W/22)-20,ty=H*0.48+Math.sin(i*1.7)*8;
+    let th=30+Math.sin(i*2.3)*20;
+    cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+6,ty-th);cx.lineTo(tx+12,ty);cx.fill();
+    cx.fillStyle='#2a5a1a';cx.beginPath();cx.moveTo(tx+8,ty);cx.lineTo(tx+14,ty-th*0.8);cx.lineTo(tx+20,ty);cx.fill();
+    cx.fillStyle='#3a6a2a';
   }
+  // Tree reflections
+  cx.save();cx.globalAlpha=0.3;cx.scale(1,-1);cx.translate(0,-H*1.05);
+  cx.fillStyle='#2a5a1a';
+  for(let i=0;i<25;i++){
+    let tx=i*(W/22)-20,ty=H*0.48+Math.sin(i*1.7)*8;
+    let th=20+Math.sin(i*2.3)*12;
+    cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+6,ty-th);cx.lineTo(tx+12,ty);cx.fill();
+  }
+  cx.restore();
   // Water
-  let water=cx.createLinearGradient(0,H*0.45,0,H);
-  water.addColorStop(0,'#0a2a4a');water.addColorStop(0.3,'#0d3050');water.addColorStop(0.7,'#0a2540');water.addColorStop(1,'#061828');
-  cx.fillStyle=water;cx.fillRect(0,H*0.45,W,H*0.55);
-  // Water surface waves
-  cx.strokeStyle='rgba(100,180,255,0.1)';cx.lineWidth=1;
-  waves.forEach(w=>{
+  waterH=H*0.5;
+  let water=cx.createLinearGradient(0,waterH,0,H);
+  water.addColorStop(0,'#4a8a6a');water.addColorStop(0.1,'#3a7a5a');water.addColorStop(0.3,'#2a6a4a');water.addColorStop(0.7,'#1a4a3a');water.addColorStop(1,'#0a2a1a');
+  cx.fillStyle=water;cx.fillRect(0,waterH,W,H-waterH);
+  // Water surface
+  cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=1;
+  for(let i=0;i<5;i++){
     cx.beginPath();
-    for(let x=0;x<W;x+=4){
-      let y=w.y+Math.sin(x*w.freq+w.phase)*w.amp;
+    for(let x=0;x<W;x+=3){
+      let y=waterH+i*6+Math.sin(x*0.03+time*0.8+i)*3;
       x===0?cx.moveTo(x,y):cx.lineTo(x,y);
     }
     cx.stroke();
-  });
+  }
   // Water shimmer
-  for(let i=0;i<20;i++){
-    let sx=(i*97+time*10)%W;
-    let sy=H*0.5+Math.sin(time+i)*20+i*8;
-    cx.fillStyle=`rgba(100,180,255,${0.03+Math.sin(time*0.5+i)*0.02})`;
-    cx.fillRect(sx,sy,30+Math.sin(time+i)*10,1);
+  for(let i=0;i<15;i++){
+    let sx=(i*89+time*8)%W;
+    let sy=waterH+10+Math.sin(time*0.5+i)*15+i*12;
+    cx.fillStyle=`rgba(255,255,255,${0.04+Math.sin(time+i)*0.02})`;
+    cx.fillRect(sx,sy,20+Math.sin(time+i)*8,1);
   }
   // Fish underwater
   fishes.forEach(f=>{
     if(!f.alive)return;
-    cx.save();cx.translate(f.x,f.y);
-    if(f.dir<0)cx.scale(-1,1);
-    // Body
-    cx.fillStyle=f.color;
-    cx.beginPath();
-    cx.ellipse(0,0,f.size,f.size*0.4,0,0,Math.PI*2);
-    cx.fill();
-    // Fin
-    cx.fillStyle=f.color+'aa';
-    cx.beginPath();cx.moveTo(-f.size*0.3,-f.size*0.3);cx.lineTo(-f.size*0.1,-f.size*0.6);cx.lineTo(f.size*0.1,-f.size*0.3);cx.fill();
-    // Tail
-    cx.beginPath();cx.moveTo(-f.size,0);cx.lineTo(-f.size*1.3,-f.size*0.3);cx.lineTo(-f.size*1.3,f.size*0.3);cx.fill();
-    // Eye
-    cx.fillStyle='#fff';cx.beginPath();cx.arc(f.size*0.5,-f.size*0.1,f.size*0.12,0,Math.PI*2);cx.fill();
-    cx.fillStyle='#000';cx.beginPath();cx.arc(f.size*0.55,-f.size*0.1,f.size*0.06,0,Math.PI*2);cx.fill();
+    cx.save();cx.translate(f.x,f.y);if(f.dir<0)cx.scale(-1,1);
+    cx.fillStyle=f.col;
+    cx.beginPath();cx.ellipse(0,0,f.sz,f.sz*0.35,0,0,Math.PI*2);cx.fill();
+    cx.fillStyle=f.col+'aa';
+    cx.beginPath();cx.moveTo(-f.sz*0.3,-f.sz*0.25);cx.lineTo(-f.sz*0.1,-f.sz*0.5);cx.lineTo(f.sz*0.1,-f.sz*0.25);cx.fill();
+    cx.beginPath();cx.moveTo(-f.sz,0);cx.lineTo(-f.sz*1.2,-f.sz*0.25);cx.lineTo(-f.sz*1.2,f.sz*0.25);cx.fill();
+    cx.fillStyle='#fff';cx.beginPath();cx.arc(f.sz*0.45,-f.sz*0.08,f.sz*0.1,0,Math.PI*2);cx.fill();
+    cx.fillStyle='#000';cx.beginPath();cx.arc(f.sz*0.5,-f.sz*0.08,f.sz*0.05,0,Math.PI*2);cx.fill();
     cx.restore();
   });
   // Bubbles
-  bubbles.forEach(b=>{
-    cx.strokeStyle=`rgba(150,200,255,${b.life*0.4})`;
-    cx.lineWidth=0.5;
-    cx.beginPath();cx.arc(b.x,b.y,b.r,0,Math.PI*2);cx.stroke();
-  });
+  bubbles.forEach(b=>{cx.strokeStyle=`rgba(200,240,255,${b.life*0.4})`;cx.lineWidth=0.5;cx.beginPath();cx.arc(b.x,b.y,b.r,0,Math.PI*2);cx.stroke();});
   // Ripples
-  ripples.forEach(r=>{
-    cx.strokeStyle=`rgba(150,200,255,${r.life*0.5})`;
-    cx.lineWidth=1;
-    cx.beginPath();cx.ellipse(r.x,r.y,r.r,r.r*0.3,0,0,Math.PI*2);cx.stroke();
+  ripples.forEach(r=>{cx.strokeStyle=`rgba(200,240,255,${r.life*0.4})`;cx.lineWidth=1;cx.beginPath();cx.ellipse(r.x,r.y,r.r,r.r*0.3,0,0,Math.PI*2);cx.stroke();});
+  // Fishing rod
+  let rodTipX=W*0.65,rodTipY=H*0.12;
+  let rodBaseX=W*0.75,rodBaseY=H*0.55;
+  cx.strokeStyle='#8B6914';cx.lineWidth=4;
+  cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.7,H*0.3,rodTipX,rodTipY);cx.stroke();
+  cx.strokeStyle='#A07828';cx.lineWidth=2;
+  cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.7,H*0.3,rodTipX,rodTipY);cx.stroke();
+  // Rod rings
+  cx.fillStyle='#888';
+  [0.3,0.5,0.7,0.9].forEach(t=>{
+    let rx=W*0.75+(rodTipX-W*0.75)*t;
+    let ry=rodBaseY+(rodTipY-rodBaseY)*t-Math.sin(t*Math.PI)*30;
+    cx.beginPath();cx.arc(rx,ry,2,0,Math.PI*2);cx.fill();
   });
-  // Fishing rod + line
+  // Line + hook
   if(state!=='idle'){
-    let rodTipX=W/2-40,rodTipY=H*0.35;
-    // Rod
-    cx.strokeStyle='#8B4513';cx.lineWidth=3;
-    cx.beginPath();cx.moveTo(W/2-80,H*0.42);cx.quadraticCurveTo(W/2-60,H*0.36,rodTipX,rodTipY);cx.stroke();
-    cx.strokeStyle='#654321';cx.lineWidth=2;
-    cx.beginPath();cx.moveTo(W/2-80,H*0.42);cx.quadraticCurveTo(W/2-60,H*0.36,rodTipX,rodTipY);cx.stroke();
-    // Line
-    cx.strokeStyle='rgba(200,200,200,0.6)';cx.lineWidth=1;
+    cx.strokeStyle='rgba(200,200,200,0.5)';cx.lineWidth=0.8;
     cx.beginPath();cx.moveTo(rodTipX,rodTipY);
-    let midX=(rodTipX+hookX)/2,midY=Math.max(rodTipY,hookY)-20;
+    let midX=(rodTipX+hookX)/2,midY=Math.min(rodTipY,hookY)-15;
     cx.quadraticCurveTo(midX,midY,hookX,hookY);cx.stroke();
     // Hook
     cx.strokeStyle='#ccc';cx.lineWidth=1.5;
-    cx.beginPath();cx.arc(hookX,hookY+5,4,0,Math.PI);cx.stroke();
-    cx.beginPath();cx.moveTo(hookX,hookY+5);cx.lineTo(hookX+3,hookY+1);cx.stroke();
+    cx.beginPath();cx.arc(hookX,hookY+4,3,0,Math.PI);cx.stroke();
+    cx.beginPath();cx.moveTo(hookX,hookY+4);cx.lineTo(hookX+2,hookY+1);cx.stroke();
     // Bobber
-    if(state==='waiting'||state==='bite'){
-      cx.fillStyle='#ff4444';cx.beginPath();cx.arc(hookX,hookY-3,4,0,Math.PI*2);cx.fill();
-      cx.fillStyle='#fff';cx.beginPath();cx.arc(hookX,hookY-3,2,0,Math.PI*2);cx.fill();
+    cx.fillStyle='#ff3333';cx.beginPath();cx.arc(hookX,hookY-2,3.5,0,Math.PI*2);cx.fill();
+    cx.fillStyle='#fff';cx.beginPath();cx.arc(hookX,hookY-2,1.5,0,Math.PI*2);cx.fill();
+  }
+  // Bite effect
+  if(state==='bite'){
+    cx.strokeStyle='rgba(255,200,0,0.6)';cx.lineWidth=2;
+    for(let i=0;i<3;i++){
+      let r=8+i*6+Math.sin(time*10)*2;
+      cx.globalAlpha=0.4-i*0.12;
+      cx.beginPath();cx.arc(hookX,hookY,r,0,Math.PI*2);cx.stroke();
     }
-    // Bite effect
-    if(state==='bite'){
-      cx.strokeStyle='rgba(255,200,0,0.5)';cx.lineWidth=2;
-      for(let i=0;i<3;i++){
-        let r=10+i*8+Math.sin(time*8)*3;
-        cx.globalAlpha=0.3-i*0.1;
-        cx.beginPath();cx.arc(hookX,hookY,r,0,Math.PI*2);cx.stroke();
-      }
-      cx.globalAlpha=1;
-    }
-  }else{
-    // Idle rod
-    cx.strokeStyle='#8B4513';cx.lineWidth=3;
-    cx.beginPath();cx.moveTo(W/2-80,H*0.42);cx.quadraticCurveTo(W/2-60,H*0.36,W/2-40,H*0.35);cx.stroke();
+    cx.globalAlpha=1;
   }
   // Shore
-  cx.fillStyle='#2a3a20';
-  cx.beginPath();cx.moveTo(0,H*0.48);cx.quadraticCurveTo(W*0.15,H*0.44,W*0.3,H*0.47);
-  cx.quadraticCurveTo(W*0.5,H*0.5,W*0.7,H*0.47);cx.quadraticCurveTo(W*0.85,H*0.44,W,H*0.48);
-  cx.lineTo(W,H*0.52);cx.lineTo(0,H*0.52);cx.fill();
-  // Grass
-  cx.strokeStyle='#3a5a25';cx.lineWidth=1.5;
-  for(let i=0;i<30;i++){
-    let gx=i*(W/28),gy=H*0.47+Math.sin(i)*3;
-    let gh=8+Math.sin(time+i)*3;
-    cx.beginPath();cx.moveTo(gx,gy);cx.lineTo(gx-2,gy-gh);cx.stroke();
-    cx.beginPath();cx.moveTo(gx+4,gy);cx.lineTo(gx+6,gy-gh*0.8);cx.stroke();
-  }
+  cx.fillStyle='#5a4a30';
+  cx.beginPath();cx.moveTo(0,waterH+5);cx.quadraticCurveTo(W*0.3,waterH-5,W*0.5,waterH+3);cx.quadraticCurveTo(W*0.7,waterH+10,W,waterH+5);cx.lineTo(W,waterH+15);cx.lineTo(0,waterH+15);cx.fill();
 }
 
 let lastT=0;
-function loop(t){
-  let dt=Math.min((t-lastT)/16,3);lastT=t;
-  update(dt);draw();
-  requestAnimationFrame(loop);
-}
+function loop(t){let dt=Math.min((t-lastT)/16,3);lastT=t;update(dt);draw();requestAnimationFrame(loop);}
 init();requestAnimationFrame(loop);
 </script>
 </body>
