@@ -7,62 +7,64 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{overflow:hidden;height:100dvh;background:#5a3a1a;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
-.wrap{display:flex;width:100vw;height:100dvh;position:relative}
-.side{width:80px;background:repeating-linear-gradient(0deg,#8B6914 0px,#A07828 3px,#7A5A10 6px,#9A7020 9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;flex-shrink:0;border-right:3px solid #5a3a1a}
+.wrap{display:flex;width:100vw;height:100dvh}
+.side{width:70px;background:repeating-linear-gradient(0deg,#8B6914 0px,#A07828 3px,#7A5A10 6px,#9A7020 9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;flex-shrink:0;border-right:3px solid #5a3a1a}
 .side.right{border-right:none;border-left:3px solid #5a3a1a}
-.fish-wall{font-size:40px;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.5));animation:sway 3s ease-in-out infinite alternate}
+.fish-wall{font-size:36px;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.5));animation:sway 3s ease-in-out infinite alternate}
 .fish-wall:nth-child(2){animation-delay:-1s}
 .fish-wall:nth-child(3){animation-delay:-2s}
 @keyframes sway{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
-.hook{font-size:20px;color:#888}
+.hook{font-size:18px;color:#888}
 .center{flex:1;display:flex;flex-direction:column;position:relative;min-width:0}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:linear-gradient(180deg,#4a3010,#3a2508);border-bottom:2px solid #2a1a05;z-index:10;gap:8px;flex-shrink:0}
-.tb-item{display:flex;align-items:center;gap:4px;color:#ffd700;font-size:13px;font-weight:700}
-.tb-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:linear-gradient(180deg,#4a3010,#3a2508);border-bottom:2px solid #2a1a05;z-index:10;gap:6px;flex-shrink:0}
+.tb-item{display:flex;align-items:center;gap:4px;color:#ffd700;font-size:12px;font-weight:700}
+.tb-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
 .coin-bg{background:linear-gradient(135deg,#ffd700,#b8860b);border:2px solid #8B6914}
 .bait-bg{background:linear-gradient(135deg,#87ceeb,#4682b4);border:2px solid #2a5a8a}
-.tb-plus{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#b8860b);border:2px solid #8B6914;color:#3a2508;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.progress-bar{flex:1;max-width:120px;height:16px;background:#2a1a05;border-radius:8px;border:1px solid #8B6914;overflow:hidden;margin:0 8px}
-.progress-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:8px;transition:width .3s;width:0%}
-.level-badge{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8B4513,#5a3010);border:2px solid #8B6914;color:#ffd700;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.settings-btn{font-size:18px;cursor:pointer;color:#ffd700;padding:4px}
-.payments-tab{position:absolute;left:0;top:50px;background:linear-gradient(180deg,#e8a020,#c88010);color:#3a2508;padding:8px 4px;border-radius:0 6px 6px 0;font-size:10px;font-weight:700;writing-mode:vertical-lr;z-index:10;cursor:pointer;border:1px solid #8B6914;border-left:none}
-.lake-wrap{flex:1;position:relative;overflow:hidden;border-radius:8px;margin:4px}
+.tb-plus{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#b8860b);border:2px solid #8B6914;color:#3a2508;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.progress-bar{flex:1;max-width:100px;height:14px;background:#2a1a05;border-radius:7px;border:1px solid #8B6914;overflow:hidden;margin:0 6px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:7px;transition:width .3s;width:0%}
+.level-badge{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#8B4513,#5a3010);border:2px solid #8B6914;color:#ffd700;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.settings-btn{font-size:16px;cursor:pointer;color:#ffd700;padding:2px}
+.payments-tab{position:absolute;left:0;top:40px;background:linear-gradient(180deg,#e8a020,#c88010);color:#3a2508;padding:6px 3px;border-radius:0 5px 5px 0;font-size:9px;font-weight:700;writing-mode:vertical-lr;z-index:10;cursor:pointer;border:1px solid #8B6914;border-left:none}
+.lake-wrap{flex:1;position:relative;overflow:hidden;margin:3px}
 canvas#cv{display:block;width:100%;height:100%}
-.cancel-btn{position:absolute;bottom:20px;right:20px;background:linear-gradient(180deg,#d4c4a0,#b8a888);border:2px solid #8B6914;color:#3a2508;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;z-index:5;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.cancel-btn:active{transform:scale(.95)}
-.bottombar{display:flex;align-items:center;padding:6px 12px;background:linear-gradient(180deg,#3a2508,#2a1a05);border-top:2px solid #4a3010;gap:8px;flex-shrink:0;z-index:10}
-.profile{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:50px}
-.profile-icon{width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,#6a5a4a,#4a3a2a);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;font-size:18px;color:#aaa}
-.profile-lvl{font-size:9px;color:#ffd700;font-weight:700}
-.profile-pts{font-size:9px;color:#8b7355}
-.hunt-btn{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#1a4a2a,#0a2a1a);border:3px solid #4CAF50;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(76,175,80,.3)}
+.pull-btn{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#d4c4a0,#b8a888);border:2px solid #8B6914;color:#3a2508;padding:12px 40px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;z-index:5;box-shadow:0 3px 8px rgba(0,0,0,.3);display:none;transition:transform .1s}
+.pull-btn:active{transform:translateX(-50%) scale(.95)}
+.pull-btn.active{background:linear-gradient(180deg,#90EE90,#4CAF50);color:#fff}
+.bottombar{display:flex;align-items:center;padding:6px 10px;background:linear-gradient(180deg,#3a2508,#2a1a05);border-top:2px solid #4a3010;gap:6px;flex-shrink:0;z-index:10}
+.profile{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:44px}
+.profile-icon{width:36px;height:36px;border-radius:5px;background:linear-gradient(135deg,#6a5a4a,#4a3a2a);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;font-size:16px;color:#aaa}
+.profile-lvl{font-size:8px;color:#ffd700;font-weight:700}
+.profile-pts{font-size:8px;color:#8b7355}
+.hunt-btn{width:50px;height:50px;border-radius:50%;background:radial-gradient(circle,#1a4a2a,#0a2a1a);border:3px solid #4CAF50;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 12px rgba(76,175,80,.3)}
 .hunt-btn:active{transform:scale(.95)}
-.hunt-text{color:#4CAF50;font-size:8px;font-weight:700;letter-spacing:1px}
-.hunt-icon{font-size:20px}
-.inv-slots{display:flex;gap:4px;flex:1;justify-content:center}
-.inv-slot{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#5a3a1a,#3a2508);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
-.inv-slot.empty::after{content:'+';color:#8B6914;font-size:20px;font-weight:700}
-.inv-slot.filled{border-color:#4CAF50}
-.inv-slot .qty{position:absolute;bottom:1px;right:3px;font-size:8px;color:#ffd700;font-weight:700}
+.hunt-text{color:#4CAF50;font-size:7px;font-weight:700;letter-spacing:1px}
+.hunt-icon{font-size:18px}
+.inv-slots{display:flex;gap:3px;flex:1;justify-content:center}
+.inv-slot{width:44px;height:44px;border-radius:5px;background:linear-gradient(135deg,#5a3a1a,#3a2508);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.inv-slot.empty::after{content:'+';color:#8B6914;font-size:18px;font-weight:700}
+.inv-slot .qty{position:absolute;bottom:1px;right:2px;font-size:7px;color:#ffd700;font-weight:700}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:linear-gradient(135deg,#3a2a1a,#2a1a0a);border:2px solid #8B6914;border-radius:12px;padding:24px;text-align:center;max-width:300px;width:88%;color:#e8d8c0}
-.modal h2{font-size:22px;color:#ffd700;margin-bottom:8px}
-.modal .emoji{font-size:48px;margin:8px 0}
-.modal .info{font-size:13px;margin:4px 0}
-.modal .reward{font-size:16px;color:#ffd700;font-weight:700;margin:8px 0}
-.modal button{padding:8px 20px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;margin:4px;background:linear-gradient(135deg,#ffd700,#b8860b);color:#3a2508}
+.modal{background:linear-gradient(135deg,#3a2a1a,#2a1a0a);border:2px solid #8B6914;border-radius:12px;padding:20px;text-align:center;max-width:280px;width:88%;color:#e8d8c0}
+.modal h2{font-size:20px;color:#ffd700;margin-bottom:6px}
+.modal .emoji{font-size:42px;margin:6px 0}
+.modal .info{font-size:12px;margin:3px 0}
+.modal .reward{font-size:14px;color:#ffd700;font-weight:700;margin:6px 0}
+.modal button{padding:7px 18px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;margin:3px;background:linear-gradient(135deg,#ffd700,#b8860b);color:#3a2508}
+.tension-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:200px;height:12px;background:#2a1a05;border-radius:6px;border:1px solid #8B6914;display:none;z-index:5;overflow:hidden}
+.tension-fill{height:100%;border-radius:6px;transition:width .1s,background .1s}
+.catch-bar{position:absolute;top:28px;left:50%;transform:translateX(-50%);width:200px;height:10px;background:#2a1a05;border-radius:5px;border:1px solid #8B6914;display:none;z-index:5;overflow:hidden}
+.catch-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:5px;transition:width .1s;width:0%}
+.arrow{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-size:28px;display:none;z-index:5;animation:arrowBounce .6s ease-in-out infinite}
+@keyframes arrowBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="side">
-    <div class="hook">🪝</div>
-    <div class="fish-wall">🐟</div>
-    <div class="fish-wall">🐠</div>
-    <div class="fish-wall">🐡</div>
-    <div class="hook">🪝</div>
+    <div class="hook">🪝</div><div class="fish-wall">🐟</div><div class="fish-wall">🐠</div><div class="fish-wall">🐡</div><div class="hook">🪝</div>
   </div>
   <div class="center">
     <div class="topbar">
@@ -76,7 +78,10 @@ canvas#cv{display:block;width:100%;height:100%}
     <div class="payments-tab">Платежи</div>
     <div class="lake-wrap">
       <canvas id="cv"></canvas>
-      <button class="cancel-btn" id="cancelBtn" onclick="cancelCast()" style="display:none">Отменить</button>
+      <div class="tension-bar" id="tensionBar"><div class="tension-fill" id="tensionFill"></div></div>
+      <div class="catch-bar" id="catchBar"><div class="catch-fill" id="catchFill"></div></div>
+      <div class="arrow" id="arrow">⬇️</div>
+      <button class="pull-btn" id="pullBtn" onmousedown="startPull()" onmouseup="stopPull()" onmouseleave="stopPull()" ontouchstart="startPull()" ontouchend="stopPull()">Тянуть</button>
     </div>
     <div class="bottombar">
       <div class="profile">
@@ -92,14 +97,9 @@ canvas#cv{display:block;width:100%;height:100%}
     </div>
   </div>
   <div class="side right">
-    <div class="hook">🪝</div>
-    <div class="fish-wall" style="animation-delay:-.5s">🐟</div>
-    <div class="fish-wall" style="animation-delay:-1.5s">🐠</div>
-    <div class="fish-wall" style="animation-delay:-2.5s">🐡</div>
-    <div class="hook">🪝</div>
+    <div class="hook">🪝</div><div class="fish-wall" style="animation-delay:-.5s">🐟</div><div class="fish-wall" style="animation-delay:-1.5s">🐠</div><div class="fish-wall" style="animation-delay:-2.5s">🐡</div><div class="hook">🪝</div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal"><div class="modal" id="modalInner"></div></div>
 
 <script>
@@ -115,30 +115,41 @@ function resize(){
 }
 resize();window.addEventListener('resize',resize);
 
+// State
 let coins=parseInt(localStorage.getItem('fc')||'292');
 let bait=parseInt(localStorage.getItem('fb')||'100');
 let lvl=parseInt(localStorage.getItem('fl')||'1');
 let xp=parseInt(localStorage.getItem('fxp')||'0');
 let caught=JSON.parse(localStorage.getItem('fca')||'[]');
 let inv=JSON.parse(localStorage.getItem('finv')||'[null,null,null,null,null,null,null]');
-let state='idle',lineX=0,lineY=0,hookX=0,hookY=0,targetX=0,targetY=0;
-let biteTimer=0,biteFish=null,reelProg=0,time=0;
+let state='idle'; // idle, casting, waiting, bite, fighting, caught
+let time=0;
+let lineX=0,lineY=0,hookX=0,hookY=0,targetX=0,targetY=0;
+let biteTimer=0,biteFish=null;
 let bubbles=[],ripples=[],clouds=[];
-let waterH=0;
+let fishes=[];
+let pulling=false;
+
+// Fight system
+let arcPos=0; // -1 to 1, position on arc
+let arcSpeed=0; // fish resistance
+let tension=0; // 0-100, line tension
+let catchProg=0; // 0-100, catch progress
+let arcDir=1; // direction indicator moves
+let fishStrength=1; // how hard fish fights
 
 const FISH=[
-  {name:'Карась',emoji:'🐟',wt:[0.2,1.5],spd:1,col:'#c0a040',val:10,bite:0.3,xp:5},
-  {name:'Окунь',emoji:'🐠',wt:[0.3,2],spd:1.5,col:'#4a8a3a',val:15,bite:0.25,xp:8},
-  {name:'Щука',emoji:'🐟',wt:[0.5,4],spd:2,col:'#5a6a3a',val:25,bite:0.2,xp:12},
-  {name:'Лещ',emoji:'🐡',wt:[0.4,2.5],spd:0.8,col:'#8a7a50',val:20,bite:0.35,xp:7},
-  {name:'Сом',emoji:'🐟',wt:[1,6],spd:1.2,col:'#3a3a3a',val:40,bite:0.15,xp:20},
-  {name:'Судак',emoji:'🐠',wt:[0.8,3.5],spd:1.8,col:'#7a8a6a',val:35,bite:0.18,xp:15},
-  {name:'Золотая',emoji:'✨',wt:[0.1,0.5],spd:3,col:'#ffd700',val:100,bite:0.05,xp:50},
+  {name:'Карась',emoji:'🐟',wt:[0.2,1.5],spd:1,col:'#c0a040',val:10,bite:0.3,xp:5,str:0.5,speed:1.5},
+  {name:'Окунь',emoji:'🐠',wt:[0.3,2],spd:1.5,col:'#4a8a3a',val:15,bite:0.25,xp:8,str:0.7,speed:2},
+  {name:'Щука',emoji:'🐟',wt:[0.5,4],spd:2,col:'#5a6a3a',val:25,bite:0.2,xp:12,str:0.9,speed:2.5},
+  {name:'Лещ',emoji:'🐡',wt:[0.4,2.5],spd:0.8,col:'#8a7a50',val:20,bite:0.35,xp:7,str:0.4,speed:1.2},
+  {name:'Сом',emoji:'🐟',wt:[1,6],spd:1.2,col:'#3a3a3a',val:40,bite:0.15,xp:20,str:1.2,speed:3},
+  {name:'Судак',emoji:'🐠',wt:[0.8,3.5],spd:1.8,col:'#7a8a6a',val:35,bite:0.18,xp:15,str:1.0,speed:2.8},
+  {name:'Золотая',emoji:'✨',wt:[0.1,0.5],spd:3,col:'#ffd700',val:100,bite:0.05,xp:50,str:1.5,speed:3.5},
 ];
 
-let fishes=[];
 function init(){
-  for(let i=0;i<4;i++)clouds.push({x:Math.random()*W,y:10+Math.random()*30,w:40+Math.random()*80,h:10+Math.random()*15,s:0.15+Math.random()*0.2});
+  for(let i=0;i<4;i++)clouds.push({x:Math.random()*W,y:10+Math.random()*25,w:30+Math.random()*60,h:8+Math.random()*12,s:0.1+Math.random()*0.15});
   for(let i=0;i<5;i++)spawnFish();
   updateUI();buildInv();
 }
@@ -146,7 +157,7 @@ function init(){
 function spawnFish(){
   let f=FISH[Math.floor(Math.random()*FISH.length)];
   let side=Math.random()>0.5?1:-1;
-  fishes.push({type:f,x:side>0?W+40:-40,y:H*0.3+Math.random()*H*0.5,vx:side*-(0.2+f.spd*0.4),sz:16+f.wt[0]*6,col:f.col,w:Math.random()*Math.PI*2,dir:side,alive:true});
+  fishes.push({type:f,x:side>0?W+40:-40,y:H*0.3+Math.random()*H*0.45,vx:side*-(0.2+f.spd*0.3),sz:14+f.wt[0]*5,col:f.col,w:Math.random()*Math.PI*2,dir:side,alive:true});
 }
 
 function updateUI(){
@@ -155,109 +166,174 @@ function updateUI(){
   document.getElementById('lvl').textContent=lvl;
   document.getElementById('ppts').textContent=xp;
   document.getElementById('plvl').textContent=lvl;
-  let needed=lvl*100;
-  document.getElementById('pf').style.width=Math.min(100,xp/needed*100)+'%';
+  document.getElementById('pf').style.width=Math.min(100,xp/(lvl*100)*100)+'%';
 }
 
 function buildInv(){
   let el=document.getElementById('invSlots');el.innerHTML='';
   for(let i=0;i<7;i++){
     let s=document.createElement('div');s.className='inv-slot'+(inv[i]?' filled':' empty');
-    if(inv[i]){
-      let f=FISH.find(x=>x.name===inv[i].name);
-      s.innerHTML=(f?f.emoji:'🐟')+(inv[i].qty>1?`<span class="qty">x${inv[i].qty}</span>`:'');
-    }
+    if(inv[i]){let f=FISH.find(x=>x.name===inv[i].name);s.innerHTML=(f?f.emoji:'🐟')+(inv[i].qty>1?`<span class="qty">x${inv[i].qty}</span>`:'');}
     el.appendChild(s);
   }
 }
 
 function addToInv(fish,weight){
-  for(let i=0;i<inv.length;i++){
-    if(inv[i]&&inv[i].name===fish.name){inv[i].qty++;save();buildInv();return;}
-  }
-  for(let i=0;i<inv.length;i++){
-    if(!inv[i]){inv[i]={name:fish.name,weight,qty:1};save();buildInv();return;}
-  }
+  for(let i=0;i<inv.length;i++){if(inv[i]&&inv[i].name===fish.name){inv[i].qty++;save();buildInv();return;}}
+  for(let i=0;i<inv.length;i++){if(!inv[i]){inv[i]={name:fish.name,weight,qty:1};save();buildInv();return;}}
 }
 
 function save(){localStorage.setItem('fc',coins);localStorage.setItem('fb',bait);localStorage.setItem('fl',lvl);localStorage.setItem('fxp',xp);localStorage.setItem('fca',JSON.stringify(caught));localStorage.setItem('finv',JSON.stringify(inv));}
-
 function buyBait(){if(coins>=10){coins-=10;bait+=10;save();updateUI();}}
 
-// ======== GAME ========
+// ======== CAST ========
 function castLine(){
   if(state!=='idle')return;
   if(bait<=0){showMsg('Нет наживки!','Купить 10 за 10🪙?',()=>{if(coins>=10){coins-=10;bait+=10;save();updateUI();}});return;}
   bait--;save();updateUI();
   state='casting';
-  lineX=W*0.6;lineY=H*0.15;
-  targetX=W*0.3+Math.random()*W*0.4;
-  targetY=H*0.3+Math.random()*H*0.4;
+  lineX=W*0.6;lineY=H*0.1;
+  targetX=W*0.25+Math.random()*W*0.4;
+  targetY=H*0.3+Math.random()*H*0.35;
   hookX=lineX;hookY=lineY;
-  document.getElementById('cancelBtn').style.display='block';
+  document.getElementById('pullBtn').style.display='none';
+  document.getElementById('tensionBar').style.display='none';
+  document.getElementById('catchBar').style.display='none';
+  document.getElementById('arrow').style.display='none';
 }
 
-function cancelCast(){
-  state='idle';
-  document.getElementById('cancelBtn').style.display='none';
+// ======== PULL SYSTEM ========
+function startPull(){
+  if(state==='bite'){startFight();return;}
+  if(state==='fighting')pulling=true;
 }
+function stopPull(){pulling=false;}
 
-function doTornado(){
-  if(state!=='idle')return;
-  state='shuffling';
-  let all=[];
-  fishes.forEach(f=>{if(f.alive)all.push(f.type);});
-  fishes=[];
-  for(let i=0;i<5;i++)spawnFish();
-  state='idle';
+function startFight(){
+  state='fighting';
+  pulling=false;
+  tension=0;catchProg=0;arcPos=0;
+  arcDir=1;
+  fishStrength=biteFish.type.str;
+  arcSpeed=1.5+biteFish.type.speed*0.5;
+  document.getElementById('pullBtn').style.display='block';
+  document.getElementById('pullBtn').textContent='Тянуть';
+  document.getElementById('tensionBar').style.display='block';
+  document.getElementById('catchBar').style.display='block';
+  document.getElementById('arrow').style.display='none';
+  ripples.push({x:hookX,y:hookY,r:8,life:1});
 }
 
 // ======== UPDATE ========
 function update(dt){
   time+=dt;
-  clouds.forEach(c=>{c.x+=c.s;if(c.x>W+100)c.x=-100;});
+  clouds.forEach(c=>{c.x+=c.s;if(c.x>W+80)c.x=-80;});
   fishes.forEach(f=>{if(!f.alive)return;f.x+=f.vx;f.w+=dt*2;f.y+=Math.sin(f.w)*0.3;});
-  fishes=fishes.filter(f=>f.alive&&(f.x>-80&&f.x<W+80));
+  fishes=fishes.filter(f=>f.alive&&(f.x>-60&&f.x<W+60));
   while(fishes.length<5)spawnFish();
-  if(Math.random()<0.03)bubbles.push({x:Math.random()*W,y:H*0.3+Math.random()*H*0.5,r:1+Math.random()*2,vy:-0.2-Math.random()*0.3,life:1});
+  if(Math.random()<0.03)bubbles.push({x:Math.random()*W,y:H*0.3+Math.random()*H*0.4,r:1+Math.random()*2,vy:-0.15-Math.random()*0.2,life:1});
   bubbles.forEach(b=>{b.y+=b.vy;b.life-=0.008;});bubbles=bubbles.filter(b=>b.life>0);
-  ripples.forEach(r=>{r.r+=0.4;r.life-=0.015;});ripples=ripples.filter(r=>r.life>0);
+  ripples.forEach(r=>{r.r+=0.3;r.life-=0.012;});ripples=ripples.filter(r=>r.life>0);
 
+  // Casting
   if(state==='casting'){
     let dx=targetX-hookX,dy=targetY-hookY,d=Math.hypot(dx,dy);
-    if(d<5){hookX=targetX;hookY=targetY;state='waiting';ripples.push({x:hookX,y:hookY,r:5,life:1});biteTimer=80+Math.random()*150;}
-    else{hookX+=dx*0.1;hookY+=dy*0.1;}
+    if(d<5){hookX=targetX;hookY=targetY;state='waiting';ripples.push({x:hookX,y:hookY,r:5,life:1});biteTimer=80+Math.random()*150;
+      document.getElementById('arrow').style.display='none';
+    }else{hookX+=dx*0.12;hookY+=dy*0.12;}
   }
+
+  // Waiting
   if(state==='waiting'){
-    hookY+=Math.sin(time*1.5)*0.15;
+    hookY+=Math.sin(time*1.5)*0.12;
     biteTimer--;
     if(biteTimer<=0){
       let near=null,minD=Infinity;
       fishes.forEach(f=>{if(!f.alive)return;let d=Math.hypot(f.x-hookX,f.y-hookY);if(d<80&&d<minD&&Math.random()<f.type.bite){minD=d;near=f;}});
-      if(near){state='bite';biteFish=near;biteTimer=100;}
-      else biteTimer=60+Math.random()*120;
+      if(near){state='bite';biteFish=near;biteTimer=120;
+        document.getElementById('arrow').style.display='block';
+        document.getElementById('arrow').style.left=hookX+'px';
+        document.getElementById('pullBtn').style.display='block';
+        document.getElementById('pullBtn').textContent='🎣 КЛЮЁТ!';
+        document.getElementById('pullBtn').classList.add('active');
+      }else biteTimer=60+Math.random()*120;
     }
   }
+
+  // Bite - waiting for player
   if(state==='bite'){
-    hookY+=Math.sin(time*12)*2.5;
+    hookY+=Math.sin(time*10)*2;
     biteTimer--;
-    if(biteTimer<=0){state='idle';biteFish=null;document.getElementById('cancelBtn').style.display='none';}
+    if(biteTimer<=0){
+      state='idle';biteFish=null;
+      hideFightUI();
+    }
   }
-  if(state==='reeling'){
-    reelProg+=0.025;
-    hookY+=(lineY-hookY)*0.04;hookX+=(lineX-hookX)*0.04;
-    if(biteFish){biteFish.x+=(lineX-biteFish.x)*0.04;biteFish.y+=(lineY-biteFish.y)*0.04;}
-    if(reelProg>=1){
-      state='idle';
-      document.getElementById('cancelBtn').style.display='none';
+
+  // Fighting - arc meter system
+  if(state==='fighting'){
+    // Fish moves the arc indicator
+    arcPos+=arcDir*arcSpeed*dt*0.06;
+    // Random direction changes (fish fighting)
+    if(Math.random()<0.02*fishStrength)arcDir*=-1;
+    // Bounce off edges
+    if(arcPos>1){arcPos=1;arcDir=-1;}
+    if(arcPos<-1){arcPos=-1;arcDir=1;}
+    // Fish periodically changes direction aggressively
+    if(Math.random()<0.008*fishStrength){arcDir*=-1;arcSpeed=1.5+fishStrength*1.5+Math.random();}
+
+    // Pulling - check if in good zone
+    if(pulling){
+      // arcPos near 0 = green zone (good)
+      let inZone=Math.abs(arcPos)<0.4;
+      if(inZone){
+        catchProg+=0.4; // progress when in green zone
+        tension=Math.max(0,tension-0.3); // tension decreases in good zone
+      }else{
+        tension+=0.8; // tension increases in bad zone
+      }
+    }else{
+      // Not pulling - catch progress decreases, tension normalizes
+      catchProg=Math.max(0,catchProg-0.15);
+      tension=Math.max(0,tension-0.1);
+    }
+
+    // Clamp
+    catchProg=Math.min(100,catchProg);
+    tension=Math.min(100,tension);
+
+    // Update UI
+    document.getElementById('tensionFill').style.width=tension+'%';
+    document.getElementById('tensionFill').style.background=tension>70?'#ff4444':tension>40?'#ffaa00':'#44aaff';
+    document.getElementById('catchFill').style.width=catchProg+'%';
+
+    // Line tension - if too high, fish escapes
+    if(tension>=100){
+      state='idle';biteFish=null;
+      hideFightUI();
+      showMsg('Обрыв!','Леска порвалась...',()=>{});
+    }
+
+    // Catch complete
+    if(catchProg>=100){
+      state='caught';
+      hideFightUI();
       showCatch();
     }
+
+    // Rod bend effect
+    hookY=H*0.15+Math.sin(time*5)*5*(pulling?3:1);
+    hookX=W*0.55+arcPos*30;
   }
 }
 
-cv.addEventListener('pointerdown',e=>{
-  if(state==='bite'){state='reeling';reelProg=0;}
-});
+function hideFightUI(){
+  document.getElementById('pullBtn').style.display='none';
+  document.getElementById('pullBtn').classList.remove('active');
+  document.getElementById('tensionBar').style.display='none';
+  document.getElementById('catchBar').style.display='none';
+  document.getElementById('arrow').style.display='none';
+}
 
 function showCatch(){
   let f=biteFish.type;
@@ -271,125 +347,109 @@ function showCatch(){
   document.getElementById('modalInner').innerHTML=`<div class="emoji">${f.emoji}</div><h2>${f.name}</h2><div class="info">Вес: ${w} кг</div><div class="reward">+${earned} 🪙  +${f.xp} XP</div><button onclick="closeModal()">ОК</button>`;
   biteFish.alive=false;biteFish=null;
 }
-
 function closeModal(){document.getElementById('modal').classList.remove('show');}
-
-function showMsg(title,text,onOk){
-  document.getElementById('modal').classList.add('show');
-  document.getElementById('modalInner').innerHTML=`<h2>${title}</h2><div class="info">${text}</div><button onclick="closeModal()">Нет</button><button onclick="(${onOk})();closeModal()">Да</button>`;
-}
+function showMsg(t,txt,fn){document.getElementById('modal').classList.add('show');document.getElementById('modalInner').innerHTML=`<h2>${t}</h2><div class="info">${txt}</div><button onclick="closeModal()">ОК</button>`;}
 
 // ======== DRAW ========
 function draw(){
   cx.clearRect(0,0,W,H);
-  // Lake background - sky
-  let sky=cx.createLinearGradient(0,0,0,H*0.55);
-  sky.addColorStop(0,'#87CEEB');sky.addColorStop(0.4,'#B0E0E6');sky.addColorStop(0.7,'#90C8A0');sky.addColorStop(1,'#5A8A50');
-  cx.fillStyle=sky;cx.fillRect(0,0,W,H*0.55);
+  // Sky
+  let sky=cx.createLinearGradient(0,0,0,H*0.5);
+  sky.addColorStop(0,'#4a90d9');sky.addColorStop(0.3,'#87CEEB');sky.addColorStop(0.6,'#B0E0E6');sky.addColorStop(1,'#5A8A50');
+  cx.fillStyle=sky;cx.fillRect(0,0,W,H*0.5);
   // Clouds
-  cx.fillStyle='rgba(255,255,255,0.7)';
-  clouds.forEach(c=>{
-    cx.beginPath();cx.ellipse(c.x,c.y,c.w/2,c.h/2,0,0,Math.PI*2);cx.fill();
-    cx.beginPath();cx.ellipse(c.x-c.w*0.3,c.y+3,c.w*0.25,c.h*0.4,0,0,Math.PI*2);cx.fill();
-  });
-  // Trees background
+  cx.fillStyle='rgba(255,255,255,0.8)';
+  clouds.forEach(c=>{cx.beginPath();cx.ellipse(c.x,c.y,c.w/2,c.h/2,0,0,Math.PI*2);cx.fill();cx.beginPath();cx.ellipse(c.x-c.w*0.3,c.y+3,c.w*0.25,c.h*0.35,0,0,Math.PI*2);cx.fill();});
+  // Mountains
+  cx.fillStyle='#5a8a4a';
+  cx.beginPath();cx.moveTo(0,H*0.48);cx.lineTo(W*0.15,H*0.35);cx.lineTo(W*0.3,H*0.42);cx.lineTo(W*0.5,H*0.32);cx.lineTo(W*0.7,H*0.4);cx.lineTo(W*0.85,H*0.34);cx.lineTo(W,H*0.45);cx.lineTo(W,H*0.5);cx.lineTo(0,H*0.5);cx.fill();
+  // Trees
   cx.fillStyle='#3a6a2a';
-  for(let i=0;i<25;i++){
-    let tx=i*(W/22)-20,ty=H*0.48+Math.sin(i*1.7)*8;
-    let th=30+Math.sin(i*2.3)*20;
-    cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+6,ty-th);cx.lineTo(tx+12,ty);cx.fill();
-    cx.fillStyle='#2a5a1a';cx.beginPath();cx.moveTo(tx+8,ty);cx.lineTo(tx+14,ty-th*0.8);cx.lineTo(tx+20,ty);cx.fill();
-    cx.fillStyle='#3a6a2a';
-  }
-  // Tree reflections
-  cx.save();cx.globalAlpha=0.3;cx.scale(1,-1);cx.translate(0,-H*1.05);
-  cx.fillStyle='#2a5a1a';
-  for(let i=0;i<25;i++){
-    let tx=i*(W/22)-20,ty=H*0.48+Math.sin(i*1.7)*8;
-    let th=20+Math.sin(i*2.3)*12;
-    cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+6,ty-th);cx.lineTo(tx+12,ty);cx.fill();
-  }
-  cx.restore();
+  for(let i=0;i<20;i++){let tx=i*(W/18)-15,ty=H*0.47+Math.sin(i*1.7)*5,th=20+Math.sin(i*2.3)*12;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx+5,ty-th);cx.lineTo(tx+10,ty);cx.fill();}
   // Water
-  waterH=H*0.5;
+  let waterH=H*0.48;
   let water=cx.createLinearGradient(0,waterH,0,H);
-  water.addColorStop(0,'#4a8a6a');water.addColorStop(0.1,'#3a7a5a');water.addColorStop(0.3,'#2a6a4a');water.addColorStop(0.7,'#1a4a3a');water.addColorStop(1,'#0a2a1a');
+  water.addColorStop(0,'#3a7aaa');water.addColorStop(0.1,'#2a6a9a');water.addColorStop(0.4,'#1a5a8a');water.addColorStop(0.7,'#0a3a6a');water.addColorStop(1,'#052040');
   cx.fillStyle=water;cx.fillRect(0,waterH,W,H-waterH);
-  // Water surface
-  cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=1;
-  for(let i=0;i<5;i++){
-    cx.beginPath();
-    for(let x=0;x<W;x+=3){
-      let y=waterH+i*6+Math.sin(x*0.03+time*0.8+i)*3;
-      x===0?cx.moveTo(x,y):cx.lineTo(x,y);
-    }
-    cx.stroke();
-  }
+  // Water surface waves
+  cx.strokeStyle='rgba(255,255,255,0.12)';cx.lineWidth=1;
+  for(let i=0;i<4;i++){cx.beginPath();for(let x=0;x<W;x+=3){let y=waterH+i*5+Math.sin(x*0.025+time*0.7+i)*2.5;x===0?cx.moveTo(x,y):cx.lineTo(x,y);}cx.stroke();}
   // Water shimmer
-  for(let i=0;i<15;i++){
-    let sx=(i*89+time*8)%W;
-    let sy=waterH+10+Math.sin(time*0.5+i)*15+i*12;
-    cx.fillStyle=`rgba(255,255,255,${0.04+Math.sin(time+i)*0.02})`;
-    cx.fillRect(sx,sy,20+Math.sin(time+i)*8,1);
-  }
+  for(let i=0;i<12;i++){let sx=(i*79+time*6)%W;let sy=waterH+8+Math.sin(time*0.4+i)*12+i*10;cx.fillStyle=`rgba(255,255,255,${0.03+Math.sin(time+i)*0.02})`;cx.fillRect(sx,sy,15+Math.sin(time+i)*6,1);}
   // Fish underwater
-  fishes.forEach(f=>{
-    if(!f.alive)return;
-    cx.save();cx.translate(f.x,f.y);if(f.dir<0)cx.scale(-1,1);
-    cx.fillStyle=f.col;
-    cx.beginPath();cx.ellipse(0,0,f.sz,f.sz*0.35,0,0,Math.PI*2);cx.fill();
-    cx.fillStyle=f.col+'aa';
-    cx.beginPath();cx.moveTo(-f.sz*0.3,-f.sz*0.25);cx.lineTo(-f.sz*0.1,-f.sz*0.5);cx.lineTo(f.sz*0.1,-f.sz*0.25);cx.fill();
-    cx.beginPath();cx.moveTo(-f.sz,0);cx.lineTo(-f.sz*1.2,-f.sz*0.25);cx.lineTo(-f.sz*1.2,f.sz*0.25);cx.fill();
-    cx.fillStyle='#fff';cx.beginPath();cx.arc(f.sz*0.45,-f.sz*0.08,f.sz*0.1,0,Math.PI*2);cx.fill();
-    cx.fillStyle='#000';cx.beginPath();cx.arc(f.sz*0.5,-f.sz*0.08,f.sz*0.05,0,Math.PI*2);cx.fill();
-    cx.restore();
-  });
+  fishes.forEach(f=>{if(!f.alive)return;cx.save();cx.translate(f.x,f.y);if(f.dir<0)cx.scale(-1,1);cx.fillStyle=f.col;cx.beginPath();cx.ellipse(0,0,f.sz,f.sz*0.3,0,0,Math.PI*2);cx.fill();cx.fillStyle=f.col+'aa';cx.beginPath();cx.moveTo(-f.sz*0.25,-f.sz*0.2);cx.lineTo(-f.sz*0.08,-f.sz*0.4);cx.lineTo(f.sz*0.08,-f.sz*0.2);cx.fill();cx.beginPath();cx.moveTo(-f.sz,0);cx.lineTo(-f.sz*1.15,-f.sz*0.2);cx.lineTo(-f.sz*1.15,f.sz*0.2);cx.fill();cx.fillStyle='#fff';cx.beginPath();cx.arc(f.sz*0.4,-f.sz*0.06,f.sz*0.08,0,Math.PI*2);cx.fill();cx.fillStyle='#000';cx.beginPath();cx.arc(f.sz*0.44,-f.sz*0.06,f.sz*0.04,0,Math.PI*2);cx.fill();cx.restore();});
   // Bubbles
-  bubbles.forEach(b=>{cx.strokeStyle=`rgba(200,240,255,${b.life*0.4})`;cx.lineWidth=0.5;cx.beginPath();cx.arc(b.x,b.y,b.r,0,Math.PI*2);cx.stroke();});
+  bubbles.forEach(b=>{cx.strokeStyle=`rgba(200,240,255,${b.life*0.35})`;cx.lineWidth=0.5;cx.beginPath();cx.arc(b.x,b.y,b.r,0,Math.PI*2);cx.stroke();});
   // Ripples
-  ripples.forEach(r=>{cx.strokeStyle=`rgba(200,240,255,${r.life*0.4})`;cx.lineWidth=1;cx.beginPath();cx.ellipse(r.x,r.y,r.r,r.r*0.3,0,0,Math.PI*2);cx.stroke();});
+  ripples.forEach(r=>{cx.strokeStyle=`rgba(200,240,255,${r.life*0.35})`;cx.lineWidth=0.8;cx.beginPath();cx.ellipse(r.x,r.y,r.r,r.r*0.25,0,0,Math.PI*2);cx.stroke();});
   // Fishing rod
-  let rodTipX=W*0.65,rodTipY=H*0.12;
-  let rodBaseX=W*0.75,rodBaseY=H*0.55;
-  cx.strokeStyle='#8B6914';cx.lineWidth=4;
-  cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.7,H*0.3,rodTipX,rodTipY);cx.stroke();
-  cx.strokeStyle='#A07828';cx.lineWidth=2;
-  cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.7,H*0.3,rodTipX,rodTipY);cx.stroke();
-  // Rod rings
-  cx.fillStyle='#888';
-  [0.3,0.5,0.7,0.9].forEach(t=>{
-    let rx=W*0.75+(rodTipX-W*0.75)*t;
-    let ry=rodBaseY+(rodTipY-rodBaseY)*t-Math.sin(t*Math.PI)*30;
-    cx.beginPath();cx.arc(rx,ry,2,0,Math.PI*2);cx.fill();
-  });
-  // Line + hook
+  let rodTipX=W*0.62,rodTipY=H*0.08;
+  let rodBaseX=W*0.72,rodBaseY=H*0.52;
+  cx.strokeStyle='#8B6914';cx.lineWidth=4;cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.68,H*0.25,rodTipX,rodTipY);cx.stroke();
+  cx.strokeStyle='#A07828';cx.lineWidth=2;cx.beginPath();cx.moveTo(rodBaseX,rodBaseY);cx.quadraticCurveTo(W*0.68,H*0.25,rodTipX,rodTipY);cx.stroke();
+  // Rod tip bend when fighting
+  let bendX=state==='fighting'?hookX:rodTipX;
+  let bendY=state==='fighting'?Math.min(rodTipY+20,hookY-10):rodTipY;
+  if(state==='fighting'){
+    cx.strokeStyle='#8B6914';cx.lineWidth=3;
+    cx.beginPath();cx.moveTo(rodTipX,rodTipY);cx.lineTo(bendX,bendY);cx.stroke();
+  }
+  // Line
   if(state!=='idle'){
-    cx.strokeStyle='rgba(200,200,200,0.5)';cx.lineWidth=0.8;
-    cx.beginPath();cx.moveTo(rodTipX,rodTipY);
-    let midX=(rodTipX+hookX)/2,midY=Math.min(rodTipY,hookY)-15;
+    let fromX=state==='fighting'?bendX:rodTipX;
+    let fromY=state==='fighting'?bendY:rodTipY;
+    cx.strokeStyle='rgba(200,200,200,0.45)';cx.lineWidth=0.7;
+    cx.beginPath();cx.moveTo(fromX,fromY);
+    let midX=(fromX+hookX)/2,midY=Math.min(fromY,hookY)-10;
     cx.quadraticCurveTo(midX,midY,hookX,hookY);cx.stroke();
     // Hook
-    cx.strokeStyle='#ccc';cx.lineWidth=1.5;
-    cx.beginPath();cx.arc(hookX,hookY+4,3,0,Math.PI);cx.stroke();
-    cx.beginPath();cx.moveTo(hookX,hookY+4);cx.lineTo(hookX+2,hookY+1);cx.stroke();
+    cx.strokeStyle='#ccc';cx.lineWidth=1.5;cx.beginPath();cx.arc(hookX,hookY+3,3,0,Math.PI);cx.stroke();cx.beginPath();cx.moveTo(hookX,hookY+3);cx.lineTo(hookX+2,hookY);cx.stroke();
     // Bobber
-    cx.fillStyle='#ff3333';cx.beginPath();cx.arc(hookX,hookY-2,3.5,0,Math.PI*2);cx.fill();
-    cx.fillStyle='#fff';cx.beginPath();cx.arc(hookX,hookY-2,1.5,0,Math.PI*2);cx.fill();
-  }
-  // Bite effect
-  if(state==='bite'){
-    cx.strokeStyle='rgba(255,200,0,0.6)';cx.lineWidth=2;
-    for(let i=0;i<3;i++){
-      let r=8+i*6+Math.sin(time*10)*2;
-      cx.globalAlpha=0.4-i*0.12;
-      cx.beginPath();cx.arc(hookX,hookY,r,0,Math.PI*2);cx.stroke();
+    if(state!=='fighting'){
+      cx.fillStyle='#ff3333';cx.beginPath();cx.arc(hookX,hookY-2,3,0,Math.PI*2);cx.fill();
+      cx.fillStyle='#fff';cx.beginPath();cx.arc(hookX,hookY-2,1.2,0,Math.PI*2);cx.fill();
     }
+  }
+  // Bite ripples
+  if(state==='bite'){
+    cx.strokeStyle='rgba(255,200,0,0.5)';cx.lineWidth=1.5;
+    for(let i=0;i<3;i++){let r=6+i*5+Math.sin(time*10)*2;cx.globalAlpha=0.35-i*0.1;cx.beginPath();cx.arc(hookX,hookY,r,0,Math.PI*2);cx.stroke();}
     cx.globalAlpha=1;
   }
   // Shore
-  cx.fillStyle='#5a4a30';
-  cx.beginPath();cx.moveTo(0,waterH+5);cx.quadraticCurveTo(W*0.3,waterH-5,W*0.5,waterH+3);cx.quadraticCurveTo(W*0.7,waterH+10,W,waterH+5);cx.lineTo(W,waterH+15);cx.lineTo(0,waterH+15);cx.fill();
+  cx.fillStyle='#5a4a30';cx.beginPath();cx.moveTo(0,waterH+4);cx.quadraticCurveTo(W*0.3,waterH-3,W*0.5,waterH+2);cx.quadraticCurveTo(W*0.7,waterH+8,W,waterH+4);cx.lineTo(W,waterH+12);cx.lineTo(0,waterH+12);cx.fill();
+  // Arc meter (when fighting)
+  if(state==='fighting')drawArc();
+}
+
+function drawArc(){
+  let cx2=cx;
+  let arcW=160,arcH=80;
+  let arcX=W/2-arcW/2,arcY=H*0.35-arcH;
+  // Arc background - gradient from red to green to red
+  cx2.save();
+  cx2.lineWidth=14;cx2.lineCap='round';
+  // Red zone (outer)
+  cx2.strokeStyle='rgba(255,60,60,0.6)';
+  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI,-Math.PI*0.7);cx2.stroke();
+  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.3,0);cx2.stroke();
+  // Yellow zone
+  cx2.strokeStyle='rgba(255,200,0,0.6)';
+  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.7,-Math.PI*0.55);cx2.stroke();
+  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.45,-Math.PI*0.3);cx2.stroke();
+  // Green zone (center)
+  cx2.strokeStyle='rgba(80,220,80,0.8)';
+  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.55,-Math.PI*0.45);cx2.stroke();
+  // Indicator needle
+  let angle=-Math.PI+((arcPos+1)/2)*Math.PI; // map -1..1 to -PI..0
+  let nx=W/2+Math.cos(angle)*(arcW/2);
+  let ny=H*0.35+Math.sin(angle)*(arcW/2);
+  cx2.fillStyle=pulling?'#fff':'#ffd700';
+  cx2.beginPath();cx2.arc(nx,ny,8,0,Math.PI*2);cx2.fill();
+  cx2.strokeStyle='#333';cx2.lineWidth=2;cx2.stroke();
+  // Center dot
+  cx2.fillStyle='#ffd700';cx2.beginPath();cx2.arc(nx,ny,3,0,Math.PI*2);cx2.fill();
+  cx2.restore();
 }
 
 let lastT=0;
