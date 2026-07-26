@@ -436,10 +436,11 @@ function update(dt){
       tension+=pullDir*playerPull;
     }
 
-    // Очень слабый дрейф к центру (едва заметный)
+    // Дрейф к центру: слабый в безопасной зоне, сильный в опасной (паника)
     if(!pulling){
-      if(tension>50)tension=Math.max(50,tension-0.005);
-      else tension=Math.min(50,tension+0.005);
+      let drift=(tension<SAFE_ZONE_LOW||tension>SAFE_ZONE_HIGH)?0.025:0.005;
+      if(tension>50)tension=Math.max(50,tension-drift);
+      else tension=Math.min(50,tension+drift);
     }
 
     // Clamp
