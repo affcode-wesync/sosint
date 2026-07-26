@@ -40,7 +40,6 @@ canvas{touch-action:none;display:block;border-radius:6px}
 .g .i{font-size:18px}
 .g .t{font-size:8px;color:#8b7355}
 .g .c{font-size:8px;color:#ffd700;font-weight:700}
-.g .cnt{position:absolute;top:-2px;right:-2px;background:#ff4757;color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
 .modal{background:linear-gradient(135deg,#1a1535,#0d1f3a);border:2px solid rgba(255,215,0,.3);border-radius:14px;padding:24px;text-align:center;max-width:300px;width:90%}
@@ -93,7 +92,8 @@ canvas{touch-action:none;display:block;border-radius:6px}
 const R=8,C=8,G=50,P=3,T=G+P;
 const GEMS=[{c:'#ffd700',s:'★'},{c:'#ff4757',s:'♦'},{c:'#3498db',s:'●'},{c:'#2ecc71',s:'◆'},{c:'#9b59b6',s:'♠'},{c:'#e67e22',s:'♣'}];
 const COST={hammer:30,lightning:50,tornado:40};
-let gs=50,tot=50,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30,co=parseInt(localStorage.getItem('m3c')||'100');
+let gs=50,tot=50,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30;
+let co=parseInt(localStorage.getItem('m3c')||'100');
 let inv=JSON.parse(localStorage.getItem('m3g')||'{"hammer":3,"lightning":1,"tornado":2}');
 let done=JSON.parse(localStorage.getItem('m3d')||'[]');
 let st={grid:null,lvl:null,idx:0,tmr:null,time:0,combo:0,obj:{},gadget:null};
@@ -101,6 +101,7 @@ let boardCache={};
 
 function save(){localStorage.setItem('m3c',co);localStorage.setItem('m3g',JSON.stringify(inv));localStorage.setItem('m3d',JSON.stringify(done));}
 
+// ======== BOARD SHAPES (lazy, cached) ========
 function getBoard(n){
   if(boardCache[n])return boardCache[n];
   let b={};
@@ -120,26 +121,19 @@ function getBoard(n){
   return b;
 }
 
+// ======== LEVELS ========
 function mkLevels(){
   lvls=[];
   for(let i=1;i<=tot;i++){
     let o={},mv,tp;
-    // 1-5: Easy - collect 1 color (fewer moves)
     if(i<=5){tp='c';o={t:'c',g:{},s:600+i*250};mv=30+~~(i*1.2);let g=~~(Math.random()*6);o.g[g]=10+i*2;}
-    // 6-10: Collect 2-3 colors (tighter)
     else if(i<=10){tp='c';o={t:'c',g:{},s:1000+i*180};mv=28+i;let gc=~~(i/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=8+i*2;});}
-    // 11-15: Break ice (more ice, fewer moves)
     else if(i<=15){tp='i';o={t:'i',ic:4+~~((i-10)*1.5),s:1500+i*120};mv=28+i;}
-    // 16-20: Collect + score
     else if(i<=20){tp='cs';o={t:'cs',g:{},s:2200+i*200};mv=26+~~(i*.7);let gc=~~((i-15)/2)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=12+i;});}
-    // 21-28: Timed (less time)
     else if(i<=28){tp='t';o={t:'t',tm:55+i,s:2500+i*160};mv=999;}
-    // 29-35: Collect + ice combo
     else if(i<=35){tp='ci';o={t:'ci',g:{},ic:6+~~((i-28)*1.2),s:3000+i*120};mv=25+~~(i*.5);let gc=~~((i-28)/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=10+i;});}
-    // 36-42: Hard (collect + ice + fewer moves)
     else if(i<=42){tp='h';o={t:'h',g:{},ic:7+~~((i-35)*1.3),s:3800+i*120};mv=24+~~(i*.35);let gc=~~((i-35)/3)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=14+i;});}
-    // 43-50: Chains + ice + tough
-    else if(i<=50){tp='ch';o={t:'ch',g:{},cc:5+~~((i-42)*1.2),ic:4+~~((i-42)/2),s:4500+i*100};mv=22+~~(i*.3);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
+    else{tp='ch';o={t:'ch',g:{},cc:5+~~((i-42)*1.2),ic:4+~~((i-42)/2),s:4500+i*100};mv=22+~~(i*.3);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
     let stars=o.t==='t'?[o.s,o.s*1.5,o.s*2.2]:[o.s,o.s*1.4,o.s*2];
     lvls.push({id:i,tp,mv,o,stars,board:getBoard(i)});
   }
@@ -187,26 +181,24 @@ function startLvl(idx){
   st.idx=idx;st.lvl=lvls[idx];sc=0;mv=st.lvl.mv;st.combo=0;sel=null;anim=false;st.gadget=null;st.obj={};
   let o=st.lvl.o;
   if(o.g)for(let g in o.g)st.obj[g]={n:o.g[g],d:0};
-  if(o.ic&&(o.t==='i'||o.t==='ci'||o.t==='h'||o.t==='ch'||o.t==='th'||o.t==='b'))st.obj._i={n:o.ic,d:0};
-  if(o.cc&&(o.t==='ch'||o.t==='b'))st.obj._c={n:o.cc,d:0};
-  if(o.t==='cs'||o.t==='t'||o.t==='th')st.obj._s={n:o.s,d:0};
+  if(o.ic&&(o.t==='i'||o.t==='ci'||o.t==='h'||o.t==='ch'))st.obj._i={n:o.ic,d:0};
+  if(o.cc&&(o.t==='ch'))st.obj._c={n:o.cc,d:0};
+  if(o.t==='cs'||o.t==='t')st.obj._s={n:o.s,d:0};
   document.getElementById('ms').classList.remove('active');
   document.getElementById('gs').classList.add('active');
-  setTimeout(resize,10);
   setTimeout(()=>{
     resize();
     document.getElementById('li').textContent='Ур. '+(idx+1);
     document.getElementById('sv').textContent='0';
-    document.getElementById('mv').textContent=o.t==='t'||o.t==='th'?fmtT(o.tm):mv;
-    document.getElementById('mv').className=o.t==='t'||o.t==='th'?'sv':'sv mv';
+    document.getElementById('mv').textContent=o.t==='t'?fmtT(o.tm):mv;
+    document.getElementById('mv').className=o.t==='t'?'sv':'sv mv';
     renderObjs();initGrid();draw();
     if(st.tmr)clearInterval(st.tmr);
-    if(o.t==='t'||o.t==='th'){
+    if(o.t==='t'){
       st.time=o.tm;document.getElementById('mv').textContent=fmtT(st.time);
       st.tmr=setInterval(()=>{st.time--;document.getElementById('mv').textContent=fmtT(st.time);if(st.time<=0){clearInterval(st.tmr);chkEnd();}},1000);
     }
-    setTimeout(()=>{if(!hasMoves())shuffle();},300);
-  },20);
+  },30);
 }
 
 function fmtT(s){return~~(s/60)+':'+(s%60<10?'0':'')+(s%60);}
@@ -306,7 +298,7 @@ async function trySwap(r1,c1,r2,c2){
   await animSwap(r1,c1,r2,c2);
   let m=findM();
   if(!m.length){await animSwap(r1,c1,r2,c2);anim=false;return;}
-  if(st.lvl.o.t!=='t'&&st.lvl.o.t!=='th'){mv--;document.getElementById('mv').textContent=mv;}
+  if(st.lvl.o.t!=='t'){mv--;document.getElementById('mv').textContent=mv;}
   await procM(m);anim=false;
   chkEnd();
 }
@@ -401,29 +393,13 @@ function animFall(){
   });
 }
 
-// ======== MOVES CHECK ========
-function hasMoves(){
-  let b=st.lvl.board;
-  for(let r=0;r<R;r++)for(let c=0;c<C;c++){
-    if(b[r+','+c]||!st.grid[r][c]||st.grid[r][c].b)continue;
-    if(c<C-1&&!b[(c+1)+','+r]&&st.grid[r][c+1]&&!st.grid[r][c+1].b){
-      swT(r,c,r,c+1);let m=findM().length;swT(r,c,r,c+1);if(m)return true;}
-    if(r<R-1&&!b[c+','+(r+1)]&&st.grid[r+1][c]&&!st.grid[r+1][c].b){
-      swT(r,c,r+1,c);let m=findM().length;swT(r,c,r+1,c);if(m)return true;}
-  }
-  return false;
-}
-function swT(r1,c1,r2,c2){let a=st.grid[r1][c1],b=st.grid[r2][c2],t=a.t;a.t=b.t;b.t=t;}
-
-async function shuffle(){
+// ======== SHUFFLE (simple, no recursion) ========
+function doShuffle(){
   let b=st.lvl.board,all=[];
   for(let r=0;r<R;r++)for(let c=0;c<C;c++){let cl=st.grid[r][c];if(cl&&!cl.b)all.push(cl.t);}
   for(let i=all.length-1;i>0;i--){let j=~~(Math.random()*(i+1));[all[i],all[j]]=[all[j],all[i]];}
   let idx=0;
   for(let r=0;r<R;r++)for(let c=0;c<C;c++){let cl=st.grid[r][c];if(cl&&!cl.b)cl.t=all[idx++];}
-  draw();
-  let m=findM();if(m.length)await procM(m);
-  if(!hasMoves())await shuffle();
 }
 
 // ======== GADGETS ========
@@ -434,12 +410,13 @@ function useG(type){
   if(type==='tornado'){doTornado();return;}
   st.gadget=st.gadget===type?null:type;
 }
-async function doTornado(){
+function doTornado(){
   let cnt=inv.tornado||0;if(cnt<=0&&co<COST.tornado)return;
   if(cnt>0)inv.tornado--;else co-=COST.tornado;save();
   st.gadget=null;anim=true;
-  await shuffle();
-  anim=false;chkEnd();
+  doShuffle();
+  let m=findM();
+  procM(m).then(()=>{anim=false;chkEnd();});
 }
 async function doGadget(r,c){
   if(anim)return;anim=true;
@@ -469,11 +446,11 @@ async function doGadget(r,c){
 // ======== END ========
 function chkEnd(){
   let o=st.lvl.o;
-  if((st.tmr&&(o.t==='t'||o.t==='th'))&&st.time<=0){
+  if(st.tmr&&o.t==='t'&&st.time<=0){
     (!st.obj._s||sc>=st.obj._s.n)?win():lose();return;}
   let ok=true;for(let k in st.obj)if(st.obj[k].d<st.obj[k].n){ok=false;break;}
   if(ok){win();return;}
-  if(mv<=0&&o.t!=='t'&&o.t!=='th')lose();
+  if(mv<=0&&o.t!=='t')lose();
 }
 
 function win(){

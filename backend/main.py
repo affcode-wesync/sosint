@@ -303,22 +303,16 @@ async def health():
 
 
 # ===== Auth System =====
-import json
 import secrets
 from datetime import datetime
+from db import load_keys, save_keys, create_key, delete_key, update_key, log_action, get_stats, init_db
 
-KEYS_FILE = os.path.join(os.path.dirname(__file__), "keys.json")
 ADMIN_KEY = "67zovpokoyo"
 
-def load_keys():
-    if not os.path.exists(KEYS_FILE):
-        return {"admin_key": ADMIN_KEY, "keys": []}
-    with open(KEYS_FILE, "r") as f:
-        return json.load(f)
-
-def save_keys(data):
-    with open(KEYS_FILE, "w") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+# Init DB on startup
+@app.on_event("startup")
+async def startup():
+    init_db()
 
 def get_client_ip(request):
     return request.client.host if request.client else "unknown"
@@ -342,14 +336,18 @@ async def auth_login(request: LoginRequest, req: Request = None):
 
     # Check admin key
     if request.key == data.get("admin_key"):
+        log_action("admin_login", {"ip": get_client_ip(req) if req else "unknown"})
         return {"status": "ok", "role": "admin", "message": "Admin access granted"}
 
     # Check user keys
     for k in data.get("keys", []):
         if k["key"] == request.key and k.get("status") == "active":
-            k["last_login"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            k["login_count"] = k.get("login_count", 0) + 1
-            save_keys(data)
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            update_key(k["key"], {
+                "last_login": now,
+                "login_count": k.get("login_count", 0) + 1
+            })
+            log_action("user_login", {"key": k["key"][:8]+"...", "username": k.get("username", "")})
             return {"status": "ok", "role": "user", "username": k.get("username", ""), "message": "Access granted"}
 
     raise HTTPException(status_code=401, detail="Invalid key")
