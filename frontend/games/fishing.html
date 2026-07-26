@@ -169,8 +169,10 @@ let tension=50;      // 0..100 — center 50 is safe
 let tensionDir=1;    // direction fish is pulling
 let fishStrength=1;  // how hard fish fights
 let catchProg=0;     // 0..100 catch progress
-const SAFE_ZONE_LOW=30;
-const SAFE_ZONE_HIGH=70;
+let struggleTimer=0; // frames until next struggle burst
+let inStruggle=false;// fish doing a burst
+const SAFE_ZONE_LOW=33;
+const SAFE_ZONE_HIGH=67;
 
 const FISH=[
   {name:'Карась',emoji:'🐟',wt:[0.2,1.5],col:'#c0a040',val:10,bite:0.3,xp:5,str:0.5,speed:1.0},
@@ -250,8 +252,8 @@ function startCharging(){
   powerPos=0.5;
   powerDir=1;
   // Speed depends on level (higher level = slower = easier)
-  // Speed: higher level = slower/easier. Base 0.005 (-0.00015 per lvl, min 0.0015)
-  powerSpeed=Math.max(0.0015,0.005-(lvl-1)*0.00015)*RODS[rodIndex].speedMult;
+  // Speed: higher level = faster (harder). Base 0.005 (+0.0002 per lvl, max 0.012)
+  powerSpeed=Math.min(0.012,0.005+(lvl-1)*0.0002)*RODS[rodIndex].speedMult;
   castQuality='';
   castBonus=false;
   document.getElementById('pullBtn').style.display='block';
@@ -303,10 +305,12 @@ function startFight(){
   tension=50;
   catchProg=0;
   fishStrength=biteFish.type.str;
+  struggleTimer=100+Math.floor(Math.random()*200); // first burst in 1.7-5s
+  inStruggle=false;
   // Random initial pull direction
   tensionDir=Math.random()>0.5?1:-1;
   document.getElementById('pullBtn').style.display='block';
-  document.getElementById('pullBtn').textContent='💪 ТЯНУТЬ';
+  document.getElementById('pullBtn').textContent='💪 ТЯНУТЬ (⚠️ ОПАСНО!)';
   document.getElementById('pullBtn').className='pull-btn fight-active';
   document.getElementById('pullBtn').onmousedown=startPull;
   document.getElementById('pullBtn').onmouseup=stopPull;
@@ -395,12 +399,29 @@ function update(dt){
 
   // === PHASE 2: Fighting (Tension Bar) ===
   if(state==='fighting'){
-    // Fish pulls tension in its direction (slow: ~1-3/sec)
-    let fishPull=fishStrength*(0.012+Math.random()*0.013);
+    // Fish pulls tension in its direction (hard: ~3-8/sec, scales with lvl)
+    let lvlScale=1+Math.log(lvl)*0.35; // fish scales logarithmically (slower growth at high levels)
+    let basePull=fishStrength*(0.025+Math.random()*0.025)*lvlScale;
+    let pullMult=inStruggle?3:1;
+    let fishPull=basePull*pullMult;
     tension+=tensionDir*fishPull;
 
-    // Fish randomly changes direction (rare: ~every 5-15s)
-    if(Math.random()<0.002*fishStrength){
+    // Struggle burst timer
+    struggleTimer--;
+    if(struggleTimer<=0&&!inStruggle){
+      inStruggle=true;
+      struggleTimer=20+Math.floor(Math.random()*30); // burst lasts 0.3-0.5s
+    }
+    if(inStruggle){
+      struggleTimer--;
+      if(struggleTimer<=0){
+        inStruggle=false;
+        struggleTimer=200+Math.floor(Math.random()*300); // next burst in 3-8s
+      }
+    }
+
+    // Fish randomly changes direction (rare: ~every 8-20s, longer commitment)
+    if(Math.random()<0.0015*fishStrength){
       tensionDir*=-1;
     }
 
@@ -408,30 +429,29 @@ function update(dt){
     if(tension<=0){tension=0;tensionDir=1;}
     if(tension>=100){tension=100;tensionDir=-1;}
 
-    // Player pulls against fish (gentle: ~3-5/sec, grows with level)
+    // ⚡ ИНВЕРТИРОВАНО: зажатие толкает натяжение к КРАСНОЙ ЗОНЕ (опасно!)
     if(pulling){
-      let playerPull=0.05*(1+lvl*0.015);
-      let pullDir=tension>50?-1:1; // pull toward center
+      let playerPull=0.08*(1+lvl*0.015);
+      let pullDir=tension>50?1:-1; // ТОЛКАЕМ К КРАЮ!
       tension+=pullDir*playerPull;
     }
 
-    // Tension naturally drifts slowly toward center when not pulling
+    // Очень слабый дрейф к центру (едва заметный)
     if(!pulling){
-      if(tension>50)tension=Math.max(50,tension-0.015);
-      else tension=Math.min(50,tension+0.015);
+      if(tension>50)tension=Math.max(50,tension-0.005);
+      else tension=Math.min(50,tension+0.005);
     }
 
     // Clamp
     tension=Math.max(0,Math.min(100,tension));
 
-    // Check if tension is in safe zone -> slow progress catch (~20-30s total)
+    // Прогресс вылова: БЫСТРЕЕ при зажатии (риск), МЕДЛЕННЕЕ при отпускании
     if(tension>=SAFE_ZONE_LOW&&tension<=SAFE_ZONE_HIGH){
-      catchProg+=0.055*(1+lvl*0.02);
+      catchProg+=(pulling?0.06:0.02)*(1+lvl*0.01);
     }
-
-    // If tension in danger zone -> lose progress slowly
+    // Потеря прогресса в опасной зоне
     if(tension<SAFE_ZONE_LOW||tension>SAFE_ZONE_HIGH){
-      catchProg=Math.max(0,catchProg-0.03);
+      catchProg=Math.max(0,catchProg-0.05);
     }
 
     catchProg=Math.min(100,catchProg);
@@ -443,10 +463,10 @@ function update(dt){
     }
 
     // Line snaps if too far out of safe zone
-    if(tension<=5||tension>=95){
+    if(tension<=10||tension>=90){
       state='idle';biteFish=null;
       hideFightUI();
-      showMsg('Обрыв!','Леска порвалась...',()=>{});
+      showMsg('Обрыв!','Рыба ушла...',()=>{});
       return;
     }
 
@@ -776,14 +796,13 @@ function drawFightBars(){
   cx2.beginPath();cx2.roundRect(barX,cBarY,barW,12,4);cx2.stroke();
   // Text
   cx2.fillStyle='#ffd700';cx2.font='bold 8px sans-serif';cx2.textAlign='center';
-  cx2.fillText('ВЫЛОВ '+(catchProg|0)+'%',barX+barW/2,cBarY+10);
-
-  // Fish name during fight
+  cx2.fillText('ВЫЛОВ '+(catchProg|0)+'%',barX+barW/2,cBarY+10);    // Fish name and struggle indicator during fight
   if(biteFish){
     cx2.fillStyle='rgba(0,0,0,0.5)';
     cx2.beginPath();cx2.roundRect(barX+barW/2-50,cBarY+20,100,20,6);cx2.fill();
     cx2.fillStyle='#ffd700';cx2.font='bold 11px sans-serif';cx2.textAlign='center';
-    cx2.fillText(biteFish.type.emoji+' '+biteFish.type.name,barX+barW/2,cBarY+33);
+    let extra=inStruggle?' 💥РЫВОК!':'';
+    cx2.fillText(biteFish.type.emoji+' '+biteFish.type.name+extra,barX+barW/2,cBarY+33);
     // Direction indicator arrow
     cx2.font='16px sans-serif';
     cx2.fillStyle=tensionDir>0?'rgba(255,80,80,0.7)':'rgba(80,120,255,0.7)';
