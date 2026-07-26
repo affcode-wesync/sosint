@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Рыбалка</title>
+<title>Рыбалка — Фаза заброса + Вываживание</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{overflow:hidden;height:100dvh;background:#5a3a1a;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
@@ -31,7 +31,8 @@ body{overflow:hidden;height:100dvh;background:#5a3a1a;font-family:'Segoe UI',Tah
 canvas#cv{display:block;width:100%;height:100%}
 .pull-btn{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#d4c4a0,#b8a888);border:2px solid #8B6914;color:#3a2508;padding:12px 40px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;z-index:5;box-shadow:0 3px 8px rgba(0,0,0,.3);display:none;transition:transform .1s}
 .pull-btn:active{transform:translateX(-50%) scale(.95)}
-.pull-btn.active{background:linear-gradient(180deg,#90EE90,#4CAF50);color:#fff}
+.pull-btn.cast-active{background:linear-gradient(180deg,#ffd700,#b8860b);color:#fff;box-shadow:0 0 20px rgba(255,215,0,.4)}
+.pull-btn.fight-active{background:linear-gradient(180deg,#90EE90,#4CAF50);color:#fff}
 .bottombar{display:flex;align-items:center;padding:6px 10px;background:linear-gradient(180deg,#3a2508,#2a1a05);border-top:2px solid #4a3010;gap:6px;flex-shrink:0;z-index:10}
 .profile{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:44px}
 .profile-icon{width:36px;height:36px;border-radius:5px;background:linear-gradient(135deg,#6a5a4a,#4a3a2a);border:2px solid #8B6914;display:flex;align-items:center;justify-content:center;font-size:16px;color:#aaa}
@@ -53,12 +54,12 @@ canvas#cv{display:block;width:100%;height:100%}
 .modal .info{font-size:12px;margin:3px 0}
 .modal .reward{font-size:14px;color:#ffd700;font-weight:700;margin:6px 0}
 .modal button{padding:7px 18px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;margin:3px;background:linear-gradient(135deg,#ffd700,#b8860b);color:#3a2508}
-.tension-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:200px;height:12px;background:#2a1a05;border-radius:6px;border:1px solid #8B6914;display:none;z-index:5;overflow:hidden}
-.tension-fill{height:100%;border-radius:6px;transition:width .1s,background .1s}
-.catch-bar{position:absolute;top:28px;left:50%;transform:translateX(-50%);width:200px;height:10px;background:#2a1a05;border-radius:5px;border:1px solid #8B6914;display:none;z-index:5;overflow:hidden}
-.catch-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:5px;transition:width .1s;width:0%}
 .arrow{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-size:28px;display:none;z-index:5;animation:arrowBounce .6s ease-in-out infinite}
 @keyframes arrowBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.cast-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#ffd700;font-size:13px;font-weight:700;display:none;z-index:5;text-shadow:0 2px 4px rgba(0,0,0,.7);background:rgba(0,0,0,.4);padding:4px 14px;border-radius:8px;border:1px solid #8B6914;white-space:nowrap}
+.cast-hint.perfect{color:#4CAF50;border-color:#4CAF50;background:rgba(30,80,30,.5)}
+.cast-hint.good{color:#ffd700;border-color:#ffd700}
+.cast-hint.bad{color:#ff4444;border-color:#ff4444}
 </style>
 </head>
 <body>
@@ -78,10 +79,9 @@ canvas#cv{display:block;width:100%;height:100%}
     <div class="payments-tab">Платежи</div>
     <div class="lake-wrap">
       <canvas id="cv"></canvas>
-      <div class="tension-bar" id="tensionBar"><div class="tension-fill" id="tensionFill"></div></div>
-      <div class="catch-bar" id="catchBar"><div class="catch-fill" id="catchFill"></div></div>
+      <div class="cast-hint" id="castHint"></div>
       <div class="arrow" id="arrow">⬇️</div>
-      <button class="pull-btn" id="pullBtn" onmousedown="startPull()" onmouseup="stopPull()" onmouseleave="stopPull()" ontouchstart="startPull()" ontouchend="stopPull()">Тянуть</button>
+      <button class="pull-btn" id="pullBtn">Заброс</button>
     </div>
     <div class="bottombar">
       <div class="profile">
@@ -89,7 +89,7 @@ canvas#cv{display:block;width:100%;height:100%}
         <div class="profile-lvl">Ур. <span id="plvl">1</span></div>
         <div class="profile-pts"><span id="ppts">0</span> оч.</div>
       </div>
-      <div class="hunt-btn" onclick="castLine()">
+      <div class="hunt-btn" onclick="startCharging()">
         <div class="hunt-icon">🎣</div>
         <div class="hunt-text">HUNT</div>
       </div>
@@ -115,14 +115,15 @@ function resize(){
 }
 resize();window.addEventListener('resize',resize);
 
-// State
+// ===== State =====
 let coins=parseInt(localStorage.getItem('fc')||'292');
 let bait=parseInt(localStorage.getItem('fb')||'100');
 let lvl=parseInt(localStorage.getItem('fl')||'1');
 let xp=parseInt(localStorage.getItem('fxp')||'0');
 let caught=JSON.parse(localStorage.getItem('fca')||'[]');
 let inv=JSON.parse(localStorage.getItem('finv')||'[null,null,null,null,null,null,null]');
-let state='idle'; // idle, casting, waiting, bite, fighting, caught
+// states: idle, charging, casting, waiting, bite, fighting, caught
+let state='idle';
 let time=0;
 let lineX=0,lineY=0,hookX=0,hookY=0,targetX=0,targetY=0;
 let biteTimer=0,biteFish=null;
@@ -130,24 +131,32 @@ let bubbles=[],ripples=[],clouds=[];
 let fishes=[];
 let pulling=false;
 
-// Fight system
-let arcPos=0; // -1 to 1, position on arc
-let arcSpeed=0; // fish resistance
-let tension=0; // 0-100, line tension
-let catchProg=0; // 0-100, catch progress
-let arcDir=1; // direction indicator moves
-let fishStrength=1; // how hard fish fights
+// ===== Phase 1: Power Bar (Casting) =====
+let powerPos=0.5;    // 0..1 position of indicator on the power bar
+let powerDir=1;      // direction of movement
+let powerSpeed=0.02; // speed of indicator
+let castQuality='';  // 'perfect', 'good', 'bad'
+let castBonus=false; // perfect cast bonus
+
+// ===== Phase 2: Tension Bar (Fighting) =====
+let tension=50;      // 0..100 — center 50 is safe
+let tensionDir=1;    // direction fish is pulling
+let fishStrength=1;  // how hard fish fights
+let catchProg=0;     // 0..100 catch progress
+const SAFE_ZONE_LOW=30;
+const SAFE_ZONE_HIGH=70;
 
 const FISH=[
-  {name:'Карась',emoji:'🐟',wt:[0.2,1.5],spd:1,col:'#c0a040',val:10,bite:0.3,xp:5,str:0.5,speed:1.5},
-  {name:'Окунь',emoji:'🐠',wt:[0.3,2],spd:1.5,col:'#4a8a3a',val:15,bite:0.25,xp:8,str:0.7,speed:2},
-  {name:'Щука',emoji:'🐟',wt:[0.5,4],spd:2,col:'#5a6a3a',val:25,bite:0.2,xp:12,str:0.9,speed:2.5},
-  {name:'Лещ',emoji:'🐡',wt:[0.4,2.5],spd:0.8,col:'#8a7a50',val:20,bite:0.35,xp:7,str:0.4,speed:1.2},
-  {name:'Сом',emoji:'🐟',wt:[1,6],spd:1.2,col:'#3a3a3a',val:40,bite:0.15,xp:20,str:1.2,speed:3},
-  {name:'Судак',emoji:'🐠',wt:[0.8,3.5],spd:1.8,col:'#7a8a6a',val:35,bite:0.18,xp:15,str:1.0,speed:2.8},
-  {name:'Золотая',emoji:'✨',wt:[0.1,0.5],spd:3,col:'#ffd700',val:100,bite:0.05,xp:50,str:1.5,speed:3.5},
+  {name:'Карась',emoji:'🐟',wt:[0.2,1.5],col:'#c0a040',val:10,bite:0.3,xp:5,str:0.5,speed:1.0},
+  {name:'Окунь',emoji:'🐠',wt:[0.3,2],col:'#4a8a3a',val:15,bite:0.25,xp:8,str:0.7,speed:1.4},
+  {name:'Лещ',emoji:'🐡',wt:[0.4,2.5],col:'#8a7a50',val:20,bite:0.35,xp:7,str:0.4,speed:0.8},
+  {name:'Щука',emoji:'🐟',wt:[0.5,4],col:'#5a6a3a',val:25,bite:0.2,xp:12,str:0.9,speed:1.8},
+  {name:'Судак',emoji:'🐠',wt:[0.8,3.5],col:'#7a8a6a',val:35,bite:0.18,xp:15,str:1.1,speed:2.0},
+  {name:'Сом',emoji:'🐟',wt:[1,6],col:'#3a3a3a',val:40,bite:0.15,xp:20,str:1.3,speed:2.2},
+  {name:'Золотая',emoji:'✨',wt:[0.1,0.5],col:'#ffd700',val:100,bite:0.05,xp:50,str:1.6,speed:2.8},
 ];
 
+// ===== Init =====
 function init(){
   for(let i=0;i<4;i++)clouds.push({x:Math.random()*W,y:10+Math.random()*25,w:30+Math.random()*60,h:8+Math.random()*12,s:0.1+Math.random()*0.15});
   for(let i=0;i<5;i++)spawnFish();
@@ -157,7 +166,7 @@ function init(){
 function spawnFish(){
   let f=FISH[Math.floor(Math.random()*FISH.length)];
   let side=Math.random()>0.5?1:-1;
-  fishes.push({type:f,x:side>0?W+40:-40,y:H*0.3+Math.random()*H*0.45,vx:side*-(0.2+f.spd*0.3),sz:14+f.wt[0]*5,col:f.col,w:Math.random()*Math.PI*2,dir:side,alive:true});
+  fishes.push({type:f,x:side>0?W+40:-40,y:H*0.3+Math.random()*H*0.45,vx:side*-(0.2+f.speed*0.25),sz:14+f.wt[0]*5,col:f.col,w:Math.random()*Math.PI*2,dir:side,alive:true});
 }
 
 function updateUI(){
@@ -173,58 +182,105 @@ function buildInv(){
   let el=document.getElementById('invSlots');el.innerHTML='';
   for(let i=0;i<7;i++){
     let s=document.createElement('div');s.className='inv-slot'+(inv[i]?' filled':' empty');
-    if(inv[i]){let f=FISH.find(x=>x.name===inv[i].name);s.innerHTML=(f?f.emoji:'🐟')+(inv[i].qty>1?`<span class="qty">x${inv[i].qty}</span>`:'');}
+    if(inv[i]){let f=FISH.find(x=>x.name===inv[i].name);s.innerHTML=(f?f.emoji:'🐟')+(inv[i].qty>1?`<span class=\"qty\">x${inv[i].qty}</span>`:'');}
     el.appendChild(s);
   }
 }
 
 function addToInv(fish,weight){
   for(let i=0;i<inv.length;i++){if(inv[i]&&inv[i].name===fish.name){inv[i].qty++;save();buildInv();return;}}
-  for(let i=0;i<inv.length;i++){if(!inv[i]){inv[i]={name:fish.name,weight,qty:1};save();buildInv();return;}}
+  for(let i=0;i<inv.length;i++){if(!inv[i]){inv[i]={name:fish.name,weight:parseFloat(weight),qty:1};save();buildInv();return;}}
 }
 
-function save(){localStorage.setItem('fc',coins);localStorage.setItem('fb',bait);localStorage.setItem('fl',lvl);localStorage.setItem('fxp',xp);localStorage.setItem('fca',JSON.stringify(caught));localStorage.setItem('finv',JSON.stringify(inv));}
+function save(){
+  localStorage.setItem('fc',coins);localStorage.setItem('fb',bait);
+  localStorage.setItem('fl',lvl);localStorage.setItem('fxp',xp);
+  localStorage.setItem('fca',JSON.stringify(caught));localStorage.setItem('finv',JSON.stringify(inv));
+}
 function buyBait(){if(coins>=10){coins-=10;bait+=10;save();updateUI();}}
 
-// ======== CAST ========
-function castLine(){
+// ===== PHASE 1: POWER BAR (CHARGING) =====
+function startCharging(){
   if(state!=='idle')return;
   if(bait<=0){showMsg('Нет наживки!','Купить 10 за 10🪙?',()=>{if(coins>=10){coins-=10;bait+=10;save();updateUI();}});return;}
   bait--;save();updateUI();
+  state='charging';
+  powerPos=0.5;
+  powerDir=1;
+  // Speed depends on level (higher level = slower = easier)
+  powerSpeed=0.015+Math.max(0.005,1/(lvl+3));
+  castQuality='';
+  castBonus=false;
+  document.getElementById('pullBtn').style.display='block';
+  document.getElementById('pullBtn').textContent='⬆ ЗАБРОС ⬆';
+  document.getElementById('pullBtn').className='pull-btn cast-active';
+  document.getElementById('pullBtn').onclick=doCast;
+  document.getElementById('arrow').style.display='none';
+  document.getElementById('castHint').style.display='none';
+}
+
+function doCast(){
+  if(state!=='charging')return;
+  // Determine cast quality based on powerPos
+  // Perfect zone: 0.35..0.65 (center 30%)
+  // Good zone: 0.2..0.35 or 0.65..0.8
+  // Bad zone: 0..0.2 or 0.8..1.0
+  if(powerPos>=0.35&&powerPos<=0.65){
+    castQuality='perfect';
+    castBonus=true;
+  }else if((powerPos>=0.2&&powerPos<0.35)||(powerPos>0.65&&powerPos<=0.8)){
+    castQuality='good';
+    castBonus=false;
+  }else{
+    castQuality='bad';
+    castBonus=false;
+  }
+  // Show hint briefly
+  let hint=document.getElementById('castHint');
+  hint.style.display='block';
+  if(castQuality==='perfect'){hint.textContent='✨ ИДЕАЛЬНЫЙ ЗАБРОС! +шанс редкой рыбы';hint.className='cast-hint perfect';}
+  else if(castQuality==='good'){hint.textContent='✓ Хороший заброс';hint.className='cast-hint good';}
+  else{hint.textContent='✗ Слабый заброс';hint.className='cast-hint bad';}
+  setTimeout(()=>{hint.style.display='none';},1200);
+
+  // Cast the line
   state='casting';
   lineX=W*0.6;lineY=H*0.1;
-  targetX=W*0.25+Math.random()*W*0.4;
-  targetY=H*0.3+Math.random()*H*0.35;
+  targetX=W*0.15+Math.random()*W*0.5;
+  targetY=H*0.25+Math.random()*H*0.4;
   hookX=lineX;hookY=lineY;
   document.getElementById('pullBtn').style.display='none';
-  document.getElementById('tensionBar').style.display='none';
-  document.getElementById('catchBar').style.display='none';
-  document.getElementById('arrow').style.display='none';
+  document.getElementById('pullBtn').onclick=null;
 }
 
-// ======== PULL SYSTEM ========
-function startPull(){
-  if(state==='bite'){startFight();return;}
-  if(state==='fighting')pulling=true;
-}
-function stopPull(){pulling=false;}
-
+// ===== PHASE 2: TENSION BAR (FIGHTING) =====
 function startFight(){
   state='fighting';
   pulling=false;
-  tension=0;catchProg=0;arcPos=0;
-  arcDir=1;
+  tension=50;
+  catchProg=0;
   fishStrength=biteFish.type.str;
-  arcSpeed=0.5+biteFish.type.speed*0.2;
+  // Random initial pull direction
+  tensionDir=Math.random()>0.5?1:-1;
   document.getElementById('pullBtn').style.display='block';
-  document.getElementById('pullBtn').textContent='Тянуть';
-  document.getElementById('tensionBar').style.display='block';
-  document.getElementById('catchBar').style.display='block';
+  document.getElementById('pullBtn').textContent='💪 ТЯНУТЬ';
+  document.getElementById('pullBtn').className='pull-btn fight-active';
+  document.getElementById('pullBtn').onmousedown=startPull;
+  document.getElementById('pullBtn').onmouseup=stopPull;
+  document.getElementById('pullBtn').onmouseleave=stopPull;
+  document.getElementById('pullBtn').ontouchstart=startPull;
+  document.getElementById('pullBtn').ontouchend=stopPull;
   document.getElementById('arrow').style.display='none';
   ripples.push({x:hookX,y:hookY,r:8,life:1});
 }
 
-// ======== UPDATE ========
+function startPull(){
+  if(state==='bite'){startFight();return;}
+  if(state==='fighting')pulling=true;
+}
+function stopPull(){if(state==='fighting')pulling=false;}
+
+// ===== UPDATE =====
 function update(dt){
   time+=dt;
   clouds.forEach(c=>{c.x+=c.s;if(c.x>W+80)c.x=-80;});
@@ -235,32 +291,56 @@ function update(dt){
   bubbles.forEach(b=>{b.y+=b.vy;b.life-=0.008;});bubbles=bubbles.filter(b=>b.life>0);
   ripples.forEach(r=>{r.r+=0.3;r.life-=0.012;});ripples=ripples.filter(r=>r.life>0);
 
-  // Casting
-  if(state==='casting'){
-    let dx=targetX-hookX,dy=targetY-hookY,d=Math.hypot(dx,dy);
-    if(d<5){hookX=targetX;hookY=targetY;state='waiting';ripples.push({x:hookX,y:hookY,r:5,life:1});biteTimer=80+Math.random()*150;
-      document.getElementById('arrow').style.display='none';
-    }else{hookX+=dx*0.12;hookY+=dy*0.12;}
+  // === PHASE 1: Power Bar charging ===
+  if(state==='charging'){
+    powerPos+=powerDir*powerSpeed;
+    if(powerPos>=1){powerPos=1;powerDir=-1;}
+    if(powerPos<=0){powerPos=0;powerDir=1;}
   }
 
-  // Waiting
+  // === Casting (line flies out) ===
+  if(state==='casting'){
+    let dx=targetX-hookX,dy=targetY-hookY,d=Math.hypot(dx,dy);
+    if(d<5){
+      hookX=targetX;hookY=targetY;
+      state='waiting';
+      ripples.push({x:hookX,y:hookY,r:5,life:1});
+      biteTimer=80+Math.random()*150;
+    }else{
+      hookX+=dx*0.12;hookY+=dy*0.12;
+    }
+  }
+
+  // === Waiting for bite ===
   if(state==='waiting'){
     hookY+=Math.sin(time*1.5)*0.12;
     biteTimer--;
     if(biteTimer<=0){
       let near=null,minD=Infinity;
-      fishes.forEach(f=>{if(!f.alive)return;let d=Math.hypot(f.x-hookX,f.y-hookY);if(d<80&&d<minD&&Math.random()<f.type.bite){minD=d;near=f;}});
-      if(near){state='bite';biteFish=near;biteTimer=120;
+      fishes.forEach(f=>{
+        if(!f.alive)return;
+        let d=Math.hypot(f.x-hookX,f.y-hookY);
+        // Perfect cast = higher bite chance
+        let biteChance=castBonus?f.type.bite*1.5:f.type.bite;
+        if(d<80&&d<minD&&Math.random()<biteChance){minD=d;near=f;}
+      });
+      if(near){
+        state='bite';biteFish=near;biteTimer=120;
         document.getElementById('arrow').style.display='block';
         document.getElementById('arrow').style.left=hookX+'px';
         document.getElementById('pullBtn').style.display='block';
         document.getElementById('pullBtn').textContent='🎣 КЛЮЁТ!';
-        document.getElementById('pullBtn').classList.add('active');
+        document.getElementById('pullBtn').className='pull-btn';
+        document.getElementById('pullBtn').onmousedown=startPull;
+        document.getElementById('pullBtn').onmouseup=stopPull;
+        document.getElementById('pullBtn').onmouseleave=stopPull;
+        document.getElementById('pullBtn').ontouchstart=startPull;
+        document.getElementById('pullBtn').ontouchend=stopPull;
       }else biteTimer=60+Math.random()*120;
     }
   }
 
-  // Bite - waiting for player
+  // === Bite window ===
   if(state==='bite'){
     hookY+=Math.sin(time*10)*2;
     biteTimer--;
@@ -270,69 +350,87 @@ function update(dt){
     }
   }
 
-  // Fighting - arc meter system
+  // === PHASE 2: Fighting (Tension Bar) ===
   if(state==='fighting'){
-    // Fish moves the arc indicator
-    arcPos+=arcDir*arcSpeed*dt*0.02;
-    // Random direction changes (fish fighting)
-    if(Math.random()<0.015*fishStrength)arcDir*=-1;
-    // Bounce off edges
-    if(arcPos>1){arcPos=1;arcDir=-1;}
-    if(arcPos<-1){arcPos=-1;arcDir=1;}
-    // Fish periodically changes direction aggressively
-    if(Math.random()<0.005*fishStrength){arcDir*=-1;arcSpeed=0.5+fishStrength*0.8+Math.random()*0.3;}
+    // Fish pulls tension in its direction
+    let fishPull=fishStrength*(0.15+Math.random()*0.1);
+    tension+=tensionDir*fishPull;
 
-    // Pulling - check if in good zone
+    // Fish randomly changes direction
+    if(Math.random()<0.01*fishStrength){
+      tensionDir*=-1;
+    }
+
+    // Bounce off edges
+    if(tension<=0){tension=0;tensionDir=1;}
+    if(tension>=100){tension=100;tensionDir=-1;}
+
+    // Player pulls against fish
     if(pulling){
-      let inZone=Math.abs(arcPos)<0.4;
-      if(inZone){
-        catchProg+=0.25;
-        tension=Math.max(0,tension-0.15);
-      }else{
-        tension+=0.4;
-      }
-    }else{
-      catchProg=Math.max(0,catchProg-0.1);
-      tension=Math.max(0,tension-0.08);
+      let playerPull=0.3*(1+lvl*0.05); // stronger pull at higher level
+      let pullDir=tension>50?-1:1; // pull toward center
+      tension+=pullDir*playerPull;
+    }
+
+    // Tension naturally drifts slowly toward center when not pulling
+    if(!pulling){
+      if(tension>50)tension=Math.max(50,tension-0.05);
+      else tension=Math.min(50,tension+0.05);
     }
 
     // Clamp
+    tension=Math.max(0,Math.min(100,tension));
+
+    // Check if tension is in safe zone -> progress catch
+    if(tension>=SAFE_ZONE_LOW&&tension<=SAFE_ZONE_HIGH){
+      catchProg+=0.15*(1+lvl*0.02);
+    }
+
+    // If tension in danger zone -> lose progress
+    if(tension<SAFE_ZONE_LOW||tension>SAFE_ZONE_HIGH){
+      catchProg=Math.max(0,catchProg-0.05);
+    }
+
     catchProg=Math.min(100,catchProg);
-    tension=Math.min(100,tension);
 
-    // Update UI
-    document.getElementById('tensionFill').style.width=tension+'%';
-    document.getElementById('tensionFill').style.background=tension>70?'#ff4444':tension>40?'#ffaa00':'#44aaff';
-    document.getElementById('catchFill').style.width=catchProg+'%';
+    // Visual red flash when in danger zone
+    if(tension<SAFE_ZONE_LOW||tension>SAFE_ZONE_HIGH){
+      cx.fillStyle='rgba(255,0,0,'+(Math.abs(tension-50)*0.003)+')';
+      cx.fillRect(0,0,W,H);
+    }
 
-    // Line tension - if too high, fish escapes
-    if(tension>=100){
+    // Line snaps if too far out of safe zone
+    if(tension<=5||tension>=95){
       state='idle';biteFish=null;
       hideFightUI();
       showMsg('Обрыв!','Леска порвалась...',()=>{});
+      return;
     }
 
-    // Catch complete
+    // Catch complete!
     if(catchProg>=100){
       state='caught';
       hideFightUI();
       showCatch();
+      return;
     }
 
-    // Rod bend effect
-    hookY=H*0.15+Math.sin(time*5)*5*(pulling?3:1);
-    hookX=W*0.55+arcPos*30;
+    // Rod animation
+    hookY=H*0.15+Math.sin(time*5)*5*(pulling?4:1);
+    hookX=W*0.55+(tension-50)*0.8;
   }
 }
 
 function hideFightUI(){
   document.getElementById('pullBtn').style.display='none';
-  document.getElementById('pullBtn').classList.remove('active');
-  document.getElementById('tensionBar').style.display='none';
-  document.getElementById('catchBar').style.display='none';
+  document.getElementById('pullBtn').className='pull-btn';
+  document.getElementById('pullBtn').onmousedown=null;
+  document.getElementById('pullBtn').onmouseup=null;
+  document.getElementById('pullBtn').onmouseleave=null;
   document.getElementById('arrow').style.display='none';
 }
 
+// ===== CATCH RESULT =====
 function showCatch(){
   let f=biteFish.type;
   let w=(f.wt[0]+Math.random()*(f.wt[1]-f.wt[0])).toFixed(1);
@@ -342,13 +440,21 @@ function showCatch(){
   caught.push({name:f.name,weight:w});
   addToInv(f,w);save();updateUI();
   document.getElementById('modal').classList.add('show');
-  document.getElementById('modalInner').innerHTML=`<div class="emoji">${f.emoji}</div><h2>${f.name}</h2><div class="info">Вес: ${w} кг</div><div class="reward">+${earned} 🪙  +${f.xp} XP</div><button onclick="closeModal()">ОК</button>`;
+  document.getElementById('modalInner').innerHTML=
+    `<div class="emoji">${f.emoji}</div><h2>${f.name}</h2>
+     <div class="info">Вес: ${w} кг</div>
+     <div class="info">Качество заброса: ${castQuality==='perfect'?'✨ Идеальный':castQuality==='good'?'✓ Хороший':'✗ Обычный'}</div>
+     <div class="reward">+${earned} 🪙  +${f.xp} XP</div>
+     <button onclick="closeModal()">ОК</button>`;
   biteFish.alive=false;biteFish=null;
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
-function showMsg(t,txt,fn){document.getElementById('modal').classList.add('show');document.getElementById('modalInner').innerHTML=`<h2>${t}</h2><div class="info">${txt}</div><button onclick="closeModal()">ОК</button>`;}
+function showMsg(t,txt,fn){document.getElementById('modal').classList.add('show');
+  document.getElementById('modalInner').innerHTML=
+    `<h2>${t}</h2><div class="info">${txt}</div><button onclick="closeModal();${fn?fn.name+'()':''}">ОК</button>`;
+}
 
-// ======== DRAW ========
+// ===== DRAW =====
 function draw(){
   cx.clearRect(0,0,W,H);
   // Sky
@@ -393,7 +499,7 @@ function draw(){
     cx.beginPath();cx.moveTo(rodTipX,rodTipY);cx.lineTo(bendX,bendY);cx.stroke();
   }
   // Line
-  if(state!=='idle'){
+  if(state!=='idle'&&state!=='charging'){
     let fromX=state==='fighting'?bendX:rodTipX;
     let fromY=state==='fighting'?bendY:rodTipY;
     cx.strokeStyle='rgba(200,200,200,0.45)';cx.lineWidth=0.7;
@@ -416,42 +522,173 @@ function draw(){
   }
   // Shore
   cx.fillStyle='#5a4a30';cx.beginPath();cx.moveTo(0,waterH+4);cx.quadraticCurveTo(W*0.3,waterH-3,W*0.5,waterH+2);cx.quadraticCurveTo(W*0.7,waterH+8,W,waterH+4);cx.lineTo(W,waterH+12);cx.lineTo(0,waterH+12);cx.fill();
-  // Arc meter (when fighting)
-  if(state==='fighting')drawArc();
+
+  // ===== PHASE 1 UI: Power Bar =====
+  if(state==='charging')drawPowerBar();
+
+  // ===== PHASE 2 UI: Tension Bar & Catch Bar =====
+  if(state==='fighting')drawFightBars();
 }
 
-function drawArc(){
+// ===== POWER BAR (Casting Phase) =====
+function drawPowerBar(){
+  let barX=W*0.08,barW=28;
+  let barY=H*0.18,barH=H*0.5;
   let cx2=cx;
-  let arcW=160,arcH=80;
-  let arcX=W/2-arcW/2,arcY=H*0.35-arcH;
-  // Arc background - gradient from red to green to red
-  cx2.save();
-  cx2.lineWidth=14;cx2.lineCap='round';
-  // Red zone (outer)
-  cx2.strokeStyle='rgba(255,60,60,0.6)';
-  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI,-Math.PI*0.7);cx2.stroke();
-  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.3,0);cx2.stroke();
-  // Yellow zone
-  cx2.strokeStyle='rgba(255,200,0,0.6)';
-  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.7,-Math.PI*0.55);cx2.stroke();
-  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.45,-Math.PI*0.3);cx2.stroke();
-  // Green zone (center)
-  cx2.strokeStyle='rgba(80,220,80,0.8)';
-  cx2.beginPath();cx2.arc(W/2,H*0.35,arcW/2,-Math.PI*0.55,-Math.PI*0.45);cx2.stroke();
-  // Indicator needle
-  let angle=-Math.PI+((arcPos+1)/2)*Math.PI; // map -1..1 to -PI..0
-  let nx=W/2+Math.cos(angle)*(arcW/2);
-  let ny=H*0.35+Math.sin(angle)*(arcW/2);
-  cx2.fillStyle=pulling?'#fff':'#ffd700';
-  cx2.beginPath();cx2.arc(nx,ny,8,0,Math.PI*2);cx2.fill();
-  cx2.strokeStyle='#333';cx2.lineWidth=2;cx2.stroke();
-  // Center dot
-  cx2.fillStyle='#ffd700';cx2.beginPath();cx2.arc(nx,ny,3,0,Math.PI*2);cx2.fill();
-  cx2.restore();
+
+  // Background
+  cx2.fillStyle='rgba(0,0,0,0.6)';
+  cx2.beginPath();cx2.roundRect(barX-4,barY-4,barW+8,barH+8,6);cx2.fill();
+
+  // Gradient zones: red/yellow/green/yellow/red
+  // Perfect zone: center 30%: from 0.35 to 0.65 of bar height
+  let pLow=0.35,pHigh=0.65;
+
+  // Red bottom (0..0.2)
+  cx2.fillStyle='rgba(255,60,60,0.5)';
+  cx2.fillRect(barX,barY+barH*(1-0.2),barW,barH*0.2);
+  // Yellow bottom (0.2..0.35)
+  cx2.fillStyle='rgba(255,200,0,0.5)';
+  cx2.fillRect(barX,barY+barH*(1-0.35),barW,barH*(0.35-0.2));
+  // Green perfect (0.35..0.65)
+  cx2.fillStyle='rgba(80,220,80,0.6)';
+  cx2.fillRect(barX,barY+barH*(1-0.65),barW,barH*(0.65-0.35));
+  // Yellow top (0.65..0.8)
+  cx2.fillStyle='rgba(255,200,0,0.5)';
+  cx2.fillRect(barX,barY+barH*(1-0.8),barW,barH*(0.8-0.65));
+  // Red top (0.8..1.0)
+  cx2.fillStyle='rgba(255,60,60,0.5)';
+  cx2.fillRect(barX,barY,barW,barH*0.2);
+
+  // Border
+  cx2.strokeStyle='#8B6914';cx2.lineWidth=2;
+  cx2.beginPath();cx2.roundRect(barX,barY,barW,barH,4);cx2.stroke();
+
+  // Indicator position (powerPos 0=bottom, 1=top)
+  let indY=barY+barH*(1-powerPos);
+  // Glow
+  let grad=cx2.createRadialGradient(barX+barW/2,indY,0,barX+barW/2,indY,18);
+  grad.addColorStop(0,'rgba(255,215,0,0.6)');grad.addColorStop(1,'rgba(255,215,0,0)');
+  cx2.fillStyle=grad;cx2.beginPath();cx2.arc(barX+barW/2,indY,18,0,Math.PI*2);cx2.fill();
+  // Indicator dot
+  cx2.fillStyle='#ffd700';cx2.shadowColor='#ffd700';cx2.shadowBlur=12;
+  cx2.beginPath();cx2.arc(barX+barW/2,indY,6,0,Math.PI*2);cx2.fill();
+  cx2.shadowBlur=0;
+  cx2.strokeStyle='#fff';cx2.lineWidth=1.5;
+  cx2.beginPath();cx2.arc(barX+barW/2,indY,6,0,Math.PI*2);cx2.stroke();
+
+  // Perfect zone markers
+  let pY1=barY+barH*(1-0.65),pY2=barY+barH*(1-0.35);
+  cx2.strokeStyle='rgba(80,220,80,0.8)';cx2.lineWidth=1;cx2.setLineDash([3,3]);
+  cx2.beginPath();cx2.moveTo(barX-2,pY1);cx2.lineTo(barX+barW+2,pY1);cx2.stroke();
+  cx2.beginPath();cx2.moveTo(barX-2,pY2);cx2.lineTo(barX+barW+2,pY2);cx2.stroke();
+  cx2.setLineDash([]);
+
+  // Label
+  cx2.fillStyle='#ffd700';cx2.font='bold 10px sans-serif';cx2.textAlign='center';
+  cx2.fillText('СИЛА',barX+barW/2,barY-8);
+  cx2.fillStyle='rgba(80,220,80,0.6)';cx2.font='7px sans-serif';
+  cx2.fillText('ИДЕАЛ',barX+barW/2,barY+barH*(1-0.5)-2);
+
+  // Arrow on the side
+  let arrowDir=powerDir>0?'▲':'▼';
+  cx2.fillStyle='#ffd700';cx2.font='16px sans-serif';cx2.textAlign='left';
+  cx2.fillText(arrowDir,barX+barW+6,indY+5);
+}
+
+// ===== TENSION BAR & CATCH BAR (Fighting Phase) =====
+function drawFightBars(){
+  let cx2=cx;
+  let barW=Math.min(280,W-40),barH=16;
+  let barX=(W-barW)/2,barY=14;
+
+  // === Tension Bar ===
+  // Background
+  cx2.fillStyle='rgba(0,0,0,0.7)';
+  cx2.beginPath();cx2.roundRect(barX-3,barY-3,barW+6,barH+6,8);cx2.fill();
+
+  // Danger zones (red)
+  let safeLow=(SAFE_ZONE_LOW/100)*barW;
+  let safeHigh=(SAFE_ZONE_HIGH/100)*barW;
+  // Left danger
+  cx2.fillStyle='rgba(255,40,40,0.5)';
+  cx2.fillRect(barX,barY,safeLow,barH);
+  // Right danger
+  cx2.fillStyle='rgba(255,40,40,0.5)';
+  cx2.fillRect(barX+safeHigh,barY,barW-safeHigh,barH);
+  // Safe zone (green center)
+  cx2.fillStyle='rgba(60,220,60,0.5)';
+  cx2.fillRect(barX+safeLow,barY,safeHigh-safeLow,barH);
+
+  // Border
+  cx2.strokeStyle='#8B6914';cx2.lineWidth=1.5;
+  cx2.beginPath();cx2.roundRect(barX,barY,barW,barH,5);cx2.stroke();
+
+  // Separation lines for safe zone
+  cx2.strokeStyle='rgba(255,255,255,0.3)';cx2.lineWidth=1;cx2.setLineDash([2,3]);
+  cx2.beginPath();cx2.moveTo(barX+safeLow,barY);cx2.lineTo(barX+safeLow,barY+barH);cx2.stroke();
+  cx2.beginPath();cx2.moveTo(barX+safeHigh,barY);cx2.lineTo(barX+safeHigh,barY+barH);cx2.stroke();
+  cx2.setLineDash([]);
+
+  // Tension indicator (diamond)
+  let tX=barX+(tension/100)*barW;
+  let tY=barY+barH/2;
+  let inSafe=tension>=SAFE_ZONE_LOW&&tension<=SAFE_ZONE_HIGH;
+  cx2.fillStyle=inSafe?'#44ff44':'#ff4444';
+  cx2.shadowColor=inSafe?'#44ff44':'#ff4444';
+  cx2.shadowBlur=10;
+  cx2.beginPath();
+  cx2.moveTo(tX,tY-9);cx2.lineTo(tX+6,tY);
+  cx2.lineTo(tX,tY+9);cx2.lineTo(tX-6,tY);
+  cx2.closePath();cx2.fill();
+  cx2.shadowBlur=0;
+  cx2.strokeStyle='#fff';cx2.lineWidth=1;
+  cx2.beginPath();
+  cx2.moveTo(tX,tY-9);cx2.lineTo(tX+6,tY);
+  cx2.lineTo(tX,tY+9);cx2.lineTo(tX-6,tY);
+  cx2.closePath();cx2.stroke();
+
+  // Labels
+  cx2.fillStyle='rgba(255,255,255,0.5)';cx2.font='8px sans-serif';cx2.textAlign='center';
+  cx2.fillText('ОПАСНО',barX+safeLow/2,barY+barH+12);
+  cx2.fillText('БЕЗОПАСНО',barX+(safeLow+safeHigh)/2,barY+barH+12);
+  cx2.fillText('ОПАСНО',barX+(barW+safeHigh)/2,barY+barH+12);
+
+  // === Catch Progress Bar ===
+  let cBarY=barY+barH+22;
+  cx2.fillStyle='rgba(0,0,0,0.6)';
+  cx2.beginPath();cx2.roundRect(barX-3,cBarY-3,barW+6,12+6,6);cx2.fill();
+  // BG
+  cx2.fillStyle='#2a1a05';
+  cx2.beginPath();cx2.roundRect(barX,cBarY,barW,12,4);cx2.fill();
+  // Fill
+  let fillW=(catchProg/100)*barW;
+  let fillGrad=cx2.createLinearGradient(barX,cBarY,barX+fillW,cBarY);
+  fillGrad.addColorStop(0,'#4CAF50');fillGrad.addColorStop(1,'#8BC34A');
+  cx2.fillStyle=fillGrad;
+  cx2.beginPath();cx2.roundRect(barX,cBarY,fillW,12,4);cx2.fill();
+  // Border
+  cx2.strokeStyle='#8B6914';cx2.lineWidth=1;
+  cx2.beginPath();cx2.roundRect(barX,cBarY,barW,12,4);cx2.stroke();
+  // Text
+  cx2.fillStyle='#ffd700';cx2.font='bold 8px sans-serif';cx2.textAlign='center';
+  cx2.fillText('ВЫЛОВ '+(catchProg|0)+'%',barX+barW/2,cBarY+10);
+
+  // Fish name during fight
+  if(biteFish){
+    cx2.fillStyle='rgba(0,0,0,0.5)';
+    cx2.beginPath();cx2.roundRect(barX+barW/2-50,cBarY+20,100,20,6);cx2.fill();
+    cx2.fillStyle='#ffd700';cx2.font='bold 11px sans-serif';cx2.textAlign='center';
+    cx2.fillText(biteFish.type.emoji+' '+biteFish.type.name,barX+barW/2,cBarY+33);
+  }
 }
 
 let lastT=0;
-function loop(t){let dt=Math.min((t-lastT)/16,3);lastT=t;update(dt);draw();requestAnimationFrame(loop);}
+function loop(t){
+  let dt=Math.min((t-lastT)/16,3);lastT=t;
+  update(dt);draw();
+  requestAnimationFrame(loop);
+}
 init();requestAnimationFrame(loop);
 </script>
 </body>
