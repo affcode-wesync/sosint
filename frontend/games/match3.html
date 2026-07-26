@@ -92,7 +92,7 @@ canvas{touch-action:none;display:block;border-radius:6px}
 const R=8,C=8,G=50,P=3,T=G+P;
 const GEMS=[{c:'#ffd700',s:'★'},{c:'#ff4757',s:'♦'},{c:'#3498db',s:'●'},{c:'#2ecc71',s:'◆'},{c:'#9b59b6',s:'♠'},{c:'#e67e22',s:'♣'}];
 const COST={hammer:30,lightning:50,tornado:40};
-let gs=50,tot=50,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30;
+let gs=50,tot=67,lvls=[],cv,cx,sel=null,anim=false,sc=0,mv=30;
 let co=parseInt(localStorage.getItem('m3c')||'100');
 let inv=JSON.parse(localStorage.getItem('m3g')||'{"hammer":3,"lightning":1,"tornado":2}');
 let done=JSON.parse(localStorage.getItem('m3d')||'[]');
@@ -133,7 +133,10 @@ function mkLevels(){
     else if(i<=28){tp='t';o={t:'t',tm:55+i,s:2500+i*160};mv=999;}
     else if(i<=35){tp='ci';o={t:'ci',g:{},ic:6+~~((i-28)*1.2),s:3000+i*120};mv=25+~~(i*.5);let gc=~~((i-28)/3)+2,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=10+i;});}
     else if(i<=42){tp='h';o={t:'h',g:{},ic:7+~~((i-35)*1.3),s:3800+i*120};mv=24+~~(i*.35);let gc=~~((i-35)/3)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=14+i;});}
-    else{tp='ch';o={t:'ch',g:{},cc:5+~~((i-42)*1.2),ic:4+~~((i-42)/2),s:4500+i*100};mv=22+~~(i*.3);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
+    else if(i<=50){tp='ch';o={t:'ch',g:{},cc:5+~~((i-42)*1.2),ic:4+~~((i-42)/2),s:4500+i*100};mv=22+~~(i*.3);let gc=~~((i-42)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=15+i;});}
+    else if(i<=58){tp='t';o={t:'t',tm:45+i,s:5000+i*100};mv=999;}
+    else if(i<=63){tp='ci';o={t:'ci',g:{},ic:8+~~((i-58)*1.5),s:5500+i*90};mv=20+~~(i*.2);let gc=~~((i-58)/2)+3,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=18+i;});}
+    else{tp='h';o={t:'h',g:{},ic:10+~~((i-63)*2),cc:3+~~((i-63)),s:6000+i*80};mv=18+~~(i*.15);let gc=~~((i-63)/2)+4,gs2=new Set;while(gs2.size<gc)gs2.add(~~(Math.random()*6));gs2.forEach(g=>{o.g[g]=20+i;});}
     let stars=o.t==='t'?[o.s,o.s*1.5,o.s*2.2]:[o.s,o.s*1.4,o.s*2];
     lvls.push({id:i,tp,mv,o,stars,board:getBoard(i)});
   }
